@@ -1,0 +1,2602 @@
+{
+ "synthetic-radar.example": [
+  {
+   "crustdata_person_id": 900101,
+   "basic_profile": {
+    "name": "Nikhil Iyer",
+    "current_title": "RF Engineer"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "RF Engineer",
+      "function_category": "Engineering",
+      "seniority_level": "Director"
+     },
+     "past": [
+      {
+       "name": "Demo Defence Electronics",
+       "title": "Engineer"
+      },
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Engineer"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "RF Design",
+     "Radar",
+     "mmWave",
+     "Antenna Design"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900102,
+   "basic_profile": {
+    "name": "Sneha Nair",
+    "current_title": "Senior Hardware Engineer"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Senior Hardware Engineer",
+      "function_category": "Engineering",
+      "seniority_level": "Senior"
+     },
+     "past": [
+      {
+       "name": "Demo Defence Electronics",
+       "title": "Engineer"
+      },
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Engineer"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Microwave Engineering",
+     "HFSS",
+     "Radar Signal Processing"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900103,
+   "basic_profile": {
+    "name": "Isha Patel",
+    "current_title": "RF Engineer"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "RF Engineer",
+      "function_category": "Engineering",
+      "seniority_level": "Senior"
+     },
+     "past": [
+      {
+       "name": "Demo Defence Electronics",
+       "title": "Engineer"
+      },
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Engineer"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "RF Power Amplifiers",
+     "GaAs",
+     "Antenna Arrays"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900104,
+   "basic_profile": {
+    "name": "Nikhil Das",
+    "current_title": "RF Engineer"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "RF Engineer",
+      "function_category": "Engineering",
+      "seniority_level": "Director"
+     },
+     "past": [
+      {
+       "name": "Demo Defence Electronics",
+       "title": "Engineer"
+      },
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Engineer"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "RF Design",
+     "Radar",
+     "mmWave",
+     "Antenna Design"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900105,
+   "basic_profile": {
+    "name": "Priya Menon",
+    "current_title": "RF Engineer"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "RF Engineer",
+      "function_category": "Engineering",
+      "seniority_level": "Senior"
+     },
+     "past": [
+      {
+       "name": "Demo Defence Electronics",
+       "title": "Engineer"
+      },
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Engineer"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Microwave Engineering",
+     "HFSS",
+     "Radar Signal Processing"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900106,
+   "basic_profile": {
+    "name": "Aarav Iyer",
+    "current_title": "Senior Hardware Engineer"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Senior Hardware Engineer",
+      "function_category": "Engineering",
+      "seniority_level": "Senior"
+     },
+     "past": [
+      {
+       "name": "Demo Defence Electronics",
+       "title": "Engineer"
+      },
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Engineer"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "RF Power Amplifiers",
+     "GaAs",
+     "Antenna Arrays"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900107,
+   "basic_profile": {
+    "name": "Isha Das",
+    "current_title": "RF Engineer"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "RF Engineer",
+      "function_category": "Engineering",
+      "seniority_level": "Director"
+     },
+     "past": [
+      {
+       "name": "Demo Defence Electronics",
+       "title": "Engineer"
+      },
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Engineer"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "RF Design",
+     "Radar",
+     "mmWave",
+     "Antenna Design"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900108,
+   "basic_profile": {
+    "name": "Vikram Reddy",
+    "current_title": "Design Engineer"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Design Engineer",
+      "function_category": "Engineering",
+      "seniority_level": "Senior"
+     },
+     "past": [
+      {
+       "name": "Demo Defence Electronics",
+       "title": "Engineer"
+      },
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Engineer"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Microwave Engineering",
+     "HFSS",
+     "Radar Signal Processing"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900109,
+   "basic_profile": {
+    "name": "Isha Rao",
+    "current_title": "FPGA Engineer"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "FPGA Engineer",
+      "function_category": "Engineering",
+      "seniority_level": "Senior"
+     },
+     "past": [
+      {
+       "name": "Demo Defence Electronics",
+       "title": "Engineer"
+      },
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Engineer"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "RF Power Amplifiers",
+     "GaAs",
+     "Antenna Arrays"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900110,
+   "basic_profile": {
+    "name": "Aarav Patel",
+    "current_title": "Design Engineer"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Design Engineer",
+      "function_category": "Engineering",
+      "seniority_level": "Director"
+     },
+     "past": [
+      {
+       "name": "Demo Defence Electronics",
+       "title": "Engineer"
+      },
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Engineer"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "RF Design",
+     "Radar",
+     "mmWave",
+     "Antenna Design"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900111,
+   "basic_profile": {
+    "name": "Meera Nair",
+    "current_title": "Senior Hardware Engineer"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Senior Hardware Engineer",
+      "function_category": "Engineering",
+      "seniority_level": "Senior"
+     },
+     "past": [
+      {
+       "name": "Demo Defence Electronics",
+       "title": "Engineer"
+      },
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Engineer"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Microwave Engineering",
+     "HFSS",
+     "Radar Signal Processing"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900112,
+   "basic_profile": {
+    "name": "Isha Gupta",
+    "current_title": "RF Engineer"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "RF Engineer",
+      "function_category": "Engineering",
+      "seniority_level": "Senior"
+     },
+     "past": [
+      {
+       "name": "Demo Defence Electronics",
+       "title": "Engineer"
+      },
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Engineer"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "RF Power Amplifiers",
+     "GaAs",
+     "Antenna Arrays"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900113,
+   "basic_profile": {
+    "name": "Diya Menon",
+    "current_title": "RF Engineer"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "RF Engineer",
+      "function_category": "Engineering",
+      "seniority_level": "Director"
+     },
+     "past": [
+      {
+       "name": "Demo Defence Electronics",
+       "title": "Engineer"
+      },
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Engineer"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "RF Design",
+     "Radar",
+     "mmWave",
+     "Antenna Design"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900114,
+   "basic_profile": {
+    "name": "Meera Gupta",
+    "current_title": "FPGA Engineer"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "FPGA Engineer",
+      "function_category": "Engineering",
+      "seniority_level": "Senior"
+     },
+     "past": [
+      {
+       "name": "Demo Defence Electronics",
+       "title": "Engineer"
+      },
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Engineer"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Microwave Engineering",
+     "HFSS",
+     "Radar Signal Processing"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900115,
+   "basic_profile": {
+    "name": "Aarav Rao",
+    "current_title": "RF Engineer"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "RF Engineer",
+      "function_category": "Engineering",
+      "seniority_level": "Senior"
+     },
+     "past": [
+      {
+       "name": "Demo Defence Electronics",
+       "title": "Engineer"
+      },
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Engineer"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "RF Power Amplifiers",
+     "GaAs",
+     "Antenna Arrays"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900116,
+   "basic_profile": {
+    "name": "Arjun Iyer",
+    "current_title": "FPGA Engineer"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "FPGA Engineer",
+      "function_category": "Engineering",
+      "seniority_level": "Director"
+     },
+     "past": [
+      {
+       "name": "Demo Defence Electronics",
+       "title": "Engineer"
+      },
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Engineer"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "RF Design",
+     "Radar",
+     "mmWave",
+     "Antenna Design"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900117,
+   "basic_profile": {
+    "name": "Nikhil Kulkarni",
+    "current_title": "Business Development Executive"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Business Development Executive",
+      "function_category": "Sales",
+      "seniority_level": "Experienced Manager"
+     },
+     "past": [
+      {
+       "name": "Demo Electronics Pvt Ltd",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Sales",
+     "Negotiation"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900118,
+   "basic_profile": {
+    "name": "Priya Reddy",
+    "current_title": "Procurement Lead"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Procurement Lead",
+      "function_category": "Sales",
+      "seniority_level": "Experienced Manager"
+     },
+     "past": [
+      {
+       "name": "Demo Electronics Pvt Ltd",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Sales",
+     "Negotiation"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900119,
+   "basic_profile": {
+    "name": "Diya Sharma",
+    "current_title": "Procurement Lead"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Procurement Lead",
+      "function_category": "Sales",
+      "seniority_level": "Experienced Manager"
+     },
+     "past": [
+      {
+       "name": "Demo Electronics Pvt Ltd",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Sales",
+     "Negotiation"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900120,
+   "basic_profile": {
+    "name": "Isha Nair",
+    "current_title": "Sales Manager"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Sales Manager",
+      "function_category": "Sales",
+      "seniority_level": "Experienced Manager"
+     },
+     "past": [
+      {
+       "name": "Demo Electronics Pvt Ltd",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Sales",
+     "Negotiation"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900121,
+   "basic_profile": {
+    "name": "Isha Iyer",
+    "current_title": "Operations Manager"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Operations Manager",
+      "function_category": "Operations",
+      "seniority_level": "Entry Level"
+     },
+     "past": [
+      {
+       "name": "Demo Electronics Pvt Ltd",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Logistics",
+     "Customs Clearance"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900122,
+   "basic_profile": {
+    "name": "Kabir Rao",
+    "current_title": "Import Export Executive"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Import Export Executive",
+      "function_category": "Operations",
+      "seniority_level": "Entry Level"
+     },
+     "past": [
+      {
+       "name": "Demo Electronics Pvt Ltd",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Logistics",
+     "Customs Clearance"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900123,
+   "basic_profile": {
+    "name": "Meera Patel",
+    "current_title": "Operations Manager"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Operations Manager",
+      "function_category": "Operations",
+      "seniority_level": "Entry Level"
+     },
+     "past": [
+      {
+       "name": "Demo Electronics Pvt Ltd",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Logistics",
+     "Customs Clearance"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900124,
+   "basic_profile": {
+    "name": "Meera Reddy",
+    "current_title": "Import Export Executive"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Import Export Executive",
+      "function_category": "Operations",
+      "seniority_level": "Entry Level"
+     },
+     "past": [
+      {
+       "name": "Demo Electronics Pvt Ltd",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Logistics",
+     "Customs Clearance"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900125,
+   "basic_profile": {
+    "name": "Kabir Iyer",
+    "current_title": "Import Export Executive"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Import Export Executive",
+      "function_category": "Operations",
+      "seniority_level": "Entry Level"
+     },
+     "past": [
+      {
+       "name": "Demo Electronics Pvt Ltd",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Logistics",
+     "Customs Clearance"
+    ]
+   }
+  }
+ ],
+ "synthetic-components.example": [
+  {
+   "crustdata_person_id": 900201,
+   "basic_profile": {
+    "name": "Nikhil Patel",
+    "current_title": "Senior Hardware Engineer"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Senior Hardware Engineer",
+      "function_category": "Engineering",
+      "seniority_level": "Director"
+     },
+     "past": [
+      {
+       "name": "Demo Electronics Pvt Ltd",
+       "title": "Engineer"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Sales"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900202,
+   "basic_profile": {
+    "name": "Rohan Rao",
+    "current_title": "Business Development Executive"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Business Development Executive",
+      "function_category": "Sales",
+      "seniority_level": "Experienced Manager"
+     },
+     "past": [
+      {
+       "name": "Demo Trading Co",
+       "title": "Executive"
+      },
+      {
+       "name": "Demo Electronics Distribution",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Sales",
+     "Negotiation"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900203,
+   "basic_profile": {
+    "name": "Kabir Das",
+    "current_title": "Sales Manager"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Sales Manager",
+      "function_category": "Sales",
+      "seniority_level": "Experienced Manager"
+     },
+     "past": [
+      {
+       "name": "Demo Trading Co",
+       "title": "Executive"
+      },
+      {
+       "name": "Demo Electronics Distribution",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Sales",
+     "Negotiation"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900204,
+   "basic_profile": {
+    "name": "Nikhil Gupta",
+    "current_title": "Sales Manager"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Sales Manager",
+      "function_category": "Sales",
+      "seniority_level": "Experienced Manager"
+     },
+     "past": [
+      {
+       "name": "Demo Trading Co",
+       "title": "Executive"
+      },
+      {
+       "name": "Demo Electronics Distribution",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Sales",
+     "Negotiation"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900205,
+   "basic_profile": {
+    "name": "Isha Sharma",
+    "current_title": "Business Development Executive"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Business Development Executive",
+      "function_category": "Sales",
+      "seniority_level": "Experienced Manager"
+     },
+     "past": [
+      {
+       "name": "Demo Trading Co",
+       "title": "Executive"
+      },
+      {
+       "name": "Demo Electronics Distribution",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Sales",
+     "Negotiation"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900206,
+   "basic_profile": {
+    "name": "Arjun Nair",
+    "current_title": "Sales Manager"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Sales Manager",
+      "function_category": "Sales",
+      "seniority_level": "Experienced Manager"
+     },
+     "past": [
+      {
+       "name": "Demo Trading Co",
+       "title": "Executive"
+      },
+      {
+       "name": "Demo Electronics Distribution",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Sales",
+     "Negotiation"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900207,
+   "basic_profile": {
+    "name": "Isha Kulkarni",
+    "current_title": "Procurement Lead"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Procurement Lead",
+      "function_category": "Sales",
+      "seniority_level": "Experienced Manager"
+     },
+     "past": [
+      {
+       "name": "Demo Trading Co",
+       "title": "Executive"
+      },
+      {
+       "name": "Demo Electronics Distribution",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Sales",
+     "Negotiation"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900208,
+   "basic_profile": {
+    "name": "Meera Reddy",
+    "current_title": "Procurement Lead"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Procurement Lead",
+      "function_category": "Sales",
+      "seniority_level": "Experienced Manager"
+     },
+     "past": [
+      {
+       "name": "Demo Trading Co",
+       "title": "Executive"
+      },
+      {
+       "name": "Demo Electronics Distribution",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Sales",
+     "Negotiation"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900209,
+   "basic_profile": {
+    "name": "Ananya Menon",
+    "current_title": "Procurement Lead"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Procurement Lead",
+      "function_category": "Sales",
+      "seniority_level": "Experienced Manager"
+     },
+     "past": [
+      {
+       "name": "Demo Trading Co",
+       "title": "Executive"
+      },
+      {
+       "name": "Demo Electronics Distribution",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Sales",
+     "Negotiation"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900210,
+   "basic_profile": {
+    "name": "Ananya Patel",
+    "current_title": "Business Development Executive"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Business Development Executive",
+      "function_category": "Sales",
+      "seniority_level": "Experienced Manager"
+     },
+     "past": [
+      {
+       "name": "Demo Trading Co",
+       "title": "Executive"
+      },
+      {
+       "name": "Demo Electronics Distribution",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Sales",
+     "Negotiation"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900211,
+   "basic_profile": {
+    "name": "Rohan Reddy",
+    "current_title": "Procurement Lead"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Procurement Lead",
+      "function_category": "Sales",
+      "seniority_level": "Experienced Manager"
+     },
+     "past": [
+      {
+       "name": "Demo Trading Co",
+       "title": "Executive"
+      },
+      {
+       "name": "Demo Electronics Distribution",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Sales",
+     "Negotiation"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900212,
+   "basic_profile": {
+    "name": "Vikram Das",
+    "current_title": "Business Development Executive"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Business Development Executive",
+      "function_category": "Sales",
+      "seniority_level": "Experienced Manager"
+     },
+     "past": [
+      {
+       "name": "Demo Trading Co",
+       "title": "Executive"
+      },
+      {
+       "name": "Demo Electronics Distribution",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Sales",
+     "Negotiation"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900213,
+   "basic_profile": {
+    "name": "Sneha Kulkarni",
+    "current_title": "Business Development Executive"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Business Development Executive",
+      "function_category": "Sales",
+      "seniority_level": "Experienced Manager"
+     },
+     "past": [
+      {
+       "name": "Demo Trading Co",
+       "title": "Executive"
+      },
+      {
+       "name": "Demo Electronics Distribution",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Sales",
+     "Negotiation"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900214,
+   "basic_profile": {
+    "name": "Priya Menon",
+    "current_title": "Operations Manager"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Operations Manager",
+      "function_category": "Operations",
+      "seniority_level": "Entry Level"
+     },
+     "past": [
+      {
+       "name": "Demo Trading Co",
+       "title": "Executive"
+      },
+      {
+       "name": "Demo Electronics Distribution",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Logistics",
+     "Customs Clearance"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900215,
+   "basic_profile": {
+    "name": "Isha Patel",
+    "current_title": "Import Export Executive"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Import Export Executive",
+      "function_category": "Operations",
+      "seniority_level": "Entry Level"
+     },
+     "past": [
+      {
+       "name": "Demo Trading Co",
+       "title": "Executive"
+      },
+      {
+       "name": "Demo Electronics Distribution",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Logistics",
+     "Customs Clearance"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900216,
+   "basic_profile": {
+    "name": "Ananya Iyer",
+    "current_title": "Logistics Coordinator"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Logistics Coordinator",
+      "function_category": "Operations",
+      "seniority_level": "Entry Level"
+     },
+     "past": [
+      {
+       "name": "Demo Trading Co",
+       "title": "Executive"
+      },
+      {
+       "name": "Demo Electronics Distribution",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Logistics",
+     "Customs Clearance"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900217,
+   "basic_profile": {
+    "name": "Diya Patel",
+    "current_title": "Import Export Executive"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Import Export Executive",
+      "function_category": "Operations",
+      "seniority_level": "Entry Level"
+     },
+     "past": [
+      {
+       "name": "Demo Trading Co",
+       "title": "Executive"
+      },
+      {
+       "name": "Demo Electronics Distribution",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Logistics",
+     "Customs Clearance"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900218,
+   "basic_profile": {
+    "name": "Rohan Menon",
+    "current_title": "Import Export Executive"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Import Export Executive",
+      "function_category": "Operations",
+      "seniority_level": "Entry Level"
+     },
+     "past": [
+      {
+       "name": "Demo Trading Co",
+       "title": "Executive"
+      },
+      {
+       "name": "Demo Electronics Distribution",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Logistics",
+     "Customs Clearance"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900219,
+   "basic_profile": {
+    "name": "Diya Menon",
+    "current_title": "Operations Manager"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Operations Manager",
+      "function_category": "Operations",
+      "seniority_level": "Entry Level"
+     },
+     "past": [
+      {
+       "name": "Demo Trading Co",
+       "title": "Executive"
+      },
+      {
+       "name": "Demo Electronics Distribution",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Logistics",
+     "Customs Clearance"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900220,
+   "basic_profile": {
+    "name": "Priya Rao",
+    "current_title": "Import Export Executive"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Import Export Executive",
+      "function_category": "Operations",
+      "seniority_level": "Entry Level"
+     },
+     "past": [
+      {
+       "name": "Demo Trading Co",
+       "title": "Executive"
+      },
+      {
+       "name": "Demo Electronics Distribution",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Logistics",
+     "Customs Clearance"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900221,
+   "basic_profile": {
+    "name": "Kabir Das",
+    "current_title": "Logistics Coordinator"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Logistics Coordinator",
+      "function_category": "Operations",
+      "seniority_level": "Entry Level"
+     },
+     "past": [
+      {
+       "name": "Demo Trading Co",
+       "title": "Executive"
+      },
+      {
+       "name": "Demo Electronics Distribution",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Logistics",
+     "Customs Clearance"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900222,
+   "basic_profile": {
+    "name": "Nikhil Iyer",
+    "current_title": "Import Export Executive"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Import Export Executive",
+      "function_category": "Operations",
+      "seniority_level": "Entry Level"
+     },
+     "past": [
+      {
+       "name": "Demo Trading Co",
+       "title": "Executive"
+      },
+      {
+       "name": "Demo Electronics Distribution",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Logistics",
+     "Customs Clearance"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900223,
+   "basic_profile": {
+    "name": "Vikram Nair",
+    "current_title": "Import Export Executive"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Import Export Executive",
+      "function_category": "Operations",
+      "seniority_level": "Entry Level"
+     },
+     "past": [
+      {
+       "name": "Demo Trading Co",
+       "title": "Executive"
+      },
+      {
+       "name": "Demo Electronics Distribution",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Logistics",
+     "Customs Clearance"
+    ]
+   }
+  }
+ ],
+ "synthetic-telecomlabs.example": [
+  {
+   "crustdata_person_id": 900301,
+   "basic_profile": {
+    "name": "Meera Iyer",
+    "current_title": "FPGA Engineer"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "FPGA Engineer",
+      "function_category": "Engineering",
+      "seniority_level": "Director"
+     },
+     "past": [
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Engineer"
+      },
+      {
+       "name": "Demo Semiconductor",
+       "title": "Engineer"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "FPGA",
+     "Verilog",
+     "5G NR"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900302,
+   "basic_profile": {
+    "name": "Arjun Patel",
+    "current_title": "Design Engineer"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Design Engineer",
+      "function_category": "Engineering",
+      "seniority_level": "Senior"
+     },
+     "past": [
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Engineer"
+      },
+      {
+       "name": "Demo Semiconductor",
+       "title": "Engineer"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "RF Engineering",
+     "LTE",
+     "Antenna Design"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900303,
+   "basic_profile": {
+    "name": "Aarav Nair",
+    "current_title": "Senior Hardware Engineer"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Senior Hardware Engineer",
+      "function_category": "Engineering",
+      "seniority_level": "Senior"
+     },
+     "past": [
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Engineer"
+      },
+      {
+       "name": "Demo Semiconductor",
+       "title": "Engineer"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Xilinx",
+     "VHDL",
+     "Telecom"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900304,
+   "basic_profile": {
+    "name": "Vikram Iyer",
+    "current_title": "FPGA Engineer"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "FPGA Engineer",
+      "function_category": "Engineering",
+      "seniority_level": "Director"
+     },
+     "past": [
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Engineer"
+      },
+      {
+       "name": "Demo Semiconductor",
+       "title": "Engineer"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "FPGA",
+     "Verilog",
+     "5G NR"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900305,
+   "basic_profile": {
+    "name": "Nikhil Das",
+    "current_title": "Senior Hardware Engineer"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Senior Hardware Engineer",
+      "function_category": "Engineering",
+      "seniority_level": "Senior"
+     },
+     "past": [
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Engineer"
+      },
+      {
+       "name": "Demo Semiconductor",
+       "title": "Engineer"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "RF Engineering",
+     "LTE",
+     "Antenna Design"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900306,
+   "basic_profile": {
+    "name": "Rohan Gupta",
+    "current_title": "Senior Hardware Engineer"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Senior Hardware Engineer",
+      "function_category": "Engineering",
+      "seniority_level": "Senior"
+     },
+     "past": [
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Engineer"
+      },
+      {
+       "name": "Demo Semiconductor",
+       "title": "Engineer"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Xilinx",
+     "VHDL",
+     "Telecom"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900307,
+   "basic_profile": {
+    "name": "Vikram Das",
+    "current_title": "RF Engineer"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "RF Engineer",
+      "function_category": "Engineering",
+      "seniority_level": "Director"
+     },
+     "past": [
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Engineer"
+      },
+      {
+       "name": "Demo Semiconductor",
+       "title": "Engineer"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "FPGA",
+     "Verilog",
+     "5G NR"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900308,
+   "basic_profile": {
+    "name": "Priya Gupta",
+    "current_title": "Design Engineer"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Design Engineer",
+      "function_category": "Engineering",
+      "seniority_level": "Senior"
+     },
+     "past": [
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Engineer"
+      },
+      {
+       "name": "Demo Semiconductor",
+       "title": "Engineer"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "RF Engineering",
+     "LTE",
+     "Antenna Design"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900309,
+   "basic_profile": {
+    "name": "Aarav Iyer",
+    "current_title": "FPGA Engineer"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "FPGA Engineer",
+      "function_category": "Engineering",
+      "seniority_level": "Senior"
+     },
+     "past": [
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Engineer"
+      },
+      {
+       "name": "Demo Semiconductor",
+       "title": "Engineer"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Xilinx",
+     "VHDL",
+     "Telecom"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900310,
+   "basic_profile": {
+    "name": "Kabir Reddy",
+    "current_title": "RF Engineer"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "RF Engineer",
+      "function_category": "Engineering",
+      "seniority_level": "Director"
+     },
+     "past": [
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Engineer"
+      },
+      {
+       "name": "Demo Semiconductor",
+       "title": "Engineer"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "FPGA",
+     "Verilog",
+     "5G NR"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900311,
+   "basic_profile": {
+    "name": "Isha Kulkarni",
+    "current_title": "RF Engineer"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "RF Engineer",
+      "function_category": "Engineering",
+      "seniority_level": "Senior"
+     },
+     "past": [
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Engineer"
+      },
+      {
+       "name": "Demo Semiconductor",
+       "title": "Engineer"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "RF Engineering",
+     "LTE",
+     "Antenna Design"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900312,
+   "basic_profile": {
+    "name": "Diya Rao",
+    "current_title": "RF Engineer"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "RF Engineer",
+      "function_category": "Engineering",
+      "seniority_level": "Senior"
+     },
+     "past": [
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Engineer"
+      },
+      {
+       "name": "Demo Semiconductor",
+       "title": "Engineer"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Xilinx",
+     "VHDL",
+     "Telecom"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900313,
+   "basic_profile": {
+    "name": "Vikram Patel",
+    "current_title": "Senior Hardware Engineer"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Senior Hardware Engineer",
+      "function_category": "Engineering",
+      "seniority_level": "Director"
+     },
+     "past": [
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Engineer"
+      },
+      {
+       "name": "Demo Semiconductor",
+       "title": "Engineer"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "FPGA",
+     "Verilog",
+     "5G NR"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900314,
+   "basic_profile": {
+    "name": "Nikhil Rao",
+    "current_title": "Senior Hardware Engineer"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Senior Hardware Engineer",
+      "function_category": "Engineering",
+      "seniority_level": "Senior"
+     },
+     "past": [
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Engineer"
+      },
+      {
+       "name": "Demo Semiconductor",
+       "title": "Engineer"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "RF Engineering",
+     "LTE",
+     "Antenna Design"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900315,
+   "basic_profile": {
+    "name": "Kabir Das",
+    "current_title": "Design Engineer"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Design Engineer",
+      "function_category": "Engineering",
+      "seniority_level": "Senior"
+     },
+     "past": [
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Engineer"
+      },
+      {
+       "name": "Demo Semiconductor",
+       "title": "Engineer"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Xilinx",
+     "VHDL",
+     "Telecom"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900316,
+   "basic_profile": {
+    "name": "Isha Das",
+    "current_title": "Procurement Lead"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Procurement Lead",
+      "function_category": "Sales",
+      "seniority_level": "Experienced Manager"
+     },
+     "past": [
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Sales",
+     "Negotiation"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900317,
+   "basic_profile": {
+    "name": "Sneha Reddy",
+    "current_title": "Procurement Lead"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Procurement Lead",
+      "function_category": "Sales",
+      "seniority_level": "Experienced Manager"
+     },
+     "past": [
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Sales",
+     "Negotiation"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900318,
+   "basic_profile": {
+    "name": "Kabir Menon",
+    "current_title": "Procurement Lead"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Procurement Lead",
+      "function_category": "Sales",
+      "seniority_level": "Experienced Manager"
+     },
+     "past": [
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Sales",
+     "Negotiation"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900319,
+   "basic_profile": {
+    "name": "Nikhil Gupta",
+    "current_title": "Business Development Executive"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Business Development Executive",
+      "function_category": "Sales",
+      "seniority_level": "Experienced Manager"
+     },
+     "past": [
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Sales",
+     "Negotiation"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900320,
+   "basic_profile": {
+    "name": "Vikram Rao",
+    "current_title": "Logistics Coordinator"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Logistics Coordinator",
+      "function_category": "Operations",
+      "seniority_level": "Entry Level"
+     },
+     "past": [
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Logistics",
+     "Customs Clearance"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900321,
+   "basic_profile": {
+    "name": "Isha Reddy",
+    "current_title": "Logistics Coordinator"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Logistics Coordinator",
+      "function_category": "Operations",
+      "seniority_level": "Entry Level"
+     },
+     "past": [
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Logistics",
+     "Customs Clearance"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900322,
+   "basic_profile": {
+    "name": "Meera Sharma",
+    "current_title": "Import Export Executive"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Import Export Executive",
+      "function_category": "Operations",
+      "seniority_level": "Entry Level"
+     },
+     "past": [
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Logistics",
+     "Customs Clearance"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900323,
+   "basic_profile": {
+    "name": "Vikram Reddy",
+    "current_title": "Import Export Executive"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Import Export Executive",
+      "function_category": "Operations",
+      "seniority_level": "Entry Level"
+     },
+     "past": [
+      {
+       "name": "Demo Telecom Equipment",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Logistics",
+     "Customs Clearance"
+    ]
+   }
+  }
+ ],
+ "synthetic-hardware.example": [
+  {
+   "crustdata_person_id": 900401,
+   "basic_profile": {
+    "name": "Isha Sharma",
+    "current_title": "RF Engineer"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "RF Engineer",
+      "function_category": "Engineering",
+      "seniority_level": "Director"
+     },
+     "past": [
+      {
+       "name": "Demo Industrial Electronics",
+       "title": "Engineer"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "FPGA",
+     "Verilog",
+     "Embedded Systems"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900402,
+   "basic_profile": {
+    "name": "Sneha Sharma",
+    "current_title": "Senior Hardware Engineer"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Senior Hardware Engineer",
+      "function_category": "Engineering",
+      "seniority_level": "Senior"
+     },
+     "past": [
+      {
+       "name": "Demo Industrial Electronics",
+       "title": "Engineer"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "PCB Design",
+     "FPGA",
+     "VHDL"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900403,
+   "basic_profile": {
+    "name": "Diya Sharma",
+    "current_title": "FPGA Engineer"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "FPGA Engineer",
+      "function_category": "Engineering",
+      "seniority_level": "Senior"
+     },
+     "past": [
+      {
+       "name": "Demo Industrial Electronics",
+       "title": "Engineer"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Embedded C",
+     "FPGA"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900404,
+   "basic_profile": {
+    "name": "Diya Das",
+    "current_title": "Sales Manager"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Sales Manager",
+      "function_category": "Sales",
+      "seniority_level": "Experienced Manager"
+     },
+     "past": [
+      {
+       "name": "Demo Electronics Pvt Ltd",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Sales",
+     "Negotiation"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900405,
+   "basic_profile": {
+    "name": "Kabir Rao",
+    "current_title": "Sales Manager"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Sales Manager",
+      "function_category": "Sales",
+      "seniority_level": "Experienced Manager"
+     },
+     "past": [
+      {
+       "name": "Demo Electronics Pvt Ltd",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Sales",
+     "Negotiation"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900406,
+   "basic_profile": {
+    "name": "Vikram Patel",
+    "current_title": "Import Export Executive"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Import Export Executive",
+      "function_category": "Operations",
+      "seniority_level": "Entry Level"
+     },
+     "past": [
+      {
+       "name": "Demo Electronics Pvt Ltd",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Logistics",
+     "Customs Clearance"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900407,
+   "basic_profile": {
+    "name": "Priya Kulkarni",
+    "current_title": "Operations Manager"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Operations Manager",
+      "function_category": "Operations",
+      "seniority_level": "Entry Level"
+     },
+     "past": [
+      {
+       "name": "Demo Electronics Pvt Ltd",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Logistics",
+     "Customs Clearance"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900408,
+   "basic_profile": {
+    "name": "Isha Rao",
+    "current_title": "Operations Manager"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Operations Manager",
+      "function_category": "Operations",
+      "seniority_level": "Entry Level"
+     },
+     "past": [
+      {
+       "name": "Demo Electronics Pvt Ltd",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Logistics",
+     "Customs Clearance"
+    ]
+   }
+  }
+ ],
+ "synthetic-shell.example": [
+  {
+   "crustdata_person_id": 900501,
+   "basic_profile": {
+    "name": "Isha Iyer",
+    "current_title": "Sales Manager"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Sales Manager",
+      "function_category": "Sales",
+      "seniority_level": "Experienced Manager"
+     },
+     "past": [
+      {
+       "name": "Demo General Trading",
+       "title": "Executive"
+      },
+      {
+       "name": "Demo Import Export",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Sales",
+     "Negotiation"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900502,
+   "basic_profile": {
+    "name": "Nikhil Menon",
+    "current_title": "Business Development Executive"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Business Development Executive",
+      "function_category": "Sales",
+      "seniority_level": "Experienced Manager"
+     },
+     "past": [
+      {
+       "name": "Demo General Trading",
+       "title": "Executive"
+      },
+      {
+       "name": "Demo Import Export",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Sales",
+     "Negotiation"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900503,
+   "basic_profile": {
+    "name": "Arjun Menon",
+    "current_title": "Operations Manager"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Operations Manager",
+      "function_category": "Operations",
+      "seniority_level": "Entry Level"
+     },
+     "past": [
+      {
+       "name": "Demo General Trading",
+       "title": "Executive"
+      },
+      {
+       "name": "Demo Import Export",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Logistics",
+     "Customs Clearance"
+    ]
+   }
+  },
+  {
+   "crustdata_person_id": 900504,
+   "basic_profile": {
+    "name": "Sneha Sharma",
+    "current_title": "Import Export Executive"
+   },
+   "experience": {
+    "employment_details": {
+     "current": {
+      "title": "Import Export Executive",
+      "function_category": "Operations",
+      "seniority_level": "Entry Level"
+     },
+     "past": [
+      {
+       "name": "Demo General Trading",
+       "title": "Executive"
+      },
+      {
+       "name": "Demo Import Export",
+       "title": "Executive"
+      }
+     ]
+    }
+   },
+   "skills": {
+    "professional_network_skills": [
+     "Logistics",
+     "Customs Clearance"
+    ]
+   }
+  }
+ ]
+}
