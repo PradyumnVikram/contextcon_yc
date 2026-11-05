@@ -51,4 +51,11 @@ def test_offline_uses_fixtures_and_unknown_is_none():
 
 
 def test_norm_key():
-    assert norm_key("https://www.X.com/a") == "x.com" and norm_key("Acme, Pvt. Ltd") == "acme pvt ltd"
+    assert norm_key("https://www.X.com/a") == "x.com" and norm_key("Acme, Trading Co") == "acme trading"
+
+
+def test_company_name_lookup_ignores_legal_suffixes():
+    c = CrustdataClient(store.connect(":memory:"), api_key="")
+    for name in ["Synthetic Radar Systems Pvt Ltd", "SYNTHETIC RADAR SYSTEMS PRIVATE LIMITED", "Synthetic Radar Systems, Ltd."]:
+        assert c.enrich_company(name)["basic_info"]["primary_domain"] == "synthetic-radar.example", name
+    assert norm_key("Acme Pvt. Ltd") == "acme" and norm_key("acme.example") == "acme.example"

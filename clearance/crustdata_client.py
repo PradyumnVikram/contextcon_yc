@@ -46,11 +46,19 @@ class CrustdataError(RuntimeError):
 _DOMAIN_RE = re.compile(r"^[a-z0-9-]+(\.[a-z0-9-]+)+$")
 
 
+_LEGAL_SUFFIX_RE = re.compile(
+    r"\b(pvt|private|ltd|limited|llc|inc|incorporated|co|company|corp|corporation|plc|gmbh|fze|fzco|llp|lp)\b")
+
+
 def norm_key(s: str) -> str:
-    """Normalised company key: bare lowercase domain, or lowercase alphanumeric name."""
+    """Normalised company key: bare lowercase domain, or lowercase alphanumeric name without legal suffixes
+    ("Acme Pvt. Ltd" and "ACME PRIVATE LIMITED" both -> "acme")."""
     s = s.strip().lower()
     d = re.sub(r"^https?://", "", s).removeprefix("www.").split("/")[0]
-    return d if _DOMAIN_RE.match(d) else re.sub(r"[^a-z0-9]+", " ", s).strip()
+    if _DOMAIN_RE.match(d):
+        return d
+    name = re.sub(r"[^a-z0-9]+", " ", s)
+    return " ".join(_LEGAL_SUFFIX_RE.sub(" ", name).split()) or " ".join(name.split())
 
 
 def is_domain(key: str) -> bool:
