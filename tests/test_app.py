@@ -27,9 +27,9 @@ def app(tmp_path, monkeypatch):
 
 
 def test_every_screen_renders(app):
-    for label in app.sidebar.radio[0].options:
-        app.sidebar.radio[0].set_value(label).run()
-        assert not app.exception, label
+    for screen in ["Inbox", "Orders", "Ready", "Exceptions", "Order detail", "Customers"]:
+        app.sidebar.radio[0].set_value(screen).run()
+        assert not app.exception, screen
 
 
 def test_compose_process_sign(app):
@@ -38,7 +38,7 @@ def test_compose_process_sign(app):
     next(b for b in app.button if b.label == "Drop into inbox").click().run()
     next(b for b in app.sidebar.button if "Process inbox" in b.label).click().run()
     assert not app.exception
-    app.sidebar.radio[0].set_value(next(o for o in app.sidebar.radio[0].options if o.startswith("Ready"))).run()
+    app.sidebar.radio[0].set_value("Ready").run()
     sign = next(b for b in app.button if b.label.startswith("✍️ Sign RELEASE"))
     sign.click().run()
     assert not app.exception
