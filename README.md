@@ -118,7 +118,7 @@ streamlit run buyer_app.py --server.port 8502     # window 2: buyer mail -> http
 
 > **Ethics rule:** use real companies only as *legitimate* buyers. Never present a real company that isn't on a restricted list as suspicious. The suspicious and listed-entity scenarios use synthetic companies.
 
-No UI at all? `python -m clearance.worker` processes the mailbox headlessly and prints each decision.
+Before a demo run, `python -m clearance.reset_demo` clears orders and mail but **keeps the paid Crustdata cache**. Don't delete `clearance.db` for this. No UI at all? `python -m clearance.worker` processes the mailbox headlessly and prints each decision.
 
 ### Other entry points
 
