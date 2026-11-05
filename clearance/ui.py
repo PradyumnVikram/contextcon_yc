@@ -139,18 +139,18 @@ def crustdata_snapshot(client: CrustdataClient, party: Party) -> dict[str, Any]:
 
 
 # --------------------------------------------------------------------------- plain-English Crustdata report
-RULE_TEXT = {
-    "C1_no_matching_people": "no sampled employee has the skills these parts need",
-    "C2_low_engineering_share": "engineering share is in the bottom 10% of similar companies",
-    "C3_young_company": "the company is less than 2 years old",
+RULE_TEXT = {  # one entry per rule in config.CAPABILITY_POINTS (names as of the dev2 merge, 2026-11-06)
+    "C1_not_a_technical_business": "the company does not look like a technical business that could use these parts",
+    "C2_low_engineering_share": "engineering share is low compared with similar companies",
+    "C3_small_staff": "the staff is very small for this kind of order",
     "C4_headcount_decline": "headcount fell by more than 20% in a year",
-    "C5_low_traffic": "web traffic is in the bottom 10% of similar companies",
-    "O1_units_per_engineer": "the order is too large for the number of matching engineers",
-    "O2_transshipment_hub": "goods ship to a transshipment hub in another country",
-    "O3_ship_to_mismatch": "goods ship to a different country from the buyer's",
-    "D1_young_distributor": "the distributor is less than 3 years old",
-    "D2_small_distributor": "the distributor is smaller than 90% of similar distributors",
-    "D3_low_traffic_distributor": "the distributor's web traffic is in the bottom 10%",
+    "C5_low_traffic": "web traffic is low compared with similar companies (recorded, not scored)",
+    "O1_quantity_vs_technical_staff": "the order quantity is too large for the company's technical staff",
+    "O2_transshipment_hub": "goods ship to a transshipment hub in another country (recorded, not scored)",
+    "O3_ship_to_mismatch": "goods ship to a different country from the buyer's (recorded, not scored)",
+    "D1_small_staff": "the distributor's staff is very small",
+    "D2_small_distributor": "the distributor is small compared with peers (recorded, not scored)",
+    "D3_low_traffic_distributor": "the distributor's web traffic is low (recorded, not scored)",
     "D4_large_order_small_distributor": "a small distributor is ordering a large quantity",
 }
 

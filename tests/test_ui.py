@@ -68,3 +68,8 @@ def test_crustdata_summary_when_nothing_found(offline):
     lines = ui.crustdata_summary(ui.crustdata_snapshot(offline, Party(role="buyer", name="Nobody Ltd")), None)
     assert lines == [("Company record", "Crustdata returned no record for this company. Clearance treats missing data as a "
                                         "risk signal, never a pass, and asks the buyer for an end-use statement.")]
+
+
+def test_every_capability_rule_has_plain_english_text():
+    from clearance import config
+    assert set(ui.RULE_TEXT) == set(config.CAPABILITY_POINTS)

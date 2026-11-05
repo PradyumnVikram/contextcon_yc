@@ -24,7 +24,7 @@ log = logging.getLogger(__name__)
 
 FIXTURES_DIR = config.DATA_DIR / "demo_crustdata"
 
-ENRICH_FIELDS = ["basic_info", "headcount", "taxonomy", "locations", "web_traffic"]
+ENRICH_FIELDS = ["basic_info", "headcount", "taxonomy", "locations", "web_traffic", "hiring", "news"]
 PEER_FIELDS = ["basic_info", "headcount", "taxonomy", "locations"]   # /company/search rejects web_traffic (live, 2026-11-06)
 PEER_ENRICH_FIELDS = ["basic_info", "headcount", "web_traffic"]
 PERSON_FIELDS = [
@@ -220,7 +220,7 @@ class CrustdataClient:
         k = norm_key(company_key)
         field = ("experience.employment_details.current.company_website_domain" if is_domain(k)
                  else "experience.employment_details.current.company_name")
-        # No `sorts`: seniority is not a supported sort field (live API, 2026-11-06).
+        # seniority_level is filterable but not a legal sort; sending it makes the live call 400.
         body = {"filters": {"field": field, "type": "=", "value": k}, "fields": fields, "limit": limit}
         data = self.post("/person/search", body) or {}
         return data.get("profiles", [])

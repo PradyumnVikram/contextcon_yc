@@ -3,8 +3,10 @@
     python -m clearance.screening.csl            # download from trade.gov and write data/csl.csv
     python -m clearance.screening.csl raw.csv    # convert an already-downloaded consolidated.csv
 
-data/csl.csv (git-ignored, ~10 MB) keeps: id, source, name, alt_names, addresses, countries.
-data/csl_demo.csv holds SYNTHETIC listed entities for the demo (ethics rule) and is always loaded too.
+data/csl.csv (git-ignored) keeps the US consolidated list.
+data/sanctions_extra.csv (git-ignored) keeps UN, EU, and UK entities, built by
+scripts/build_sanctions_extra.py. data/csl_demo.csv holds synthetic demo names.
+All three are loaded together.
 """
 from __future__ import annotations
 
@@ -20,6 +22,8 @@ from clearance import config
 CSL_URL = "https://data.trade.gov/downloadable_consolidated_screening_list/v1/consolidated.csv"
 CSL_CSV = config.DATA_DIR / "csl.csv"
 CSL_DEMO_CSV = config.DATA_DIR / "csl_demo.csv"
+# UN, EU, and UK entity lists, same columns as csl.csv. Built by scripts/build_sanctions_extra.py.
+EXTRA_CSV = config.DATA_DIR / "sanctions_extra.csv"
 COLUMNS = ["id", "source", "name", "alt_names", "addresses", "countries"]
 
 csv.field_size_limit(10_000_000)
@@ -84,9 +88,11 @@ def _read(path: Path) -> list[Entry]:
 
 @lru_cache(maxsize=4)
 def load(paths: tuple[Path, ...] | None = None) -> list[Entry]:
-    """Real CSL (if downloaded) + the synthetic demo list. Module globals are read at call time so tests can
-    point CSL_CSV at a small fixture."""
-    return [e for p in (paths or (CSL_CSV, CSL_DEMO_CSV)) for e in _read(p)]
+    """US CSL (if downloaded) + UN/EU/UK entities (if built) + the synthetic demo list.
+
+    Module globals are read at call time so tests can point CSL_CSV and EXTRA_CSV at fixtures.
+    """
+    return [e for p in (paths or (CSL_CSV, EXTRA_CSV, CSL_DEMO_CSV)) for e in _read(p)]
 
 
 if __name__ == "__main__":

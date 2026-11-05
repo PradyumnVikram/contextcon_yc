@@ -66,6 +66,16 @@ class CompanyProfile:
         total = sum(self.by_role.values())
         return eng / total if total else None
 
+    @property
+    def technical_headcount(self) -> float | None:
+        """Engineering staff. Percentages are applied to total headcount."""
+        eng = sum(v for k, v in self.by_role.items() if func_bucket(k) == "engineering")
+        if not self.by_role:
+            return None
+        if self.by_role_is_pct:
+            return None if not self.headcount else self.headcount * eng / 100
+        return eng
+
 
 def parse_company(cd: dict) -> CompanyProfile:
     by_role_abs = _get(cd, "headcount.by_role_absolute") or {}

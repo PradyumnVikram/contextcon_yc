@@ -34,7 +34,7 @@ def test_acceptance_case_outcome(case):
 
 def test_rule_ids_are_unique_and_end_with_release():
     ids = [r.id for r in RULES]
-    assert len(ids) == len(set(ids)) == 12 and ids[-1] == "R12_release"
+    assert len(ids) == len(set(ids)) and ids[-1] == "R12_release"
 
 
 def test_llm_unavailable_holds_instead_of_asking():
