@@ -1,6 +1,30 @@
 # Clearance: one place for a compliance officer
 
-Local notes on `dev2`. Not pushed. This is the job, the algorithm as it stands after the rule changes, the lists on disk, and what the officer should see and do on each order before they override.
+Read this file first. Branch `dev2` on `https://github.com/akshat-sathiya/contextcon_yc`. The new work is commit `646fffb` and anything after it. `WORKFLOW.md` and the `AGENTS_*.md` files are the older build plan. They were not rewritten. Where they disagree with this file, this file is the one to follow.
+
+## For the next agent
+
+The scoring, screening, and decision changes below are already in the code. Do not rebuild them. Do not revert them to the old point table.
+
+Already done in code:
+
+- Buyer type uses workforce share, not the words “design” or “manufacturing.”
+- Quantity is compared with technical headcount (`O1`) or distributor headcount (`D4`).
+- Small staff replaced company age (`C3`, `D1`).
+- Traffic, peer headcount, destination, and age are recorded and not scored.
+- `C1` fades and is zero once engineering share is about 25% or the public trail shows the company does the work.
+- `C2` fades from the 0th percentile to the 50th.
+- US, UN, EU, and UK entity lists load together. A matching address is its own block.
+- A controlled order the buyer cannot use stays a hold after the end-use letter (`R9b`).
+- Unusual price, a third-country payer, or a house or virtual office is a hold when the officer marks it (`R5b`).
+- Unknown part numbers can match a datasheet phrase. Indian buyers get a note that the DGFT check was not done.
+- Live people search no longer sends the illegal sort field.
+
+Not done. This is the work:
+
+1. Build the one-stop officer screen described under “One order, before override” and “What they can do from here.” The current UI is `app.py`. It can sign and override. It does not yet let the officer edit the order facts, mark DGFT, paste a datasheet, or set the order red flags, then run the decision again.
+2. Do not commit `.env`, `data/csl.csv`, or `data/sanctions_extra.csv`. They are git-ignored. To screen for real, download the US list with `python -m clearance.screening.csl` and build the extra file with `scripts/build_sanctions_extra.py`. Put `CRUSTDATA_API_KEY` in `.env`.
+3. Keep the demo from calling a real unlisted company suspicious. Suspicious examples stay synthetic or already listed.
 
 The product recommends. The officer signs a release or a block, or overrides with a written reason. The original recommendation stays in the audit.
 
