@@ -1,0 +1,9 @@
+regime,match,destination,required,reason,documents
+SCOMET,*,IN,false,Domestic sale: no SCOMET export authorisation needed,
+SCOMET,*,*,true,SCOMET-controlled item exported from India,SCOMET authorisation application (DGFT);End-user certificate;Statement of end use
+EAR,3A001,IN,false,US-origin 3A001 item within India: check the original US export licence for in-country transfer conditions,Copy of original US export authorisation;Written assurance against re-export
+EAR,3A001,DE,false,US-origin 3A001 re-export to Germany: no EAR licence for this demo destination,
+EAR,3A001,US,false,Return to the United States,
+EAR,3A001,SG,false,US-origin 3A001 re-export to Singapore: no EAR licence for this demo destination (verify),
+EAR,3A001,*,true,US-origin 3A001 item: EAR re-export licence required for this destination,BIS re-export licence or licence-exception determination;End-user statement (BIS-711 equivalent)
+EAR,EAR99,*,false,EAR99: no licence except to embargoed destinations or prohibited end users,
