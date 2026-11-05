@@ -74,8 +74,8 @@ contextcon_yc/
 │   ├── mail/                   B
 │   ├── enduse/                 B
 │   ├── decision/               B
-│   └── pipeline.py             B (not created yet)
-├── app.py                      B (not created yet)
+│   └── pipeline.py             B
+├── app.py                      B
 ├── data/                       A: catalog.csv, licence_rules.csv, csl.csv, test_companies.csv
 ├── mailbox/inbox, outbox/      B: simulated email (.eml files are git-ignored)
 ├── eval/                       B: hand-written end-use replies + scorer
@@ -93,8 +93,7 @@ contextcon_yc/
 | `models.py`, `evidence.py`, `store.py`, `config.py` | **Done.** Shared contracts, ledger, all SQLite tables, all tunables |
 | `tests/fixtures/cases.py`, `tests/test_shared.py` | **Done.** 9 acceptance cases, shared-layer tests |
 | `catalog/`, `screening/`, `capability/`, `watch/`, `crustdata_client.py` | **Stubs** (`STUB = True`). Correct signatures and fake data; A replaces them |
-| `llm/`, `mail/`, `enduse/`, `decision/` | **Empty packages.** B writes their stubs and real code |
-| `pipeline.py`, `app.py` | **Not created.** B creates them (B7, B8) |
+| `llm/`, `mail/`, `enduse/`, `decision/`, `pipeline.py`, `app.py`, `eval/` | **Done (B1–B8)** on `dev`. Real implementations, running against A's stubs |
 
 A module's stub keeps the exact function signature from AGENTS §5.2. When the real implementation lands, delete `STUB = True`.
 
@@ -151,4 +150,15 @@ Each checkpoint is a command you can run plus what you should see. Person A's ch
 | CP8 | A10–A12 | `pytest` | All green. Every acceptance case has a buyer in `data/test_companies.csv` |
 | CP9 | I1–I2 integration | `pytest tests/test_cases.py` | 9/9 acceptance cases produce the §4.8 recommendation |
 
-Person B defines their checkpoints in `AGENTS_PRODUCT.md` §16 as they go.
+Person B's checkpoints (run on `dev`, offline unless noted):
+
+| # | After | Run | Expect |
+|---|---|---|---|
+| CP-B1 | B1–B2 Claude client, validator | `pytest tests/test_llm.py` | 5 passed: cache hit makes no second call; refusal/max_tokens → `LLMUnavailable`; unknown IDs rejected |
+| CP-B1-live | Live Claude call (needs `ANTHROPIC_API_KEY`) | `python -c "from clearance import store; from clearance.llm import ClaudeLLM; from clearance.llm.schemas import DraftOut; print(ClaudeLLM(store.connect()).structured('draft_email', DraftOut, {'kind':'end_use_request','tag':'[CLR-T1]','ask_for':['end user']}))"` | A `DraftOut` whose subject starts `[CLR-T1]`. Run it twice: the second run is instant (cached) |
+| CP-B3 | B3 mail | `pytest tests/test_mail.py` | 5 passed: .eml round trip, missing field → `Incomplete` → reply merges, tag/In-Reply-To matching |
+| CP-B4 | B4–B5 end-use, eval | `pytest tests/test_enduse.py`, then (live) `python eval/score.py` | 4 passed. With a key: per-field accuracy on `eval/replies.jsonl` |
+| CP-B6 | B6 decision | `pytest tests/test_rules.py` | 14 passed, including all 9 acceptance cases against A's stubs |
+| CP-B7 | B7 pipeline | `pytest tests/test_pipeline.py` | 8 passed: clean release + sign, end-use loop with exactly one follow-up, no-data HOLD, missing details, LLM-down HOLD, override audited |
+| CP-B8 | B8 UI | `pytest tests/test_app.py`, then `streamlit run app.py` | 2 passed. In the browser: Inbox → preset "Radar firm order" → Drop into inbox → Process inbox → Ready to sign → enter officer name → Sign → Customers lists the buyer |
+| CP-B9 | Everything | `pytest` | 45 passed |
