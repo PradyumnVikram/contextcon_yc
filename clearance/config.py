@@ -21,6 +21,8 @@ CRUSTDATA_API_KEY = os.getenv("CRUSTDATA_API_KEY", "")
 
 # --- Claude (Person B) -------------------------------------------------------
 LLM_MODEL = "claude-opus-5-5"
+LLM_MAX_TOKENS = 16000
+LLM_SERVER_FALLBACK = True  # server-side refusal fallback (`fallbacks: "default"`); set False if the API rejects it
 LLM_EFFORT = {
     "parse_order": "low",
     "extract_end_use": "low",
