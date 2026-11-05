@@ -134,3 +134,52 @@ def test_unmatched_tagged_reply_is_kept(tmp_path):
     mb.compose("b@x.example", "Re: [CLR-O9999] hello", "...")
     assert p.process_inbox() == []
     assert conn.execute("SELECT COUNT(*) n FROM emails WHERE order_id IS NULL").fetchone()["n"] == 1
+
+
+RING_ORDERS = {
+    "Ring A": {"buyer_name": "Synthetic Orbit Electronics", "buyer_country": "IN", "ship_to_country": "AE",
+               "lines": [{"part_number": "PA-77G-HE", "quantity": 6}]},
+    "Ring B": {"buyer_name": "Synthetic Nimbus Instruments", "buyer_country": "IN", "ship_to_country": "AE",
+               "lines": [{"part_number": "LNA-77G-HE", "quantity": 6}]},
+    "Ring C": {"buyer_name": "Synthetic Delta Systems", "buyer_country": "IN", "ship_to_country": "AE",
+               "lines": [{"part_number": "ADC-12G-HE", "quantity": 8}]},
+    "Apex": {"buyer_name": "Synthetic Apex Components", "buyer_country": "IN", "ship_to_country": "IN",
+             "lines": [{"part_number": "FPGA-C10", "quantity": 20}]},
+}
+
+
+def test_ring_orders_look_routine_alone_but_the_network_holds_them(tmp_path):
+    p, mb, conn = make(tmp_path, parse=lambda pl: next(v for k, v in RING_ORDERS.items() if k in pl["email"]["subject"]))
+    senders = {"Ring A": "p@orbit-electronics.example", "Ring B": "p@nimbus-instruments.example",
+               "Ring C": "p@delta-systems.example"}
+    ids = []
+    for subj, frm in senders.items():
+        mb.compose(frm, subj, "...")
+        ids += p.process_inbox()
+    a, b, c = (store.load_decision(conn, i) for i in ids)
+    assert c.rule_fired == "R9c_linked_orders_form_controlled_system" and c.outcome == "HOLD"
+    # the earlier orders were re-checked when the third completed the set
+    assert a.rule_fired == b.rule_fired == "R9c_linked_orders_form_controlled_system"
+    assert any("network alert" in e.claim.lower() for e in p._ledger(ids[0]).items)
+
+
+def test_signed_orders_get_an_alert_but_keep_their_signature(tmp_path):
+    p, mb, conn = make(tmp_path, parse=lambda pl: next(v for k, v in RING_ORDERS.items() if k in pl["email"]["subject"]))
+    mb.compose("p@orbit-electronics.example", "Ring A", "...")
+    [first] = p.process_inbox()
+    p.override(first, "RELEASE", "A. Officer", "Licence on file")
+    p.sign(first, "A. Officer")
+    for subj, frm in [("Ring B", "p@nimbus-instruments.example"), ("Ring C", "p@delta-systems.example")]:
+        mb.compose(frm, subj, "...")
+        p.process_inbox()
+    d = store.load_decision(conn, first)
+    assert d.signature and d.outcome == "RELEASE"                       # never silently un-signed
+    assert any("network alert" in e.claim.lower() for e in p._ledger(first).items)
+    assert p.context(first).network_alerts
+
+
+def test_staff_from_listed_entity_holds_the_order(tmp_path):
+    p, mb, conn = make(tmp_path, parse=lambda pl: RING_ORDERS["Apex"])
+    mb.compose("md@apex-components.example", "Apex", "...")
+    [oid] = p.process_inbox()
+    assert store.load_decision(conn, oid).rule_fired == "R3c_staff_from_listed_entity"

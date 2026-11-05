@@ -1,0 +1,4 @@
+system,required_functions,concern,fits_keywords,min_coverage
+Radar seeker front-end,mmwave_power_amp;mmwave_lna;high_speed_adc;fpga|rad_hard_fpga,"guidance or fire-control radar (missile seeker, counter-drone radar)",radar;mmwave;automotive radar;antenna;defence electronics;defense and space,0.75
+UAV flight and guidance controller,imu;gnss;mcu;motor_driver,"drone or loitering-munition flight control",drone;uav;unmanned;flight controller;robotics;agri-drone,0.75
+Space or missile payload electronics,rad_hard_fpga;rad_hard_adc,"satellite or missile payload electronics",satellite;space;avionics;aerospace;defense and space,1.0
