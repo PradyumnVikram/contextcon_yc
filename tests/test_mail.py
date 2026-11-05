@@ -61,3 +61,18 @@ def test_match_reply_by_tag_and_in_reply_to():
     reply = Email(msg_id="<r>", from_addr="", to_addr="", subject="Re: hello", body="", in_reply_to="<ours>")
     assert match_reply(reply, conn) == "C9"
     assert match_reply(Email(msg_id="z", from_addr="", to_addr="", subject="hi", body=""), conn) is None
+
+
+def test_sender_corporate_domain_identifies_buyer_when_no_website_given():
+    led = Ledger()
+    corp = Email(msg_id="<m>", from_addr="Procurement <procurement@astramwp.com>", to_addr="c@y", subject="PO", body="...")
+    order = parse_order(corp, "9", FakeLLM({"parse_order": FULL}), led)
+    assert order.buyer.domain == "astramwp.com"
+    assert any(e.claim.startswith("Buyer domain taken from sender address") for e in led.items)
+
+    free = Email(msg_id="<n>", from_addr="someone@gmail.com", to_addr="c@y", subject="PO", body="...")
+    assert parse_order(free, "10", FakeLLM({"parse_order": FULL}), Ledger()).buyer.domain is None
+
+    stated = Email(msg_id="<o>", from_addr="a@astramwp.com", to_addr="c@y", subject="PO", body="...")
+    o = parse_order(stated, "11", FakeLLM({"parse_order": {**FULL, "buyer_website": "www.other.example"}}), Ledger())
+    assert o.buyer.domain == "www.other.example"     # a website stated in the email wins
