@@ -140,7 +140,7 @@ class Pipeline:
 
     # ------------------------------------------------------------------ assessment
     def _assess(self, oid: str, order: Order, ledger: Ledger, ctx: OrderContext) -> None:
-        cls = [self.catalog.classify(l.part_number, ledger) for l in order.lines]
+        cls = [self.catalog.classify(l.part_number, ledger, l.description) for l in order.lines]
         lic = [self.catalog.licence(c, order.ship_to_country, ledger) for c in cls if c.found]
         store.set_state(self.conn, oid, OrderState.CLASSIFIED)
         scr = [self.screening.screen(p, ledger) for p in order.parties]

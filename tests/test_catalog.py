@@ -10,6 +10,9 @@ def test_known_and_unknown_parts():
     assert led.get(c.evidence_ids[0]).source.startswith("catalog:row/")
     miss = catalog.classify("NOT-A-PART", led)
     assert not miss.found and led.get(miss.evidence_ids[0]).source == "catalog:miss"
+    sheet = catalog.classify("ADI-UNKNOWN", led, "77 GHz GaAs power amplifier, 2 W")
+    assert sheet.found and sheet.controlled and sheet.part_class == "high_end"
+    assert led.get(sheet.evidence_ids[0]).source.startswith("datasheet:")
 
 
 def test_licence_rules():

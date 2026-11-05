@@ -9,8 +9,8 @@ from __future__ import annotations
 from datetime import datetime, timezone
 
 from clearance import config, crustdata_client
-from clearance.capability.people import background_check, buyer_type, keyword_vote, people_vote
-from clearance.capability.peers import peer_percentiles, peer_set
+from clearance.capability.people import background_check, decide_buyer, domain_evidence, keyword_vote, people_vote
+from clearance.capability.peers import comparison, fade_points, peer_percentiles, peer_set
 from clearance.capability.profile import parse_company
 from clearance.evidence import Ledger
 from clearance.models import CapabilityResult, Classification, OrderLine, Party
@@ -53,7 +53,7 @@ def assess(party: Party, classifications: list[Classification], lines: list[Orde
     needs = sorted({n for c in classifications for n in c.needs})
     matching = pc.matching(needs) if pc and needs else []
     kw, pv = keyword_vote(prof), people_vote(pc)
-    btype = buyer_type(kw, pv)
+    btype, buyer_basis = decide_buyer(prof, pc)
     peers = peer_set(client, conn, prof)
     pcts, n_peers = peer_percentiles(prof, peers)
 
@@ -63,7 +63,8 @@ def assess(party: Party, classifications: list[Classification], lines: list[Orde
              "people_sampled": pc.n if pc else 0, "matching_people": len(matching) if needs else None,
              "function_mix": pc.function_mix() if pc else {}, "technical_share": pc.technical_share() if pc else None,
              "past_employer_profile": pc.past_employer_profile() if pc else {},
-             "buyer_type_keyword_vote": kw, "buyer_type_people_vote": pv, "peer_count": n_peers}
+             "buyer_type_keyword_vote": kw, "buyer_type_people_vote": pv,
+             "buyer_type_basis": buyer_basis, "peer_count": n_peers}
 
     ev(f"Company profile of '{prof.name}'", {"industry": prof.industry, "country": prof.country,
                                               "description": (prof.description or "")[:160]}, "/company/enrich#basic_info")
@@ -79,64 +80,137 @@ def assess(party: Party, classifications: list[Classification], lines: list[Orde
         if needs:
             ev(f"Employees whose title/skills match {needs}", [f"{p.name}: {p.title}" for p in matching][:10] or 0,
                "/person/search#title,skills")
-    ev("Buyer type (keyword vote + people vote)", {"type": btype, "keyword": kw, "people": pv}, "derived:buyer_type")
+    ev("Buyer type", {"type": btype, "basis": buyer_basis, "description_hint": kw,
+                      "employee_sample": pv, "workforce_engineering_share": feats["engineering_share"]},
+       "derived:buyer_type")
     if pcts:
         ev(f"Peer percentiles vs {n_peers} similar companies", pcts, "/company/search#peers")
 
-    # ---- rules --------------------------------------------------------------
-    def manufacturer_rules() -> list[str]:
-        r = []
-        if needs and len(matching) == 0:
-            r.append("C1_no_matching_people")
-        if pcts.get("engineering_share") is not None and pcts["engineering_share"] < config.LOW_PERCENTILE:
-            r.append("C2_low_engineering_share")
-        if age is not None and age < config.YOUNG_COMPANY_YEARS:
-            r.append("C3_young_company")
-        if prof.growth_yoy_pct is not None and prof.growth_yoy_pct < -config.HEADCOUNT_DECLINE_PCT:
-            r.append("C4_headcount_decline")
-        if pcts.get("monthly_visitors") is not None and pcts["monthly_visitors"] < config.LOW_PERCENTILE:
-            r.append("C5_low_traffic")
-        if needs:
-            for line in lines:
-                c = next((c for c in classifications if c.part_number.upper() == line.part_number.upper()), None)
-                if c and c.max_units_per_engineer and line.quantity / max(len(matching), 1e-9) > c.max_units_per_engineer:
-                    r.append("O1_units_per_engineer")
-                    break
-        return r
+    def track(code: str, label: str, value: float | None, attr: str) -> None:
+        detail = comparison(value, peers, attr)
+        if detail is None:
+            return
+        detail["code"] = code
+        detail["against"] = {"industry": prof.industry, "country": prof.country}
+        tracked.append(detail)
+        ev(f"{label} is {detail['value']} against {detail['peer_count']} peers "
+           f"in {prof.industry or 'the same industry'} ({prof.country or 'any country'}). "
+           f"Peer median {detail['median']}, range {detail['low']}–{detail['high']}, "
+           f"percentile {detail['percentile']}. Not scored.",
+           detail, "derived:tracked")
 
-    def distributor_rules() -> list[str]:
+    tracked: list[dict] = []
+    track("D2_small_distributor", "Headcount", float(prof.headcount) if prof.headcount is not None else None, "headcount")
+    track("C5_D3_traffic", "Monthly visitors", prof.monthly_visitors, "monthly_visitors")
+
+    # ---- rules --------------------------------------------------------------
+    evidence = domain_evidence(prof, pc, needs)
+    tech = prof.technical_headcount
+    sampled = pc.n if pc else 0
+    feats["domain_evidence"] = evidence
+    feats["technical_headcount"] = None if tech is None else round(tech, 1)
+    feats["sample_covers_staff"] = bool(prof.headcount and sampled >= config.SMALL_STAFF_SAMPLE_COVERS * prof.headcount)
+
+    def small_staff_points(full: float) -> float:
+        hc = prof.headcount
+        if not hc or hc >= config.SMALL_STAFF_FADE_AT:
+            return 0
+        base = full * (config.SMALL_STAFF_FADE_AT - hc) / config.SMALL_STAFF_FADE_AT
+        if feats["sample_covers_staff"]:
+            base *= 1.35
+        return round(min(full * 1.35, base), 1)
+
+    def over_order_points(qty: int, staff: float, per_person: int, full: float) -> tuple[float, float]:
+        """0 at a reasonable order, full points at OVER_ORDER_FULL_AT times that.
+
+        10,000 high-end parts at 5 per technical person is a normal buy only for
+        about 2,000 engineers. 10,000 commodity FPGAs at 50 per person is normal
+        for about 200. A handful of engineers ordering 10,000 is not.
+        """
+        reasonable = max(per_person, (staff or 0) * per_person)
+        if qty <= reasonable:
+            return 0, reasonable
+        ratio = qty / reasonable
+        span = config.OVER_ORDER_FULL_AT - 1
+        return round(min(full, full * (ratio - 1) / span), 1), reasonable
+
+    def manufacturer_rules() -> list[tuple[str, float]]:
         r = []
-        if age is not None and age < config.YOUNG_DISTRIBUTOR_YEARS:
-            r.append("D1_young_distributor")
-        if pcts.get("headcount") is not None and pcts["headcount"] < config.LOW_PERCENTILE:
-            r.append("D2_small_distributor")
-        if pcts.get("monthly_visitors") is not None and pcts["monthly_visitors"] < config.LOW_PERCENTILE:
-            r.append("D3_low_traffic_distributor")
-        small = prof.headcount is not None and prof.headcount < config.SMALL_DISTRIBUTOR_HEADCOUNT
+        eng = prof.engineering_share or 0
+        if needs and not evidence and eng < config.TECHNICAL_SHARE_CLEAR:
+            c1 = round(PTS["C1_not_a_technical_business"] * (1 - eng / config.TECHNICAL_SHARE_CLEAR), 1)
+            if c1:
+                r.append(("C1_not_a_technical_business", c1))
+        c2 = fade_points(pcts.get("engineering_share"), PTS["C2_low_engineering_share"], config.C2_FADE_UNTIL)
+        if c2:
+            r.append(("C2_low_engineering_share", c2))
+        small = small_staff_points(PTS["C3_small_staff"])
+        if small:
+            r.append(("C3_small_staff", small))
+        if prof.growth_yoy_pct is not None and prof.growth_yoy_pct < -config.HEADCOUNT_DECLINE_PCT:
+            r.append(("C4_headcount_decline", PTS["C4_headcount_decline"]))
         for line in lines:
             c = next((c for c in classifications if c.part_number.upper() == line.part_number.upper()), None)
-            if small and c and c.max_units_distributor_small and line.quantity > c.max_units_distributor_small:
-                r.append("D4_large_order_small_distributor")
+            if not c or not c.max_units_per_engineer:
+                continue
+            pts, reasonable = over_order_points(line.quantity, tech or 0, c.max_units_per_engineer,
+                                                PTS["O1_quantity_vs_technical_staff"])
+            feats["reasonable_quantity"] = reasonable
+            feats["ordered_quantity"] = line.quantity
+            if pts:
+                r.append(("O1_quantity_vs_technical_staff", pts))
                 break
         return r
 
-    ship_rules = []
+    def distributor_rules() -> list[tuple[str, float]]:
+        r = []
+        small = small_staff_points(PTS["D1_small_staff"])
+        if small:
+            r.append(("D1_small_staff", small))
+        staff = float(prof.headcount or 0)
+        for line in lines:
+            c = next((c for c in classifications if c.part_number.upper() == line.part_number.upper()), None)
+            if not c or not c.max_units_distributor_small:
+                continue
+            # The catalog cap is what a 5-person reseller can move. Bigger staff scales it up.
+            per_person = max(1, c.max_units_distributor_small / 5)
+            pts, reasonable = over_order_points(line.quantity, staff, int(per_person),
+                                                PTS["D4_large_order_small_distributor"])
+            feats["reasonable_quantity"] = reasonable
+            feats["ordered_quantity"] = line.quantity
+            if pts:
+                r.append(("D4_large_order_small_distributor", pts))
+                break
+        return r
+
     buyer_country = (party.country or "").upper()
     dest = (ship_to_country or "").upper()
+    ship_note = None
     if dest and buyer_country and dest != buyer_country:
-        ship_rules.append("O2_transshipment_hub" if dest in config.TRANSSHIPMENT_HUBS else "O3_ship_to_mismatch")
+        ship_note = "transshipment_hub" if dest in config.TRANSSHIPMENT_HUBS else "different_country"
+    feats["buyer_country"] = buyer_country or None
+    feats["ship_to_country"] = dest or None
+    feats["ship_note"] = ship_note
+    if ship_note:
+        ev(f"Ship-to country {dest} is not the buyer's country {buyer_country}",
+           {"note": ship_note, "hubs": sorted(config.TRANSSHIPMENT_HUBS)}, "order:ship_to")
 
-    score = lambda rules: sum(PTS[r] for r in rules)
+    def point_sum(rules: list[tuple[str, float]]) -> float:
+        return sum(pts for _, pts in rules)
+
     if btype == "manufacturer":
-        triggered = manufacturer_rules() + ship_rules
+        awarded = manufacturer_rules()
     elif btype == "distributor":
-        triggered = distributor_rules() + ship_rules
+        awarded = distributor_rules()
     else:
-        m, d = manufacturer_rules() + ship_rules, distributor_rules() + ship_rules
-        triggered = m if score(m) >= score(d) else d
-    total = score(triggered)
+        m, d = manufacturer_rules(), distributor_rules()
+        awarded = m if point_sum(m) >= point_sum(d) else d
+    triggered = [name for name, pts in awarded if pts > 0]
+    total = point_sum(awarded)
     tier = _tier(total)
-    ev(f"Capability score {total} -> {tier}", {"rules": triggered, "buyer_type": btype}, "derived:capability_score")
+    feats["tracked"] = tracked
+    feats["rule_points"] = {name: pts for name, pts in awarded}
+    ev(f"Capability score {total} -> {tier}", {"rules": feats["rule_points"], "buyer_type": btype}, "derived:capability_score")
 
     return CapabilityResult(party_name=party.name, coverage="rich", buyer_type=btype, features=feats, percentiles=pcts,
                             triggered_rules=triggered, mismatch_score=float(total), tier=tier, evidence_ids=ids)

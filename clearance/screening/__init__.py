@@ -98,6 +98,10 @@ def screen(party: Party, ledger: Ledger) -> ScreeningResult:
             if i not in best or m.score > best[i].score:
                 best[i] = m
 
+    address_hit = _address_match(party, entries)
+    if address_hit and (address_hit.csl_entry_id not in {m.csl_entry_id for m in best.values()}):
+        best[len(best)] = address_hit
+
     matches = sorted(best.values(), key=lambda m: -m.score)[:5]
     status = "exact_hit" if any(m.listed_record["exact"] for m in matches) else "fuzzy_hit" if matches else "clear"
     if matches:
@@ -111,8 +115,39 @@ def screen(party: Party, ledger: Ledger) -> ScreeningResult:
     ids = [eid]
     if is_forwarder:
         ids.append(ledger.add(f"'{party.name}' is a freight/logistics company", True, "screening:forwarder_keywords"))
+    if (party.country or "").upper() == "IN":
+        ids.append(ledger.add(
+            "DGFT denied-entity status was not checked"
+            + (f" for IEC {party.iec}" if party.iec else "; no importer-exporter code was on the order"),
+            party.iec, "dgft:iec"))
     return ScreeningResult(party_role=party.role, party_name=party.name, status=status, matches=matches,
                            is_forwarder=is_forwarder, evidence_ids=ids)
+
+
+def _address_match(party: Party, entries) -> Match | None:
+    """A listed address is its own hit, even when the company name is new."""
+    addr = (party.address or "").strip()
+    if len(addr) < 10:
+        return None
+    country = (party.country or "").upper()
+    best: Match | None = None
+    for e in entries:
+        if country and e.countries and country not in e.countries:
+            continue
+        for listed in e.addresses:
+            if len(listed) < 10:
+                continue
+            score = float(fuzz.token_set_ratio(addr.lower(), listed.lower()))
+            if score < 90:
+                continue
+            exact = score >= 90
+            m = Match(csl_entry_id=e.id, listed_name=e.name, score=score,
+                      breakdown={"address": round(score, 1)},
+                      listed_record={"source": e.source, "name": e.name, "addresses": [listed],
+                                     "countries": sorted(e.countries), "exact": exact, "address_match": True})
+            if best is None or m.score > best.score:
+                best = m
+    return best
 
 
 def reload() -> None:

@@ -99,12 +99,82 @@ def background_check(client: CrustdataClient, conn: sqlite3.Connection, company_
 
 
 def keyword_vote(profile: CompanyProfile | None) -> str | None:
+    """Guide only, from the company's own description. The industry label is ignored:
+    "Electronics Manufacturing" is how distributors are filed, not proof they build anything."""
     if profile is None:
         return None
-    text = " ".join(filter(None, [profile.description, profile.industry])).lower()
+    text = (profile.description or "").lower()
     d = sum(k in text for k in config.DISTRIBUTOR_KEYWORDS)
     m = sum(k in text for k in config.MANUFACTURER_KEYWORDS)
     return "distributor" if d > m else "manufacturer" if m > d else None
+
+
+def _snippets(obj: object, limit: int = 40) -> list[str]:
+    out: list[str] = []
+
+    def walk(v: object) -> None:
+        if len(out) >= limit:
+            return
+        if isinstance(v, str) and v.strip():
+            out.append(v.strip())
+        elif isinstance(v, dict):
+            for item in v.values():
+                walk(item)
+        elif isinstance(v, list):
+            for item in v[:limit]:
+                walk(item)
+
+    walk(obj)
+    return out
+
+
+def domain_evidence(profile: CompanyProfile | None, pc: PeopleCheck | None, needs: list[str]) -> list[str]:
+    """Short bits of text showing the company already does this kind of work.
+
+    Description, hiring, news, and past employers. A missing keyword is not a finding.
+    There is no purchase-order feed; this is the public trail of the work.
+    """
+    if profile is None or not needs:
+        return []
+    words = {w for n in needs for w in NEEDS_KEYWORDS.get(n, [n])}
+    blobs = [profile.description or "", profile.industry or ""]
+    blobs += _snippets((profile.raw or {}).get("hiring"))
+    blobs += _snippets((profile.raw or {}).get("news"))
+    if pc:
+        for person in pc.people:
+            blobs.append(person.title)
+            blobs.extend(person.past_employers)
+    hits: list[str] = []
+    for blob in blobs:
+        low = blob.lower()
+        if any(w in low for w in words) and blob not in hits:
+            hits.append(blob[:180])
+        if len(hits) >= 3:
+            break
+    return hits
+
+
+def decide_buyer(profile: CompanyProfile | None, pc: PeopleCheck | None) -> tuple[str, str]:
+    """Who the company is, and which fact decided it.
+
+    Order: the whole workforce (headcount by role), then an explicit "distributor"
+    in the description when the workforce is not a large engineering team, then the
+    employee sample, and only then the description on its own.
+    """
+    eng = None if profile is None else profile.engineering_share
+    hint = keyword_vote(profile)
+    sample = people_vote(pc)
+    if eng is not None and eng >= 0.40:
+        return "manufacturer", "workforce_engineering_share"
+    if hint == "distributor" and (eng is None or eng < 0.40):
+        return "distributor", "description_and_workforce"
+    if eng is not None and eng >= 0.30 and hint != "distributor":
+        return "manufacturer", "workforce_engineering_share"
+    if sample:
+        return sample, "employee_sample"
+    if hint:
+        return hint, "description_only"
+    return "unclear", "insufficient"
 
 
 def people_vote(pc: PeopleCheck | None, min_people: int = 3) -> str | None:

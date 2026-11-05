@@ -33,3 +33,5 @@ clearance.db
 mailbox/inbox/*.eml
 mailbox/outbox/*.eml
 data/csl.csv
+data/sanctions_extra.csv
+data/sanctions_raw/

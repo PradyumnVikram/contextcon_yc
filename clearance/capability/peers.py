@@ -45,6 +45,35 @@ def percentile(value: float | None, others: list[float | None]) -> float | None:
     return round(100 * sum(v < value for v in vals) / len(vals), 1)
 
 
+def comparison(value: float | None, peers: list[CompanyProfile], attr: str) -> dict | None:
+    """This company's value against peers that have the same field. None when the peer set is too small."""
+    pairs = []
+    for p in peers:
+        v = getattr(p, attr)
+        if isinstance(v, (int, float)):
+            pairs.append((p.name or "?", float(v)))
+    if value is None or len(pairs) < config.PEER_SET_MIN:
+        return None
+    nums = sorted(v for _, v in pairs)
+    mid = nums[len(nums) // 2]
+    return {
+        "value": round(float(value), 3),
+        "peer_count": len(nums),
+        "median": round(mid, 3),
+        "low": round(nums[0], 3),
+        "high": round(nums[-1], 3),
+        "percentile": percentile(float(value), nums),
+        "examples": [name for name, _ in pairs[:5]],
+    }
+
+
+def fade_points(percentile_value: float | None, full: float, zero_at: float) -> float:
+    """Full points at the 0th percentile, falling in a straight line to 0 at `zero_at`."""
+    if percentile_value is None or percentile_value >= zero_at:
+        return 0
+    return round(full * (zero_at - percentile_value) / zero_at, 1)
+
+
 def peer_percentiles(profile: CompanyProfile, peers: list[CompanyProfile]) -> tuple[dict[str, float], int]:
     feats = {
         "engineering_share": (profile.engineering_share, [p.engineering_share for p in peers]),

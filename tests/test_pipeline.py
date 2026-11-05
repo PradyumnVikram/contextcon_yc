@@ -72,14 +72,15 @@ def test_shell_end_use_loop_with_one_followup_then_hold(tmp_path):
     assert len(mb.outbox_messages()) == 2   # no third email
 
 
-def test_shell_with_good_end_use_still_holds_as_high_risk(tmp_path):
+def test_shell_with_good_end_use_still_needs_a_licence(tmp_path):
     p, mb, conn = make(tmp_path, extract=[GOOD])
     mb.compose("x@shell.example", "PO shell", "100 pcs")
     [oid] = p.process_inbox()
     req = mb.outbox_messages()[0]
     mb.compose("x@shell.example", f"Re: {req.subject}", "radar")
     p.process_inbox()
-    assert store.load_decision(conn, oid).rule_fired == "R9_high_risk_despite_end_use"
+    d = store.load_decision(conn, oid)
+    assert (d.outcome, d.rule_fired) == ("HOLD", "R9b_buyer_cannot_use_quantity")
 
 
 def test_no_data_holds_and_asks_and_never_auto_releases(tmp_path):
