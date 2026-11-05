@@ -5,6 +5,29 @@
 > **The other half:** Person B builds the Claude client, mail, end-use loop, decision, pipeline and UI, and their brief is `AGENTS_PRODUCT.md`. §1–§15 are identical in both files. If you change anything in §1–§15, make the same change in both files in the same commit.
 > Read this whole file before writing code.
 
+## ★ Your job (Person A: data and risk signals, branch `data`)
+
+**Your job is to build every deterministic data and risk signal Clearance relies on.** Given a party and an order, your modules answer:
+- What is this part, and does it need a licence?
+- Is this party on the US restricted-party list?
+- Can this buyer actually use what it's buying?
+
+The pipeline built by Person B calls your modules, and you never call Claude.
+
+**Do these tasks, in this order** (full details in §16):
+1. **S1–S5** (shared, with Person B, on `dev`): scaffold, contracts, storage, fixtures, stubs.
+2. **A1–A3**: Crustdata client, field discovery, coverage go/no-go.
+3. **A4–A5**: catalog and licence rules, CSL screening.
+4. **A6–A9**: employee background check, buyer type, peer comparison, capability scoring.
+5. **A10–A12**: test companies, watcher, tests.
+6. **I1–I3** (with Person B): integration, acceptance cases, rehearsal.
+
+**You deliver** `clearance/crustdata_client.py`, `clearance/catalog/`, `clearance/screening/`, `clearance/capability/`, `clearance/watch/`, `data/*.csv`, and their tests.
+
+**You do NOT do:** any B-task (Claude client, mail, end-use loop, decision rules, audit, pipeline, UI). Don't edit Person B's folders (§17). If you need something from their side, use the S5 stubs.
+
+**Definition of done for your job:** `pytest` passes offline for all your modules, and acceptance cases 1–9 (§4.9) get the correct capability and screening results from your modules.
+
 ## 1. What we are building
 
 **Clearance** is an autonomous export-compliance agent for Indian electronics exporters and distributors. It does the job of a trade compliance officer. An order for sensitive electronic parts arrives by email, and the agent gathers the evidence and recommends one of **RELEASE, LICENCE_REQUIRED, HOLD or BLOCK**. It writes an audit file that cites the evidence behind every step. A compliance officer resolves the exceptions and signs every RELEASE and BLOCK.

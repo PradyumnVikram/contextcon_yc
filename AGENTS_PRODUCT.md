@@ -5,6 +5,33 @@
 > **The other half:** Person A builds the Crustdata client, catalog, screening, capability engine and watcher, and their brief is `AGENTS_DATA.md`. §1–§15 are identical in both files. If you change anything in §1–§15, make the same change in both files in the same commit.
 > Read this whole file before writing code.
 
+## ★ Your job (Person B: agent, LLM and product, branch `product`)
+
+**Your job is to build the agent the compliance officer actually uses.** It:
+- reads order emails and replies to buyers;
+- runs the end-use loop;
+- applies the decision table;
+- writes the cited explanation and audit file;
+- drives each order through its states;
+- gives the officer the screens to sign, resolve exceptions and override.
+
+You call Person A's modules for every data signal. You never compute screening or capability yourself.
+
+**Do these tasks, in this order** (full details in §16):
+1. **S1–S5** (shared, with Person A, on `dev`): scaffold, contracts, storage, fixtures, stubs.
+2. **B1–B2**: Claude client, prompts, evidence-ID validator.
+3. **B3**: mail module (inbox, order parsing, missing-details auto-reply, reply matching).
+4. **B4–B5**: end-use loop and the hand-written eval set.
+5. **B6–B7**: decision rules, explanation and audit, pipeline state machine.
+6. **B8–B9**: Streamlit UI, tests.
+7. **I1–I3** (with Person A): integration, acceptance cases, rehearsal.
+
+**You deliver** `clearance/llm/`, `clearance/mail/`, `clearance/enduse/`, `clearance/decision/`, `clearance/pipeline.py`, `app.py`, `mailbox/`, `eval/`, and their tests.
+
+**You do NOT do:** any A-task (Crustdata, catalog, screening, capability scoring, buyer type, watcher). Don't edit Person A's folders (§17). Until their modules land, use the S5 stubs.
+
+**Definition of done for your job:** `pytest` passes offline for all your modules, acceptance cases 1–9 (§4.9) produce the expected recommendation through `pipeline`, and the demo script (§12) runs from the UI.
+
 ## 1. What we are building
 
 **Clearance** is an autonomous export-compliance agent for Indian electronics exporters and distributors. It does the job of a trade compliance officer. An order for sensitive electronic parts arrives by email, and the agent gathers the evidence and recommends one of **RELEASE, LICENCE_REQUIRED, HOLD or BLOCK**. It writes an audit file that cites the evidence behind every step. A compliance officer resolves the exceptions and signs every RELEASE and BLOCK.
