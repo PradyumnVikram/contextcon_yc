@@ -196,7 +196,7 @@ class CrustdataClient:
         return data.get("companies", [])
 
     def search_people(self, company_key: str, fields: list[str] = PERSON_FIELDS, limit: int = 25) -> list[dict] | None:
-        """Up to `limit` current employees, most senior first. None = company unknown to the source."""
+        """Up to `limit` current employees. None = company unknown to the source."""
         fx = self.fixtures.company_people(company_key)
         if fx is not None:
             return fx[:limit]
@@ -205,8 +205,8 @@ class CrustdataClient:
         k = norm_key(company_key)
         field = ("experience.employment_details.current.company_website_domain" if is_domain(k)
                  else "experience.employment_details.current.company_name")
-        body = {"filters": {"field": field, "type": "=", "value": k}, "fields": fields, "limit": limit,
-                "sorts": [{"field": "experience.employment_details.current.seniority_level", "order": "desc"}]}
+        # No `sorts`: seniority is not a supported sort field (live API, 2026-11-06).
+        body = {"filters": {"field": field, "type": "=", "value": k}, "fields": fields, "limit": limit}
         data = self.post("/person/search", body) or {}
         return data.get("profiles", [])
 
@@ -247,3 +247,33 @@ def set_client(client: CrustdataClient | None) -> None:
     """Tests and the watcher can swap the module-wide client."""
     global _default
     _default = client
+
+
+def _check(domain: str = "stripe.com") -> int:
+    """`python -m clearance.crustdata_client [domain]`: verify the key, show credits, make ONE cached enrich (~2 credits)."""
+    import httpx
+    c = get_client()
+    if not c.live:
+        print("CRUSTDATA_API_KEY is not set (check .env). Only synthetic demo fixtures are available.")
+        return 1
+    h = {"authorization": f"Bearer {c.api_key}", "x-api-version": config.CRUSTDATA_API_VERSION}
+    r = httpx.get(config.CRUSTDATA_BASE_URL + "/account/credits", headers=h, timeout=30)
+    if r.status_code != 200:
+        print(f"key rejected: /account/credits -> {r.status_code} {r.text[:200]}")
+        return 1
+    print(f"key OK. credits: {r.json()['account']['credits']:,.0f}")
+    from clearance.capability.profile import parse_company
+    cd = c.enrich_company(domain)
+    if cd is None:
+        print(f"enrich {domain}: no match")
+        return 1
+    p = parse_company(cd)
+    print(f"enrich {domain}: {p.name} | {p.industry} | {p.country} | founded {p.year_founded} | "
+          f"headcount {p.headcount} | engineering share {p.engineering_share} | visitors/month {p.monthly_visitors}")
+    print("(cached: running this again costs nothing)")
+    return 0
+
+
+if __name__ == "__main__":
+    import sys
+    sys.exit(_check(*sys.argv[1:2]))
