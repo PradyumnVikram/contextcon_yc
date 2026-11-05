@@ -6,7 +6,7 @@ An autonomous export-compliance agent for Indian electronics exporters, built fo
 | | Person A | Person B |
 |---|---|---|
 | Brief | `AGENTS_DATA.md` | `AGENTS_PRODUCT.md` |
-| Branch | `dev` | `dev2` |
+| Branch | `dev2` | `dev` |
 | Job | Data and risk signals: Crustdata, catalog and licence, CSL screening, capability engine, watcher | Agent and product: Claude, mail, end-use loop, decisions and audit, pipeline, UI |
 | Tasks | S1–S5, A1–A12, I1–I3 | S1–S5, B1–B9, I1–I3 |
 
@@ -19,6 +19,6 @@ Open your own brief and start at the "★ Your job" section.
 §1–§15 are shared and identical in both files. Change them in both files in the same commit.
 
 ## Branching
-See `WORKFLOW.md` §6. `main` is the always-green integration branch with the shared foundation. Person A works on `dev`, Person B on `dev2`. After each finished, tested feature: merge `origin/main` into your branch, run `pytest`, merge into `main`, and the other person pulls `main`.
+See `WORKFLOW.md` §6. `main` is the always-green integration branch with the shared foundation. Person A works on `dev2`, Person B on `dev`. After each finished, tested feature: merge `origin/main` into your branch, run `pytest`, merge into `main`, and the other person pulls `main`.
 
 Start with [`WORKFLOW.md`](WORKFLOW.md) for structure, flow, setup and checkpoints.

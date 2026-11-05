@@ -1,11 +1,11 @@
 # AGENTS_DATA.md: Clearance, Person A (data and risk signals)
 
-> **Who reads this:** Person A and any coding agent working on the **`dev`** branch.
+> **Who reads this:** Person A and any coding agent working on the **`dev2`** branch.
 > **Your scope:** Crustdata client, catalog and licence rules, restricted-list screening, the capability engine (employee background check, buyer type, peer comparison, scoring), test companies, and the watcher.
 > **The other half:** Person B builds the Claude client, mail, end-use loop, decision, pipeline and UI, and their brief is `AGENTS_PRODUCT.md`. §1–§15 are identical in both files. If you change anything in §1–§15, make the same change in both files in the same commit.
 > Read this whole file and `WORKFLOW.md` before writing code.
 
-## ★ Your job (Person A: data and risk signals, branch `dev`)
+## ★ Your job (Person A: data and risk signals, branch `dev2`)
 
 **Your job is to build every deterministic data and risk signal Clearance relies on.** Given a party and an order, your modules answer:
 - What is this part, and does it need a licence?
@@ -15,7 +15,7 @@
 The pipeline built by Person B calls your modules, and you never call Claude.
 
 **Do these tasks, in this order** (full details in §16):
-1. **S1–S5** ✅ already on `main` (scaffold, contracts, storage, fixtures, your stubs). Start at A1 on `dev`.
+1. **S1–S5** ✅ already on `main` (scaffold, contracts, storage, fixtures, your stubs). Start at A1 on `dev2`.
 2. **A1–A3**: Crustdata client, field discovery, coverage go/no-go.
 3. **A4–A5**: catalog and licence rules, CSL screening.
 4. **A6–A9**: employee background check, buyer type, peer comparison, capability scoring.
@@ -336,7 +336,7 @@ contextcon_yc/
 ## 8. Branching and collaboration
 Full procedure in `WORKFLOW.md` §6.
 - `main`: **the integration branch, always green.** The shared foundation (S1–S4 and A's stubs) is already here.
-- `dev`: Person A's working branch. `dev2`: Person B's working branch.
+- `dev2`: Person A's working branch. `dev`: Person B's working branch.
 - **Feature loop:** finish a task with its tests → `git merge origin/main` into your branch → `pytest` green → PR (or agreed direct merge) into `main` → your teammate pulls `main` straight away.
 - **Shared files** (`models.py`, `evidence.py`, `store.py`, `config.py`, `pyproject.toml`, `tests/fixtures/`, `WORKFLOW.md`, §1–§15 here) change only after both people agree, in a commit of their own, merged to `main` first.
 - **Stay in your own folders** (see §7). If you need something from the other side, use their stub, and don't edit their module.
@@ -350,7 +350,7 @@ Full procedure in `WORKFLOW.md` §6.
 | S2 ✅ | `clearance/models.py` with every contract in §5.1 | Both people sign off. Frozen |
 | S3 ✅ | `evidence.py` (Ledger), `store.py` (all tables in §5.3), `config.py` (all weights and thresholds in §4) | Unit tests for the Ledger and store pass |
 | S4 ✅ | `tests/fixtures/`: fake results for every module, plus the 9 acceptance cases (§4.9) as orders | Fixtures load into the models without errors |
-| S5 | Stubs: Person A's modules (`catalog`, `screening`, `capability`, `watch`, `crustdata_client`) are **done on `main`**. Person B writes stubs for `llm`, `mail`, `enduse`, `decision` and a stub `pipeline.run` on `dev2` | `tests/test_data_stubs.py` passes (A). B's stub pipeline runs the 9 cases (B) |
+| S5 | Stubs: Person A's modules (`catalog`, `screening`, `capability`, `watch`, `crustdata_client`) are **done on `main`**. Person B writes stubs for `llm`, `mail`, `enduse`, `decision` and a stub `pipeline.run` on `dev` | `tests/test_data_stubs.py` passes (A). B's stub pipeline runs the 9 cases (B) |
 
 ## 10. Integration tasks (both)
 | ID | Task | Done when |
@@ -395,9 +395,9 @@ Clearance is a hackathon prototype that automates a compliance workflow. It is n
 
 ---
 
-## 16. Your tasks (Person A, branch `dev`)
+## 16. Your tasks (Person A, branch `dev2`)
 
-S1–S5 are already on `main` (§9). Work on `dev`. "→" marks a dependency.
+S1–S5 are already on `main` (§9). Work on `dev2`. "→" marks a dependency.
 
 | ID | Task | Depends on | Done when |
 |---|---|---|---|

@@ -1,11 +1,11 @@
 # AGENTS_PRODUCT.md: Clearance, Person B (agent, LLM and product)
 
-> **Who reads this:** Person B and any coding agent working on the **`dev2`** branch.
+> **Who reads this:** Person B and any coding agent working on the **`dev`** branch.
 > **Your scope:** the Claude client, the mail module, the end-use loop and its eval set, decision rules, explanations and the audit file, the pipeline state machine, and the Streamlit UI.
 > **The other half:** Person A builds the Crustdata client, catalog, screening, capability engine and watcher, and their brief is `AGENTS_DATA.md`. §1–§15 are identical in both files. If you change anything in §1–§15, make the same change in both files in the same commit.
 > Read this whole file and `WORKFLOW.md` before writing code.
 
-## ★ Your job (Person B: agent, LLM and product, branch `dev2`)
+## ★ Your job (Person B: agent, LLM and product, branch `dev`)
 
 **Your job is to build the agent the compliance officer actually uses.** It:
 - reads order emails and replies to buyers;
@@ -18,7 +18,7 @@
 You call Person A's modules for every data signal. You never compute screening or capability yourself.
 
 **Do these tasks, in this order** (full details in §16):
-1. **S1–S4** ✅ already on `main`. Pull `main` into `dev2`, then do **S5 (your part)**: stubs for `llm`, `mail`, `enduse`, `decision` and a stub `pipeline.run`.
+1. **S1–S4** ✅ already on `main`. Pull `main` into `dev`, then do **S5 (your part)**: stubs for `llm`, `mail`, `enduse`, `decision` and a stub `pipeline.run`.
 2. **B1–B2**: Claude client, prompts, evidence-ID validator.
 3. **B3**: mail module (inbox, order parsing, missing-details auto-reply, reply matching).
 4. **B4–B5**: end-use loop and the hand-written eval set.
@@ -340,7 +340,7 @@ contextcon_yc/
 ## 8. Branching and collaboration
 Full procedure in `WORKFLOW.md` §6.
 - `main`: **the integration branch, always green.** The shared foundation (S1–S4 and A's stubs) is already here.
-- `dev`: Person A's working branch. `dev2`: Person B's working branch.
+- `dev2`: Person A's working branch. `dev`: Person B's working branch.
 - **Feature loop:** finish a task with its tests → `git merge origin/main` into your branch → `pytest` green → PR (or agreed direct merge) into `main` → your teammate pulls `main` straight away.
 - **Shared files** (`models.py`, `evidence.py`, `store.py`, `config.py`, `pyproject.toml`, `tests/fixtures/`, `WORKFLOW.md`, §1–§15 here) change only after both people agree, in a commit of their own, merged to `main` first.
 - **Stay in your own folders** (see §7). If you need something from the other side, use their stub, and don't edit their module.
@@ -354,7 +354,7 @@ Full procedure in `WORKFLOW.md` §6.
 | S2 ✅ | `clearance/models.py` with every contract in §5.1 | Both people sign off. Frozen |
 | S3 ✅ | `evidence.py` (Ledger), `store.py` (all tables in §5.3), `config.py` (all weights and thresholds in §4) | Unit tests for the Ledger and store pass |
 | S4 ✅ | `tests/fixtures/`: fake results for every module, plus the 9 acceptance cases (§4.9) as orders | Fixtures load into the models without errors |
-| S5 | Stubs: Person A's modules (`catalog`, `screening`, `capability`, `watch`, `crustdata_client`) are **done on `main`**. Person B writes stubs for `llm`, `mail`, `enduse`, `decision` and a stub `pipeline.run` on `dev2` | `tests/test_data_stubs.py` passes (A). B's stub pipeline runs the 9 cases (B) |
+| S5 | Stubs: Person A's modules (`catalog`, `screening`, `capability`, `watch`, `crustdata_client`) are **done on `main`**. Person B writes stubs for `llm`, `mail`, `enduse`, `decision` and a stub `pipeline.run` on `dev` | `tests/test_data_stubs.py` passes (A). B's stub pipeline runs the 9 cases (B) |
 
 ## 10. Integration tasks (both)
 | ID | Task | Done when |
@@ -399,9 +399,9 @@ Clearance is a hackathon prototype that automates a compliance workflow. It is n
 
 ---
 
-## 16. Your tasks (Person B, branch `dev2`)
+## 16. Your tasks (Person B, branch `dev`)
 
-S1–S4 are already on `main`. Your part of S5 comes first (§9). Work on `dev2`. "→" marks a dependency.
+S1–S4 are already on `main`. Your part of S5 comes first (§9). Work on `dev`. "→" marks a dependency.
 
 | ID | Task | Depends on | Done when |
 |---|---|---|---|

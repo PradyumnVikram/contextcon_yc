@@ -117,8 +117,8 @@ If a system install adds its own pytest plugins (for example ROS through `PYTHON
 | Branch | Who | Purpose |
 |---|---|---|
 | `main` | both | **Integration branch. Always green.** The shared foundation lives here, and every finished feature lands here |
-| `dev` | Person A | A's working branch |
-| `dev2` | Person B | B's working branch |
+| `dev2` | Person A | A's working branch |
+| `dev` | Person B | B's working branch |
 
 **Feature loop (both people, every finished task):**
 1. Finish a task on your branch, with its tests.
