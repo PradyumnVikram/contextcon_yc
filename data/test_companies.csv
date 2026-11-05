@@ -1,0 +1,9 @@
+case,role,name,domain,country,in_crustdata,expected_tier,note
+1-2,buyer,Synthetic Radar Systems,synthetic-radar.example,IN,fixture,consistent,legitimate radar maker with RF engineers
+3-4,buyer,Synthetic Components distributor,synthetic-components.example,IN,fixture,consistent,established distributor (reseller branch)
+3,end_user,Synthetic Telecom Labs,synthetic-telecomlabs.example,IN,fixture,consistent,end user with FPGA/RF engineers
+5,buyer,Synthetic Hardware Works,synthetic-hardware.example,IN,fixture,consistent,small real hardware firm with 3 FPGA engineers
+6,buyer,Synthetic shell Traders,synthetic-shell.example,IN,fixture,high_risk,synthetic shell: 1 year old, 5 people, no engineers
+7,buyer,Synthetic nodata Enterprises,,IN,absent,no_data,no Crustdata record
+8,buyer,Listed Electronics Trading,,AE,absent,no_data,SYNTHETIC listed entity (data/csl_demo.csv) -> BLOCK
+9,buyer,Listed Electronic Tradng,,AE,absent,no_data,close spelling of the synthetic listed entity -> fuzzy HOLD

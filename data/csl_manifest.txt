@@ -1,0 +1,32 @@
+Downloaded 2026-11-06 from
+https://data.trade.gov/downloadable_consolidated_screening_list/v1/consolidated.csv
+
+Saved as data/csl.csv (git-ignored). Individuals were dropped.
+18,598 companies, vessels, and aircraft.
+
+12014  Specially Designated Nationals (SDN) - Treasury Department
+ 3419  Entity List (EL) - Bureau of Industry and Security
+ 1596  Denied Persons List (DPL) - Bureau of Industry and Security
+  801  ITAR Debarred (DTC) - State Department
+  286  Sectoral Sanctions Identifications List (SSI) - Treasury Department
+  222  Unverified List (UVL) - Bureau of Industry and Security
+  105  Nonproliferation Sanctions (ACN) - State Department
+   70  Military End User (MEU) List - Bureau of Industry and Security
+   68  Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department
+   16  Non-SDN Menu-Based Sanctions List (NS-MBS List) - Treasury Department
+    1  Capta List (CAP) - Treasury Department
+
+Also always loaded: data/csl_demo.csv, 2 synthetic names for the demo.
+
+Also loaded when present: data/sanctions_extra.csv (git-ignored), built 2026-11-06
+by scripts/build_sanctions_extra.py. Entities only, individuals dropped.
+  274  UN Security Council Consolidated List
+       https://scsanctions.un.org/resources/xml/en/consolidated.xml
+ 1779  EU Financial Sanctions
+       https://webgate.ec.europa.eu/fsd/fsf/public/files/csvFullSanctionsList/content?token=dG9rZW4tMjAxNw
+ 1667  UK Sanctions List (FCDO; the old OFSI file is no longer updated)
+       https://sanctionslist.fcdo.gov.uk/docs/UK-Sanctions-List.csv
+
+Not downloaded: India's Denied Entity List has no bulk public file (one IEC at a time).
+Canada, Australia, Japan, and Switzerland lists are not used for this electronics flow.
+No trustworthy-company list exists in these files. Absence is not approval.

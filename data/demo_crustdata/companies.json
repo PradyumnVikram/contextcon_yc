@@ -1,0 +1,182 @@
+{
+ "synthetic-radar.example": {
+  "crustdata_company_id": 9001,
+  "basic_info": {
+   "name": "Synthetic Radar Systems",
+   "primary_domain": "synthetic-radar.example",
+   "website": "https://synthetic-radar.example",
+   "description": "Designs and manufactures automotive and defence radar modules, mmWave front-ends and antenna arrays.",
+   "year_founded": 2009
+  },
+  "headcount": {
+   "total": 180,
+   "by_role_absolute": {
+    "Engineering": 95,
+    "Research": 20,
+    "Sales": 20,
+    "Operations": 30,
+    "Finance": 15
+   },
+   "growth_percent": {
+    "yoy": 8.0
+   }
+  },
+  "taxonomy": {
+   "professional_network_industry": "Defense and Space Manufacturing"
+  },
+  "locations": {
+   "country": "India"
+  },
+  "web_traffic": {
+   "domain_traffic": [
+    {
+     "domain": "synthetic-radar.example",
+     "monthly_visitors": 42000
+    }
+   ]
+  }
+ },
+ "synthetic-components.example": {
+  "crustdata_company_id": 9002,
+  "basic_info": {
+   "name": "Synthetic Components distributor",
+   "primary_domain": "synthetic-components.example",
+   "website": "https://synthetic-components.example",
+   "description": "Authorised distributor of electronic components for Indian OEMs.",
+   "year_founded": 2004
+  },
+  "headcount": {
+   "total": 120,
+   "by_role_absolute": {
+    "Sales": 55,
+    "Operations": 45,
+    "Engineering": 6,
+    "Finance": 14
+   },
+   "growth_percent": {
+    "yoy": 3.0
+   }
+  },
+  "taxonomy": {
+   "professional_network_industry": "Wholesale"
+  },
+  "locations": {
+   "country": "India"
+  },
+  "web_traffic": {
+   "domain_traffic": [
+    {
+     "domain": "synthetic-components.example",
+     "monthly_visitors": 95000
+    }
+   ]
+  }
+ },
+ "synthetic-telecomlabs.example": {
+  "crustdata_company_id": 9003,
+  "basic_info": {
+   "name": "Synthetic Telecom Labs",
+   "primary_domain": "synthetic-telecomlabs.example",
+   "website": "https://synthetic-telecomlabs.example",
+   "description": "Telecom equipment design lab: 5G radio units, FPGA prototyping and RF test.",
+   "year_founded": 2012
+  },
+  "headcount": {
+   "total": 300,
+   "by_role_absolute": {
+    "Engineering": 170,
+    "Research": 40,
+    "Sales": 30,
+    "Operations": 40,
+    "Finance": 20
+   },
+   "growth_percent": {
+    "yoy": 12.0
+   }
+  },
+  "taxonomy": {
+   "professional_network_industry": "Telecommunications"
+  },
+  "locations": {
+   "country": "India"
+  },
+  "web_traffic": {
+   "domain_traffic": [
+    {
+     "domain": "synthetic-telecomlabs.example",
+     "monthly_visitors": 60000
+    }
+   ]
+  }
+ },
+ "synthetic-hardware.example": {
+  "crustdata_company_id": 9004,
+  "basic_info": {
+   "name": "Synthetic Hardware Works",
+   "primary_domain": "synthetic-hardware.example",
+   "website": "https://synthetic-hardware.example",
+   "description": "Design and manufacture of embedded control boards for industrial automation.",
+   "year_founded": 2016
+  },
+  "headcount": {
+   "total": 12,
+   "by_role_absolute": {
+    "Engineering": 3,
+    "Operations": 5,
+    "Sales": 3,
+    "Finance": 1
+   },
+   "growth_percent": {
+    "yoy": 0.0
+   }
+  },
+  "taxonomy": {
+   "professional_network_industry": "Computer Hardware Manufacturing"
+  },
+  "locations": {
+   "country": "India"
+  },
+  "web_traffic": {
+   "domain_traffic": [
+    {
+     "domain": "synthetic-hardware.example",
+     "monthly_visitors": 14000
+    }
+   ]
+  }
+ },
+ "synthetic-shell.example": {
+  "crustdata_company_id": 9005,
+  "basic_info": {
+   "name": "Synthetic shell Traders",
+   "primary_domain": "synthetic-shell.example",
+   "website": "https://synthetic-shell.example",
+   "description": "General trading, import and export of goods.",
+   "year_founded": 2025
+  },
+  "headcount": {
+   "total": 5,
+   "by_role_absolute": {
+    "Sales": 3,
+    "Operations": 2
+   },
+   "growth_percent": {
+    "yoy": 0.0
+   }
+  },
+  "taxonomy": {
+   "professional_network_industry": "Wholesale"
+  },
+  "locations": {
+   "country": "India"
+  },
+  "web_traffic": {
+   "domain_traffic": [
+    {
+     "domain": "synthetic-shell.example",
+     "monthly_visitors": 250
+    }
+   ]
+  }
+ }
+}

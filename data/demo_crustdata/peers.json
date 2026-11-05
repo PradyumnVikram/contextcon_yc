@@ -1,0 +1,2530 @@
+{
+ "Defense and Space Manufacturing": [
+  {
+   "crustdata_company_id": 83100,
+   "basic_info": {
+    "name": "Peer Defense and  1",
+    "primary_domain": "peer1.defe.example",
+    "year_founded": 1998
+   },
+   "headcount": {
+    "total": 729,
+    "by_role_percent": {
+     "Engineering": 64.4
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 12944
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83101,
+   "basic_info": {
+    "name": "Peer Defense and  2",
+    "primary_domain": "peer2.defe.example",
+    "year_founded": 2020
+   },
+   "headcount": {
+    "total": 472,
+    "by_role_percent": {
+     "Engineering": 54.1
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 117941
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83102,
+   "basic_info": {
+    "name": "Peer Defense and  3",
+    "primary_domain": "peer3.defe.example",
+    "year_founded": 2001
+   },
+   "headcount": {
+    "total": 171,
+    "by_role_percent": {
+     "Engineering": 34.9
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 75292
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83103,
+   "basic_info": {
+    "name": "Peer Defense and  4",
+    "primary_domain": "peer4.defe.example",
+    "year_founded": 2000
+   },
+   "headcount": {
+    "total": 519,
+    "by_role_percent": {
+     "Engineering": 30.6
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 41509
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83104,
+   "basic_info": {
+    "name": "Peer Defense and  5",
+    "primary_domain": "peer5.defe.example",
+    "year_founded": 1997
+   },
+   "headcount": {
+    "total": 533,
+    "by_role_percent": {
+     "Engineering": 35.0
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 63082
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83105,
+   "basic_info": {
+    "name": "Peer Defense and  6",
+    "primary_domain": "peer6.defe.example",
+    "year_founded": 2015
+   },
+   "headcount": {
+    "total": 623,
+    "by_role_percent": {
+     "Engineering": 28.9
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 75855
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83106,
+   "basic_info": {
+    "name": "Peer Defense and  7",
+    "primary_domain": "peer7.defe.example",
+    "year_founded": 2019
+   },
+   "headcount": {
+    "total": 75,
+    "by_role_percent": {
+     "Engineering": 63.8
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 116240
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83107,
+   "basic_info": {
+    "name": "Peer Defense and  8",
+    "primary_domain": "peer8.defe.example",
+    "year_founded": 2010
+   },
+   "headcount": {
+    "total": 302,
+    "by_role_percent": {
+     "Engineering": 31.7
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 68092
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83108,
+   "basic_info": {
+    "name": "Peer Defense and  9",
+    "primary_domain": "peer9.defe.example",
+    "year_founded": 1996
+   },
+   "headcount": {
+    "total": 278,
+    "by_role_percent": {
+     "Engineering": 59.6
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 26579
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83109,
+   "basic_info": {
+    "name": "Peer Defense and  10",
+    "primary_domain": "peer10.defe.example",
+    "year_founded": 2007
+   },
+   "headcount": {
+    "total": 448,
+    "by_role_percent": {
+     "Engineering": 25.1
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 39760
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83110,
+   "basic_info": {
+    "name": "Peer Defense and  11",
+    "primary_domain": "peer11.defe.example",
+    "year_founded": 2017
+   },
+   "headcount": {
+    "total": 525,
+    "by_role_percent": {
+     "Engineering": 36.4
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 100748
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83111,
+   "basic_info": {
+    "name": "Peer Defense and  12",
+    "primary_domain": "peer12.defe.example",
+    "year_founded": 2010
+   },
+   "headcount": {
+    "total": 629,
+    "by_role_percent": {
+     "Engineering": 51.5
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 25289
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83112,
+   "basic_info": {
+    "name": "Peer Defense and  13",
+    "primary_domain": "peer13.defe.example",
+    "year_founded": 1996
+   },
+   "headcount": {
+    "total": 254,
+    "by_role_percent": {
+     "Engineering": 36.9
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 80914
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83113,
+   "basic_info": {
+    "name": "Peer Defense and  14",
+    "primary_domain": "peer14.defe.example",
+    "year_founded": 2005
+   },
+   "headcount": {
+    "total": 615,
+    "by_role_percent": {
+     "Engineering": 27.4
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 12492
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83114,
+   "basic_info": {
+    "name": "Peer Defense and  15",
+    "primary_domain": "peer15.defe.example",
+    "year_founded": 2011
+   },
+   "headcount": {
+    "total": 111,
+    "by_role_percent": {
+     "Engineering": 48.4
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 116767
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83115,
+   "basic_info": {
+    "name": "Peer Defense and  16",
+    "primary_domain": "peer16.defe.example",
+    "year_founded": 2011
+   },
+   "headcount": {
+    "total": 603,
+    "by_role_percent": {
+     "Engineering": 31.3
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 15500
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83116,
+   "basic_info": {
+    "name": "Peer Defense and  17",
+    "primary_domain": "peer17.defe.example",
+    "year_founded": 1997
+   },
+   "headcount": {
+    "total": 250,
+    "by_role_percent": {
+     "Engineering": 27.7
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 93501
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83117,
+   "basic_info": {
+    "name": "Peer Defense and  18",
+    "primary_domain": "peer18.defe.example",
+    "year_founded": 2013
+   },
+   "headcount": {
+    "total": 300,
+    "by_role_percent": {
+     "Engineering": 41.2
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 37271
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83118,
+   "basic_info": {
+    "name": "Peer Defense and  19",
+    "primary_domain": "peer19.defe.example",
+    "year_founded": 2014
+   },
+   "headcount": {
+    "total": 652,
+    "by_role_percent": {
+     "Engineering": 48.8
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 15745
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83119,
+   "basic_info": {
+    "name": "Peer Defense and  20",
+    "primary_domain": "peer20.defe.example",
+    "year_founded": 2013
+   },
+   "headcount": {
+    "total": 489,
+    "by_role_percent": {
+     "Engineering": 51.3
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 73522
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83120,
+   "basic_info": {
+    "name": "Peer Defense and  21",
+    "primary_domain": "peer21.defe.example",
+    "year_founded": 2001
+   },
+   "headcount": {
+    "total": 383,
+    "by_role_percent": {
+     "Engineering": 62.4
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 92782
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83121,
+   "basic_info": {
+    "name": "Peer Defense and  22",
+    "primary_domain": "peer22.defe.example",
+    "year_founded": 2003
+   },
+   "headcount": {
+    "total": 793,
+    "by_role_percent": {
+     "Engineering": 37.6
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 56876
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83122,
+   "basic_info": {
+    "name": "Peer Defense and  23",
+    "primary_domain": "peer23.defe.example",
+    "year_founded": 2004
+   },
+   "headcount": {
+    "total": 194,
+    "by_role_percent": {
+     "Engineering": 51.9
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 64929
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83123,
+   "basic_info": {
+    "name": "Peer Defense and  24",
+    "primary_domain": "peer24.defe.example",
+    "year_founded": 1997
+   },
+   "headcount": {
+    "total": 383,
+    "by_role_percent": {
+     "Engineering": 62.2
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 6220
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83124,
+   "basic_info": {
+    "name": "Peer Defense and  25",
+    "primary_domain": "peer25.defe.example",
+    "year_founded": 2013
+   },
+   "headcount": {
+    "total": 529,
+    "by_role_percent": {
+     "Engineering": 49.8
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 18104
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83125,
+   "basic_info": {
+    "name": "Peer Defense and  26",
+    "primary_domain": "peer26.defe.example",
+    "year_founded": 2011
+   },
+   "headcount": {
+    "total": 135,
+    "by_role_percent": {
+     "Engineering": 46.5
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 39760
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83126,
+   "basic_info": {
+    "name": "Peer Defense and  27",
+    "primary_domain": "peer27.defe.example",
+    "year_founded": 1997
+   },
+   "headcount": {
+    "total": 195,
+    "by_role_percent": {
+     "Engineering": 62.3
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 37018
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83127,
+   "basic_info": {
+    "name": "Peer Defense and  28",
+    "primary_domain": "peer28.defe.example",
+    "year_founded": 2009
+   },
+   "headcount": {
+    "total": 438,
+    "by_role_percent": {
+     "Engineering": 36.4
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 114280
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83128,
+   "basic_info": {
+    "name": "Peer Defense and  29",
+    "primary_domain": "peer29.defe.example",
+    "year_founded": 2014
+   },
+   "headcount": {
+    "total": 616,
+    "by_role_percent": {
+     "Engineering": 53.1
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 110788
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83129,
+   "basic_info": {
+    "name": "Peer Defense and  30",
+    "primary_domain": "peer30.defe.example",
+    "year_founded": 2016
+   },
+   "headcount": {
+    "total": 729,
+    "by_role_percent": {
+     "Engineering": 46.2
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 112099
+     }
+    ]
+   }
+  }
+ ],
+ "Telecommunications": [
+  {
+   "crustdata_company_id": 81800,
+   "basic_info": {
+    "name": "Peer Telecommunic 1",
+    "primary_domain": "peer1.tele.example",
+    "year_founded": 2016
+   },
+   "headcount": {
+    "total": 1215,
+    "by_role_percent": {
+     "Engineering": 35.5
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 35154
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 81801,
+   "basic_info": {
+    "name": "Peer Telecommunic 2",
+    "primary_domain": "peer2.tele.example",
+    "year_founded": 1998
+   },
+   "headcount": {
+    "total": 355,
+    "by_role_percent": {
+     "Engineering": 34.3
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 153024
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 81802,
+   "basic_info": {
+    "name": "Peer Telecommunic 3",
+    "primary_domain": "peer3.tele.example",
+    "year_founded": 2014
+   },
+   "headcount": {
+    "total": 398,
+    "by_role_percent": {
+     "Engineering": 34.5
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 63215
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 81803,
+   "basic_info": {
+    "name": "Peer Telecommunic 4",
+    "primary_domain": "peer4.tele.example",
+    "year_founded": 2015
+   },
+   "headcount": {
+    "total": 782,
+    "by_role_percent": {
+     "Engineering": 32.1
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 77201
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 81804,
+   "basic_info": {
+    "name": "Peer Telecommunic 5",
+    "primary_domain": "peer5.tele.example",
+    "year_founded": 1996
+   },
+   "headcount": {
+    "total": 1115,
+    "by_role_percent": {
+     "Engineering": 42.1
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 32195
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 81805,
+   "basic_info": {
+    "name": "Peer Telecommunic 6",
+    "primary_domain": "peer6.tele.example",
+    "year_founded": 2003
+   },
+   "headcount": {
+    "total": 1379,
+    "by_role_percent": {
+     "Engineering": 39.8
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 19557
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 81806,
+   "basic_info": {
+    "name": "Peer Telecommunic 7",
+    "primary_domain": "peer7.tele.example",
+    "year_founded": 1999
+   },
+   "headcount": {
+    "total": 87,
+    "by_role_percent": {
+     "Engineering": 36.7
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 175015
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 81807,
+   "basic_info": {
+    "name": "Peer Telecommunic 8",
+    "primary_domain": "peer8.tele.example",
+    "year_founded": 2009
+   },
+   "headcount": {
+    "total": 616,
+    "by_role_percent": {
+     "Engineering": 30.7
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 152619
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 81808,
+   "basic_info": {
+    "name": "Peer Telecommunic 9",
+    "primary_domain": "peer9.tele.example",
+    "year_founded": 1998
+   },
+   "headcount": {
+    "total": 955,
+    "by_role_percent": {
+     "Engineering": 44.6
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 27724
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 81809,
+   "basic_info": {
+    "name": "Peer Telecommunic 10",
+    "primary_domain": "peer10.tele.example",
+    "year_founded": 2012
+   },
+   "headcount": {
+    "total": 1495,
+    "by_role_percent": {
+     "Engineering": 56.6
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 17444
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 81810,
+   "basic_info": {
+    "name": "Peer Telecommunic 11",
+    "primary_domain": "peer11.tele.example",
+    "year_founded": 1999
+   },
+   "headcount": {
+    "total": 836,
+    "by_role_percent": {
+     "Engineering": 45.4
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 120666
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 81811,
+   "basic_info": {
+    "name": "Peer Telecommunic 12",
+    "primary_domain": "peer12.tele.example",
+    "year_founded": 2006
+   },
+   "headcount": {
+    "total": 341,
+    "by_role_percent": {
+     "Engineering": 26.5
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 18458
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 81812,
+   "basic_info": {
+    "name": "Peer Telecommunic 13",
+    "primary_domain": "peer13.tele.example",
+    "year_founded": 2002
+   },
+   "headcount": {
+    "total": 812,
+    "by_role_percent": {
+     "Engineering": 32.4
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 182832
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 81813,
+   "basic_info": {
+    "name": "Peer Telecommunic 14",
+    "primary_domain": "peer14.tele.example",
+    "year_founded": 2012
+   },
+   "headcount": {
+    "total": 290,
+    "by_role_percent": {
+     "Engineering": 37.4
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 114529
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 81814,
+   "basic_info": {
+    "name": "Peer Telecommunic 15",
+    "primary_domain": "peer15.tele.example",
+    "year_founded": 2002
+   },
+   "headcount": {
+    "total": 1351,
+    "by_role_percent": {
+     "Engineering": 51.2
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 50598
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 81815,
+   "basic_info": {
+    "name": "Peer Telecommunic 16",
+    "primary_domain": "peer16.tele.example",
+    "year_founded": 1995
+   },
+   "headcount": {
+    "total": 442,
+    "by_role_percent": {
+     "Engineering": 55.8
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 55018
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 81816,
+   "basic_info": {
+    "name": "Peer Telecommunic 17",
+    "primary_domain": "peer17.tele.example",
+    "year_founded": 2008
+   },
+   "headcount": {
+    "total": 760,
+    "by_role_percent": {
+     "Engineering": 52.4
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 183612
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 81817,
+   "basic_info": {
+    "name": "Peer Telecommunic 18",
+    "primary_domain": "peer18.tele.example",
+    "year_founded": 2020
+   },
+   "headcount": {
+    "total": 588,
+    "by_role_percent": {
+     "Engineering": 34.3
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 191835
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 81818,
+   "basic_info": {
+    "name": "Peer Telecommunic 19",
+    "primary_domain": "peer19.tele.example",
+    "year_founded": 1996
+   },
+   "headcount": {
+    "total": 301,
+    "by_role_percent": {
+     "Engineering": 38.4
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 131388
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 81819,
+   "basic_info": {
+    "name": "Peer Telecommunic 20",
+    "primary_domain": "peer20.tele.example",
+    "year_founded": 2009
+   },
+   "headcount": {
+    "total": 535,
+    "by_role_percent": {
+     "Engineering": 32.0
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 99660
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 81820,
+   "basic_info": {
+    "name": "Peer Telecommunic 21",
+    "primary_domain": "peer21.tele.example",
+    "year_founded": 2002
+   },
+   "headcount": {
+    "total": 705,
+    "by_role_percent": {
+     "Engineering": 53.7
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 66438
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 81821,
+   "basic_info": {
+    "name": "Peer Telecommunic 22",
+    "primary_domain": "peer22.tele.example",
+    "year_founded": 2007
+   },
+   "headcount": {
+    "total": 128,
+    "by_role_percent": {
+     "Engineering": 48.1
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 94051
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 81822,
+   "basic_info": {
+    "name": "Peer Telecommunic 23",
+    "primary_domain": "peer23.tele.example",
+    "year_founded": 2019
+   },
+   "headcount": {
+    "total": 650,
+    "by_role_percent": {
+     "Engineering": 55.3
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 81170
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 81823,
+   "basic_info": {
+    "name": "Peer Telecommunic 24",
+    "primary_domain": "peer24.tele.example",
+    "year_founded": 2007
+   },
+   "headcount": {
+    "total": 799,
+    "by_role_percent": {
+     "Engineering": 47.5
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 186131
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 81824,
+   "basic_info": {
+    "name": "Peer Telecommunic 25",
+    "primary_domain": "peer25.tele.example",
+    "year_founded": 1995
+   },
+   "headcount": {
+    "total": 1178,
+    "by_role_percent": {
+     "Engineering": 36.6
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 38236
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 81825,
+   "basic_info": {
+    "name": "Peer Telecommunic 26",
+    "primary_domain": "peer26.tele.example",
+    "year_founded": 2003
+   },
+   "headcount": {
+    "total": 614,
+    "by_role_percent": {
+     "Engineering": 31.2
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 18028
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 81826,
+   "basic_info": {
+    "name": "Peer Telecommunic 27",
+    "primary_domain": "peer27.tele.example",
+    "year_founded": 2006
+   },
+   "headcount": {
+    "total": 302,
+    "by_role_percent": {
+     "Engineering": 45.9
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 198983
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 81827,
+   "basic_info": {
+    "name": "Peer Telecommunic 28",
+    "primary_domain": "peer28.tele.example",
+    "year_founded": 2011
+   },
+   "headcount": {
+    "total": 722,
+    "by_role_percent": {
+     "Engineering": 40.3
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 38315
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 81828,
+   "basic_info": {
+    "name": "Peer Telecommunic 29",
+    "primary_domain": "peer29.tele.example",
+    "year_founded": 2001
+   },
+   "headcount": {
+    "total": 868,
+    "by_role_percent": {
+     "Engineering": 56.5
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 74773
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 81829,
+   "basic_info": {
+    "name": "Peer Telecommunic 30",
+    "primary_domain": "peer30.tele.example",
+    "year_founded": 1995
+   },
+   "headcount": {
+    "total": 170,
+    "by_role_percent": {
+     "Engineering": 49.8
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 144293
+     }
+    ]
+   }
+  }
+ ],
+ "Computer Hardware Manufacturing": [
+  {
+   "crustdata_company_id": 83100,
+   "basic_info": {
+    "name": "Peer Computer Har 1",
+    "primary_domain": "peer1.comp.example",
+    "year_founded": 2018
+   },
+   "headcount": {
+    "total": 145,
+    "by_role_percent": {
+     "Engineering": 42.5
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 49802
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83101,
+   "basic_info": {
+    "name": "Peer Computer Har 2",
+    "primary_domain": "peer2.comp.example",
+    "year_founded": 1997
+   },
+   "headcount": {
+    "total": 58,
+    "by_role_percent": {
+     "Engineering": 29.6
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 45031
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83102,
+   "basic_info": {
+    "name": "Peer Computer Har 3",
+    "primary_domain": "peer3.comp.example",
+    "year_founded": 2016
+   },
+   "headcount": {
+    "total": 92,
+    "by_role_percent": {
+     "Engineering": 39.9
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 9667
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83103,
+   "basic_info": {
+    "name": "Peer Computer Har 4",
+    "primary_domain": "peer4.comp.example",
+    "year_founded": 2016
+   },
+   "headcount": {
+    "total": 84,
+    "by_role_percent": {
+     "Engineering": 35.3
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 28264
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83104,
+   "basic_info": {
+    "name": "Peer Computer Har 5",
+    "primary_domain": "peer5.comp.example",
+    "year_founded": 2004
+   },
+   "headcount": {
+    "total": 91,
+    "by_role_percent": {
+     "Engineering": 31.1
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 37833
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83105,
+   "basic_info": {
+    "name": "Peer Computer Har 6",
+    "primary_domain": "peer6.comp.example",
+    "year_founded": 2016
+   },
+   "headcount": {
+    "total": 40,
+    "by_role_percent": {
+     "Engineering": 22.7
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 26347
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83106,
+   "basic_info": {
+    "name": "Peer Computer Har 7",
+    "primary_domain": "peer7.comp.example",
+    "year_founded": 2004
+   },
+   "headcount": {
+    "total": 52,
+    "by_role_percent": {
+     "Engineering": 39.6
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 28112
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83107,
+   "basic_info": {
+    "name": "Peer Computer Har 8",
+    "primary_domain": "peer8.comp.example",
+    "year_founded": 2004
+   },
+   "headcount": {
+    "total": 148,
+    "by_role_percent": {
+     "Engineering": 48.3
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 20303
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83108,
+   "basic_info": {
+    "name": "Peer Computer Har 9",
+    "primary_domain": "peer9.comp.example",
+    "year_founded": 2013
+   },
+   "headcount": {
+    "total": 61,
+    "by_role_percent": {
+     "Engineering": 32.2
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 41258
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83109,
+   "basic_info": {
+    "name": "Peer Computer Har 10",
+    "primary_domain": "peer10.comp.example",
+    "year_founded": 2009
+   },
+   "headcount": {
+    "total": 90,
+    "by_role_percent": {
+     "Engineering": 33.6
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 45777
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83110,
+   "basic_info": {
+    "name": "Peer Computer Har 11",
+    "primary_domain": "peer11.comp.example",
+    "year_founded": 2020
+   },
+   "headcount": {
+    "total": 62,
+    "by_role_percent": {
+     "Engineering": 35.4
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 49731
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83111,
+   "basic_info": {
+    "name": "Peer Computer Har 12",
+    "primary_domain": "peer12.comp.example",
+    "year_founded": 2004
+   },
+   "headcount": {
+    "total": 51,
+    "by_role_percent": {
+     "Engineering": 41.4
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 35280
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83112,
+   "basic_info": {
+    "name": "Peer Computer Har 13",
+    "primary_domain": "peer13.comp.example",
+    "year_founded": 2019
+   },
+   "headcount": {
+    "total": 93,
+    "by_role_percent": {
+     "Engineering": 18.7
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 16892
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83113,
+   "basic_info": {
+    "name": "Peer Computer Har 14",
+    "primary_domain": "peer14.comp.example",
+    "year_founded": 2001
+   },
+   "headcount": {
+    "total": 87,
+    "by_role_percent": {
+     "Engineering": 24.0
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 11156
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83114,
+   "basic_info": {
+    "name": "Peer Computer Har 15",
+    "primary_domain": "peer15.comp.example",
+    "year_founded": 2010
+   },
+   "headcount": {
+    "total": 14,
+    "by_role_percent": {
+     "Engineering": 16.8
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 41560
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83115,
+   "basic_info": {
+    "name": "Peer Computer Har 16",
+    "primary_domain": "peer16.comp.example",
+    "year_founded": 2015
+   },
+   "headcount": {
+    "total": 26,
+    "by_role_percent": {
+     "Engineering": 33.2
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 39227
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83116,
+   "basic_info": {
+    "name": "Peer Computer Har 17",
+    "primary_domain": "peer17.comp.example",
+    "year_founded": 2007
+   },
+   "headcount": {
+    "total": 57,
+    "by_role_percent": {
+     "Engineering": 43.7
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 33899
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83117,
+   "basic_info": {
+    "name": "Peer Computer Har 18",
+    "primary_domain": "peer18.comp.example",
+    "year_founded": 2015
+   },
+   "headcount": {
+    "total": 110,
+    "by_role_percent": {
+     "Engineering": 24.8
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 46564
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83118,
+   "basic_info": {
+    "name": "Peer Computer Har 19",
+    "primary_domain": "peer19.comp.example",
+    "year_founded": 2019
+   },
+   "headcount": {
+    "total": 9,
+    "by_role_percent": {
+     "Engineering": 50.7
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 8485
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83119,
+   "basic_info": {
+    "name": "Peer Computer Har 20",
+    "primary_domain": "peer20.comp.example",
+    "year_founded": 2020
+   },
+   "headcount": {
+    "total": 116,
+    "by_role_percent": {
+     "Engineering": 23.8
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 47107
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83120,
+   "basic_info": {
+    "name": "Peer Computer Har 21",
+    "primary_domain": "peer21.comp.example",
+    "year_founded": 2012
+   },
+   "headcount": {
+    "total": 140,
+    "by_role_percent": {
+     "Engineering": 33.6
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 17831
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83121,
+   "basic_info": {
+    "name": "Peer Computer Har 22",
+    "primary_domain": "peer22.comp.example",
+    "year_founded": 2020
+   },
+   "headcount": {
+    "total": 39,
+    "by_role_percent": {
+     "Engineering": 33.3
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 31950
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83122,
+   "basic_info": {
+    "name": "Peer Computer Har 23",
+    "primary_domain": "peer23.comp.example",
+    "year_founded": 2014
+   },
+   "headcount": {
+    "total": 143,
+    "by_role_percent": {
+     "Engineering": 54.5
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 22294
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83123,
+   "basic_info": {
+    "name": "Peer Computer Har 24",
+    "primary_domain": "peer24.comp.example",
+    "year_founded": 2018
+   },
+   "headcount": {
+    "total": 121,
+    "by_role_percent": {
+     "Engineering": 39.5
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 34581
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83124,
+   "basic_info": {
+    "name": "Peer Computer Har 25",
+    "primary_domain": "peer25.comp.example",
+    "year_founded": 2012
+   },
+   "headcount": {
+    "total": 117,
+    "by_role_percent": {
+     "Engineering": 48.2
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 30723
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83125,
+   "basic_info": {
+    "name": "Peer Computer Har 26",
+    "primary_domain": "peer26.comp.example",
+    "year_founded": 2010
+   },
+   "headcount": {
+    "total": 48,
+    "by_role_percent": {
+     "Engineering": 44.7
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 30995
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83126,
+   "basic_info": {
+    "name": "Peer Computer Har 27",
+    "primary_domain": "peer27.comp.example",
+    "year_founded": 2015
+   },
+   "headcount": {
+    "total": 74,
+    "by_role_percent": {
+     "Engineering": 45.1
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 19673
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83127,
+   "basic_info": {
+    "name": "Peer Computer Har 28",
+    "primary_domain": "peer28.comp.example",
+    "year_founded": 2002
+   },
+   "headcount": {
+    "total": 141,
+    "by_role_percent": {
+     "Engineering": 34.4
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 19496
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83128,
+   "basic_info": {
+    "name": "Peer Computer Har 29",
+    "primary_domain": "peer29.comp.example",
+    "year_founded": 2004
+   },
+   "headcount": {
+    "total": 120,
+    "by_role_percent": {
+     "Engineering": 18.1
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 16867
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 83129,
+   "basic_info": {
+    "name": "Peer Computer Har 30",
+    "primary_domain": "peer30.comp.example",
+    "year_founded": 2012
+   },
+   "headcount": {
+    "total": 77,
+    "by_role_percent": {
+     "Engineering": 28.4
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 6780
+     }
+    ]
+   }
+  }
+ ],
+ "Wholesale": [
+  {
+   "crustdata_company_id": 80900,
+   "basic_info": {
+    "name": "Peer Wholesale 1",
+    "primary_domain": "peer1.whol.example",
+    "year_founded": 2007
+   },
+   "headcount": {
+    "total": 166,
+    "by_role_percent": {
+     "Engineering": 1.5
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 185914
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 80901,
+   "basic_info": {
+    "name": "Peer Wholesale 2",
+    "primary_domain": "peer2.whol.example",
+    "year_founded": 1997
+   },
+   "headcount": {
+    "total": 181,
+    "by_role_percent": {
+     "Engineering": 7.1
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 112755
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 80902,
+   "basic_info": {
+    "name": "Peer Wholesale 3",
+    "primary_domain": "peer3.whol.example",
+    "year_founded": 2009
+   },
+   "headcount": {
+    "total": 442,
+    "by_role_percent": {
+     "Engineering": 3.3
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 112992
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 80903,
+   "basic_info": {
+    "name": "Peer Wholesale 4",
+    "primary_domain": "peer4.whol.example",
+    "year_founded": 2008
+   },
+   "headcount": {
+    "total": 88,
+    "by_role_percent": {
+     "Engineering": 2.1
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 106099
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 80904,
+   "basic_info": {
+    "name": "Peer Wholesale 5",
+    "primary_domain": "peer5.whol.example",
+    "year_founded": 2019
+   },
+   "headcount": {
+    "total": 45,
+    "by_role_percent": {
+     "Engineering": 8.6
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 154913
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 80905,
+   "basic_info": {
+    "name": "Peer Wholesale 6",
+    "primary_domain": "peer6.whol.example",
+    "year_founded": 2006
+   },
+   "headcount": {
+    "total": 414,
+    "by_role_percent": {
+     "Engineering": 4.8
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 82279
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 80906,
+   "basic_info": {
+    "name": "Peer Wholesale 7",
+    "primary_domain": "peer7.whol.example",
+    "year_founded": 2008
+   },
+   "headcount": {
+    "total": 424,
+    "by_role_percent": {
+     "Engineering": 8.5
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 145091
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 80907,
+   "basic_info": {
+    "name": "Peer Wholesale 8",
+    "primary_domain": "peer8.whol.example",
+    "year_founded": 2002
+   },
+   "headcount": {
+    "total": 584,
+    "by_role_percent": {
+     "Engineering": 8.0
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 131986
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 80908,
+   "basic_info": {
+    "name": "Peer Wholesale 9",
+    "primary_domain": "peer9.whol.example",
+    "year_founded": 2010
+   },
+   "headcount": {
+    "total": 249,
+    "by_role_percent": {
+     "Engineering": 2.7
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 11608
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 80909,
+   "basic_info": {
+    "name": "Peer Wholesale 10",
+    "primary_domain": "peer10.whol.example",
+    "year_founded": 2016
+   },
+   "headcount": {
+    "total": 423,
+    "by_role_percent": {
+     "Engineering": 3.4
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 213228
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 80910,
+   "basic_info": {
+    "name": "Peer Wholesale 11",
+    "primary_domain": "peer11.whol.example",
+    "year_founded": 2009
+   },
+   "headcount": {
+    "total": 439,
+    "by_role_percent": {
+     "Engineering": 7.2
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 245052
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 80911,
+   "basic_info": {
+    "name": "Peer Wholesale 12",
+    "primary_domain": "peer12.whol.example",
+    "year_founded": 2012
+   },
+   "headcount": {
+    "total": 155,
+    "by_role_percent": {
+     "Engineering": 9.8
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 11069
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 80912,
+   "basic_info": {
+    "name": "Peer Wholesale 13",
+    "primary_domain": "peer13.whol.example",
+    "year_founded": 2016
+   },
+   "headcount": {
+    "total": 428,
+    "by_role_percent": {
+     "Engineering": 5.9
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 11104
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 80913,
+   "basic_info": {
+    "name": "Peer Wholesale 14",
+    "primary_domain": "peer14.whol.example",
+    "year_founded": 1999
+   },
+   "headcount": {
+    "total": 110,
+    "by_role_percent": {
+     "Engineering": 6.4
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 231239
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 80914,
+   "basic_info": {
+    "name": "Peer Wholesale 15",
+    "primary_domain": "peer15.whol.example",
+    "year_founded": 2003
+   },
+   "headcount": {
+    "total": 497,
+    "by_role_percent": {
+     "Engineering": 1.8
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 103379
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 80915,
+   "basic_info": {
+    "name": "Peer Wholesale 16",
+    "primary_domain": "peer16.whol.example",
+    "year_founded": 2005
+   },
+   "headcount": {
+    "total": 360,
+    "by_role_percent": {
+     "Engineering": 2.1
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 92473
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 80916,
+   "basic_info": {
+    "name": "Peer Wholesale 17",
+    "primary_domain": "peer17.whol.example",
+    "year_founded": 2008
+   },
+   "headcount": {
+    "total": 413,
+    "by_role_percent": {
+     "Engineering": 2.8
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 70131
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 80917,
+   "basic_info": {
+    "name": "Peer Wholesale 18",
+    "primary_domain": "peer18.whol.example",
+    "year_founded": 2018
+   },
+   "headcount": {
+    "total": 108,
+    "by_role_percent": {
+     "Engineering": 4.7
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 145405
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 80918,
+   "basic_info": {
+    "name": "Peer Wholesale 19",
+    "primary_domain": "peer19.whol.example",
+    "year_founded": 2006
+   },
+   "headcount": {
+    "total": 78,
+    "by_role_percent": {
+     "Engineering": 10.0
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 62778
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 80919,
+   "basic_info": {
+    "name": "Peer Wholesale 20",
+    "primary_domain": "peer20.whol.example",
+    "year_founded": 2015
+   },
+   "headcount": {
+    "total": 95,
+    "by_role_percent": {
+     "Engineering": 7.8
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 14553
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 80920,
+   "basic_info": {
+    "name": "Peer Wholesale 21",
+    "primary_domain": "peer21.whol.example",
+    "year_founded": 2001
+   },
+   "headcount": {
+    "total": 56,
+    "by_role_percent": {
+     "Engineering": 9.5
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 223998
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 80921,
+   "basic_info": {
+    "name": "Peer Wholesale 22",
+    "primary_domain": "peer22.whol.example",
+    "year_founded": 2002
+   },
+   "headcount": {
+    "total": 45,
+    "by_role_percent": {
+     "Engineering": 6.2
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 37088
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 80922,
+   "basic_info": {
+    "name": "Peer Wholesale 23",
+    "primary_domain": "peer23.whol.example",
+    "year_founded": 2013
+   },
+   "headcount": {
+    "total": 509,
+    "by_role_percent": {
+     "Engineering": 6.7
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 61138
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 80923,
+   "basic_info": {
+    "name": "Peer Wholesale 24",
+    "primary_domain": "peer24.whol.example",
+    "year_founded": 2019
+   },
+   "headcount": {
+    "total": 501,
+    "by_role_percent": {
+     "Engineering": 7.0
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 100703
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 80924,
+   "basic_info": {
+    "name": "Peer Wholesale 25",
+    "primary_domain": "peer25.whol.example",
+    "year_founded": 2018
+   },
+   "headcount": {
+    "total": 196,
+    "by_role_percent": {
+     "Engineering": 6.1
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 192313
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 80925,
+   "basic_info": {
+    "name": "Peer Wholesale 26",
+    "primary_domain": "peer26.whol.example",
+    "year_founded": 2000
+   },
+   "headcount": {
+    "total": 142,
+    "by_role_percent": {
+     "Engineering": 7.8
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 85536
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 80926,
+   "basic_info": {
+    "name": "Peer Wholesale 27",
+    "primary_domain": "peer27.whol.example",
+    "year_founded": 2004
+   },
+   "headcount": {
+    "total": 135,
+    "by_role_percent": {
+     "Engineering": 5.8
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 154941
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 80927,
+   "basic_info": {
+    "name": "Peer Wholesale 28",
+    "primary_domain": "peer28.whol.example",
+    "year_founded": 2017
+   },
+   "headcount": {
+    "total": 409,
+    "by_role_percent": {
+     "Engineering": 4.0
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 55990
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 80928,
+   "basic_info": {
+    "name": "Peer Wholesale 29",
+    "primary_domain": "peer29.whol.example",
+    "year_founded": 2015
+   },
+   "headcount": {
+    "total": 102,
+    "by_role_percent": {
+     "Engineering": 5.9
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 67661
+     }
+    ]
+   }
+  },
+  {
+   "crustdata_company_id": 80929,
+   "basic_info": {
+    "name": "Peer Wholesale 30",
+    "primary_domain": "peer30.whol.example",
+    "year_founded": 2004
+   },
+   "headcount": {
+    "total": 129,
+    "by_role_percent": {
+     "Engineering": 7.0
+    }
+   },
+   "web_traffic": {
+    "domain_traffic": [
+     {
+      "monthly_visitors": 226899
+     }
+    ]
+   }
+  }
+ ]
+}

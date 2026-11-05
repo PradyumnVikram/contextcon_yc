@@ -59,6 +59,7 @@ class Email(BaseModel):
 class OrderLine(BaseModel):
     part_number: str
     quantity: int
+    description: str = ""               # datasheet or email wording, used when the part number is unknown
 
 
 class Party(BaseModel):
@@ -67,6 +68,7 @@ class Party(BaseModel):
     country: str | None = None           # ISO-3166 alpha-2
     address: str | None = None
     domain: str | None = None
+    iec: str | None = None               # Indian importer-exporter code; no bulk denied-entity file exists
 
 
 class Order(BaseModel):
@@ -76,6 +78,9 @@ class Order(BaseModel):
     lines: list[OrderLine]
     ship_to_country: str
     stated_purpose: str | None = None
+    unusual_premium: bool = False
+    payer_country: str | None = None     # ISO-2, when someone else is paying
+    virtual_or_residential_ship_to: bool = False
     created_at: datetime = Field(default_factory=utcnow)
 
     def party(self, role: PartyRole) -> Party | None:
