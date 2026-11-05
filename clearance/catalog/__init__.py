@@ -35,12 +35,41 @@ def load_rules(path: Path = RULES_CSV) -> list[dict]:
         return list(csv.DictReader(f))
 
 
-def classify(part_number: str, ledger: Ledger) -> Classification:
+# Wording from a datasheet or the order email. Each tuple maps to a known catalog row.
+_DATASHEET = (
+    (("77 ghz", "gaas power", "mmwave power"), "PA-77G-HE"),
+    (("10 gsps", "10gsps", "high-speed adc"), "ADC-12G-HE"),
+    (("radiation-hardened fpga", "rad-hard fpga", "radiation hardened fpga"), "FPGA-RH-X"),
+    (("sub-6 ghz transceiver", "sub-6ghz transceiver"), "RF-TRX-IN"),
+)
+
+
+def _from_datasheet(description: str) -> str | None:
+    text = description.lower()
+    for phrases, part in _DATASHEET:
+        if any(p in text for p in phrases):
+            return part
+    return None
+
+
+def classify(part_number: str, ledger: Ledger, description: str = "") -> Classification:
     pn = part_number.strip().upper()
     row = load_catalog().get(pn)
     if row is None:
-        eid = ledger.add(f"Part {part_number} is not in the catalog", None, "catalog:miss")
-        return Classification(part_number=part_number, found=False, evidence_ids=[eid])
+        family = _from_datasheet(description)
+        row = load_catalog().get(family) if family else None
+        if row is None:
+            eid = ledger.add(f"Part {part_number} is not in the catalog", None, "catalog:miss")
+            return Classification(part_number=part_number, found=False, evidence_ids=[eid])
+        value = {k: row[k] for k in ("description", "controlled", "scomet_category", "eccn", "us_origin", "part_class", "needs")}
+        eid = ledger.add(f"Datasheet wording for {part_number} matched {family}", value, f"datasheet:{family}")
+        return Classification(
+            part_number=pn, found=True, controlled=_bool(row["controlled"]),
+            scomet_category=row["scomet_category"] or None, eccn=row["eccn"] or None, us_origin=_bool(row["us_origin"]),
+            part_class=row["part_class"], needs=[n for n in row["needs"].split(";") if n],
+            max_units_per_engineer=int(row["max_units_per_engineer"]),
+            max_units_distributor_small=int(row["max_units_distributor_small"]), function=row.get("function") or None,
+            evidence_ids=[eid])
     idx = list(load_catalog()).index(pn) + 2  # CSV line number (header is line 1)
     value = {k: row[k] for k in ("description", "controlled", "scomet_category", "eccn", "us_origin", "part_class", "needs")}
     eid = ledger.add(f"Catalog entry for {pn}", value, f"catalog:row/{idx}")
@@ -49,7 +78,8 @@ def classify(part_number: str, ledger: Ledger) -> Classification:
         scomet_category=row["scomet_category"] or None, eccn=row["eccn"] or None, us_origin=_bool(row["us_origin"]),
         part_class=row["part_class"], needs=[n for n in row["needs"].split(";") if n],
         max_units_per_engineer=int(row["max_units_per_engineer"]),
-        max_units_distributor_small=int(row["max_units_distributor_small"]), evidence_ids=[eid])
+        max_units_distributor_small=int(row["max_units_distributor_small"]), function=row.get("function") or None,
+            evidence_ids=[eid])
 
 
 def _best(regime: str, key: str, dest: str) -> tuple[int, dict] | None:

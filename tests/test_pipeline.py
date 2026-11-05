@@ -72,14 +72,15 @@ def test_shell_end_use_loop_with_one_followup_then_hold(tmp_path):
     assert len(mb.outbox_messages()) == 2   # no third email
 
 
-def test_shell_with_good_end_use_still_holds_as_high_risk(tmp_path):
+def test_shell_with_good_end_use_still_needs_a_licence(tmp_path):
     p, mb, conn = make(tmp_path, extract=[GOOD])
     mb.compose("x@shell.example", "PO shell", "100 pcs")
     [oid] = p.process_inbox()
     req = mb.outbox_messages()[0]
     mb.compose("x@shell.example", f"Re: {req.subject}", "radar")
     p.process_inbox()
-    assert store.load_decision(conn, oid).rule_fired == "R9_high_risk_despite_end_use"
+    d = store.load_decision(conn, oid)
+    assert (d.outcome, d.rule_fired) == ("HOLD", "R9b_buyer_cannot_use_quantity")
 
 
 def test_no_data_holds_and_asks_and_never_auto_releases(tmp_path):
@@ -133,3 +134,52 @@ def test_unmatched_tagged_reply_is_kept(tmp_path):
     mb.compose("b@x.example", "Re: [CLR-O9999] hello", "...")
     assert p.process_inbox() == []
     assert conn.execute("SELECT COUNT(*) n FROM emails WHERE order_id IS NULL").fetchone()["n"] == 1
+
+
+RING_ORDERS = {
+    "Ring A": {"buyer_name": "Synthetic Orbit Electronics", "buyer_country": "IN", "ship_to_country": "AE",
+               "lines": [{"part_number": "PA-77G-HE", "quantity": 6}]},
+    "Ring B": {"buyer_name": "Synthetic Nimbus Instruments", "buyer_country": "IN", "ship_to_country": "AE",
+               "lines": [{"part_number": "LNA-77G-HE", "quantity": 6}]},
+    "Ring C": {"buyer_name": "Synthetic Delta Systems", "buyer_country": "IN", "ship_to_country": "AE",
+               "lines": [{"part_number": "ADC-12G-HE", "quantity": 8}]},
+    "Apex": {"buyer_name": "Synthetic Apex Components", "buyer_country": "IN", "ship_to_country": "IN",
+             "lines": [{"part_number": "FPGA-C10", "quantity": 20}]},
+}
+
+
+def test_ring_orders_look_routine_alone_but_the_network_holds_them(tmp_path):
+    p, mb, conn = make(tmp_path, parse=lambda pl: next(v for k, v in RING_ORDERS.items() if k in pl["email"]["subject"]))
+    senders = {"Ring A": "p@orbit-electronics.example", "Ring B": "p@nimbus-instruments.example",
+               "Ring C": "p@delta-systems.example"}
+    ids = []
+    for subj, frm in senders.items():
+        mb.compose(frm, subj, "...")
+        ids += p.process_inbox()
+    a, b, c = (store.load_decision(conn, i) for i in ids)
+    assert c.rule_fired == "R9c_linked_orders_form_controlled_system" and c.outcome == "HOLD"
+    # the earlier orders were re-checked when the third completed the set
+    assert a.rule_fired == b.rule_fired == "R9c_linked_orders_form_controlled_system"
+    assert any("network alert" in e.claim.lower() for e in p._ledger(ids[0]).items)
+
+
+def test_signed_orders_get_an_alert_but_keep_their_signature(tmp_path):
+    p, mb, conn = make(tmp_path, parse=lambda pl: next(v for k, v in RING_ORDERS.items() if k in pl["email"]["subject"]))
+    mb.compose("p@orbit-electronics.example", "Ring A", "...")
+    [first] = p.process_inbox()
+    p.override(first, "RELEASE", "A. Officer", "Licence on file")
+    p.sign(first, "A. Officer")
+    for subj, frm in [("Ring B", "p@nimbus-instruments.example"), ("Ring C", "p@delta-systems.example")]:
+        mb.compose(frm, subj, "...")
+        p.process_inbox()
+    d = store.load_decision(conn, first)
+    assert d.signature and d.outcome == "RELEASE"                       # never silently un-signed
+    assert any("network alert" in e.claim.lower() for e in p._ledger(first).items)
+    assert p.context(first).network_alerts
+
+
+def test_staff_from_listed_entity_holds_the_order(tmp_path):
+    p, mb, conn = make(tmp_path, parse=lambda pl: RING_ORDERS["Apex"])
+    mb.compose("md@apex-components.example", "Apex", "...")
+    [oid] = p.process_inbox()
+    assert store.load_decision(conn, oid).rule_fired == "R3c_staff_from_listed_entity"

@@ -14,6 +14,7 @@ FIXTURES = Path(__file__).parent / "fixtures"
 def offline(monkeypatch):
     monkeypatch.setattr(config, "CRUSTDATA_API_KEY", "")
     monkeypatch.setattr(csl, "CSL_CSV", FIXTURES / "csl_sample.csv")
+    monkeypatch.setattr(csl, "EXTRA_CSV", FIXTURES / "no_such_extra.csv")
     screening.reload()
     client = crustdata_client.CrustdataClient.open(":memory:", api_key="")
     crustdata_client.set_client(client)

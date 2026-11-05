@@ -28,6 +28,29 @@ def test_transliteration_and_forwarder():
     assert fwd.is_forwarder and len(fwd.evidence_ids) == 2
 
 
+def test_extra_sanctions_list_is_screened(tmp_path, monkeypatch):
+    extra = tmp_path / "extra.csv"
+    extra.write_text(
+        "id,source,name,alt_names,addresses,countries\n"
+        'UN-1,UN Security Council Consolidated List,ACME SANCTIONED TRADING,,"Dubai, AE",AE\n'
+    )
+    monkeypatch.setattr(csl, "EXTRA_CSV", extra)
+    screening.reload()
+    assert _s("Acme Sanctioned Trading LLC", "AE").status == "exact_hit"
+
+
+def test_listed_address_is_its_own_hit():
+    hit = _s("Independent Buyer", "AE", address="Office 12, Demo Tower, Dubai")
+    assert hit.status == "exact_hit"
+    assert hit.matches[0].listed_record.get("address_match")
+
+
+def test_indian_buyer_records_that_iec_was_not_checked():
+    led = Ledger()
+    screening.screen(Party(role="buyer", name="Synthetic Radar Systems", country="IN"), led)
+    assert any(e.source == "dgft:iec" for e in led.items)
+
+
 def test_normalize():
     assert screening.normalize("ACME Pvt. Ltd.") == "acme"
     assert screening.normalize("Ünïcode & Sons Private Limited") == "unicode and sons"
@@ -42,3 +65,9 @@ def test_convert_raw_csl(tmp_path):
     assert csl.convert(raw, out) == 1
     [e] = csl._read(out)
     assert e.countries == {"AE", "IN"} and e.alt_names == ["XC"]
+
+
+def test_one_word_listed_name_does_not_flag_longer_company_names():
+    # a listed entity called just "NOVA" must not flag every company with "Nova" in its name
+    assert _s("Nova Microwave Products Limited", "IN").status == "clear"
+    assert _s("Nova", "RU").status == "exact_hit"

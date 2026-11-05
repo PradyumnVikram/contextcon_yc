@@ -178,5 +178,149 @@
     }
    ]
   }
+ },
+ "orbit-electronics.example": {
+  "crustdata_company_id": 9100,
+  "basic_info": {
+   "name": "Synthetic Orbit Electronics",
+   "primary_domain": "orbit-electronics.example",
+   "website": "https://orbit-electronics.example",
+   "description": "Repair and calibration of electronic test equipment.",
+   "year_founded": 2015
+  },
+  "headcount": {
+   "total": 42,
+   "by_role_absolute": {
+    "Engineering": 14,
+    "Operations": 14,
+    "Sales": 10,
+    "Finance": 4
+   },
+   "growth_percent": {
+    "yoy": 4.0
+   }
+  },
+  "taxonomy": {
+   "professional_network_industry": "Computer Hardware Manufacturing"
+  },
+  "locations": {
+   "country": "India"
+  },
+  "web_traffic": {
+   "domain_traffic": [
+    {
+     "domain": "orbit-electronics.example",
+     "monthly_visitors": 9000
+    }
+   ]
+  }
+ },
+ "nimbus-instruments.example": {
+  "crustdata_company_id": 9101,
+  "basic_info": {
+   "name": "Synthetic Nimbus Instruments",
+   "primary_domain": "nimbus-instruments.example",
+   "website": "https://nimbus-instruments.example",
+   "description": "Servicing and spares for laboratory instruments.",
+   "year_founded": 2013
+  },
+  "headcount": {
+   "total": 55,
+   "by_role_absolute": {
+    "Engineering": 18,
+    "Operations": 18,
+    "Sales": 14,
+    "Finance": 5
+   },
+   "growth_percent": {
+    "yoy": 4.0
+   }
+  },
+  "taxonomy": {
+   "professional_network_industry": "Computer Hardware Manufacturing"
+  },
+  "locations": {
+   "country": "India"
+  },
+  "web_traffic": {
+   "domain_traffic": [
+    {
+     "domain": "nimbus-instruments.example",
+     "monthly_visitors": 12000
+    }
+   ]
+  }
+ },
+ "delta-systems.example": {
+  "crustdata_company_id": 9102,
+  "basic_info": {
+   "name": "Synthetic Delta Systems",
+   "primary_domain": "delta-systems.example",
+   "website": "https://delta-systems.example",
+   "description": "Embedded electronics design services for industrial clients.",
+   "year_founded": 2016
+  },
+  "headcount": {
+   "total": 38,
+   "by_role_absolute": {
+    "Engineering": 14,
+    "Operations": 12,
+    "Sales": 9,
+    "Finance": 3
+   },
+   "growth_percent": {
+    "yoy": 4.0
+   }
+  },
+  "taxonomy": {
+   "professional_network_industry": "Computer Hardware Manufacturing"
+  },
+  "locations": {
+   "country": "India"
+  },
+  "web_traffic": {
+   "domain_traffic": [
+    {
+     "domain": "delta-systems.example",
+     "monthly_visitors": 7000
+    }
+   ]
+  }
+ },
+ "apex-components.example": {
+  "crustdata_company_id": 9200,
+  "basic_info": {
+   "name": "Synthetic Apex Components",
+   "primary_domain": "apex-components.example",
+   "website": "https://apex-components.example",
+   "description": "Design of power electronics for industrial drives.",
+   "year_founded": 2012
+  },
+  "headcount": {
+   "total": 60,
+   "by_role_absolute": {
+    "Engineering": 26,
+    "Operations": 18,
+    "Sales": 12,
+    "Finance": 4
+   },
+   "growth_percent": {
+    "yoy": 2.0
+   }
+  },
+  "taxonomy": {
+   "professional_network_industry": "Computer Hardware Manufacturing"
+  },
+  "locations": {
+   "country": "India"
+  },
+  "web_traffic": {
+   "domain_traffic": [
+    {
+     "domain": "apex-components.example",
+     "monthly_visitors": 15000
+    }
+   ]
+  }
  }
 }

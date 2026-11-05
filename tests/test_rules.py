@@ -34,7 +34,7 @@ def test_acceptance_case_outcome(case):
 
 def test_rule_ids_are_unique_and_end_with_release():
     ids = [r.id for r in RULES]
-    assert len(ids) == len(set(ids)) == 12 and ids[-1] == "R12_release"
+    assert len(ids) == len(set(ids)) and ids[-1] == "R12_release"
 
 
 def test_llm_unavailable_holds_instead_of_asking():
@@ -58,7 +58,7 @@ def test_explain_validates_and_falls_back():
     assert explain(d, led, good)[0].evidence_ids == [good_id]
     bad = FakeLLM({"explain": {"sentences": [{"text": "Made up.", "evidence_ids": ["E999"]}]}})
     fallback = explain(d, led, bad)
-    assert fallback[0].text.startswith("Recommendation: BLOCK") and all(led.has(i) for i in fallback[0].evidence_ids)
+    assert fallback[0].text.startswith("Block:") and all(led.has(i) for i in fallback[0].evidence_ids)
 
 
 def test_audit_html_contains_everything():

@@ -59,6 +59,7 @@ class Email(BaseModel):
 class OrderLine(BaseModel):
     part_number: str
     quantity: int
+    description: str = ""               # datasheet or email wording, used when the part number is unknown
 
 
 class Party(BaseModel):
@@ -67,6 +68,7 @@ class Party(BaseModel):
     country: str | None = None           # ISO-3166 alpha-2
     address: str | None = None
     domain: str | None = None
+    iec: str | None = None               # Indian importer-exporter code; no bulk denied-entity file exists
 
 
 class Order(BaseModel):
@@ -76,6 +78,9 @@ class Order(BaseModel):
     lines: list[OrderLine]
     ship_to_country: str
     stated_purpose: str | None = None
+    unusual_premium: bool = False
+    payer_country: str | None = None     # ISO-2, when someone else is paying
+    virtual_or_residential_ship_to: bool = False
     created_at: datetime = Field(default_factory=utcnow)
 
     def party(self, role: PartyRole) -> Party | None:
@@ -108,6 +113,7 @@ class Classification(BaseModel):
     needs: list[str] = Field(default_factory=list)
     max_units_per_engineer: int | None = None
     max_units_distributor_small: int | None = None
+    function: str | None = None          # what the part does in a system (catalog `function`), for kit inference
     evidence_ids: list[str] = Field(default_factory=list)
 
 
@@ -167,6 +173,47 @@ class EndUseResult(BaseModel):
     evidence_ids: list[str] = Field(default_factory=list)
 
 
+# --- Cross-order network (who is linked to whom, and what they are building together) ----------
+class NetworkLink(BaseModel):
+    company: str                          # the other company's key
+    company_name: str
+    kind: Literal["person", "email_domain", "phone", "address", "forwarder", "middleman"]
+    value: str                            # the shared identifier, human readable
+    weight: float                         # strength after down-weighting common identifiers
+
+
+class SystemFinding(BaseModel):
+    system: str
+    concern: str
+    coverage: float                       # share of the system's required functions present
+    functions_present: list[str]
+    functions_missing: list[str]
+    orders: list[str]                     # order ids that together supply the functions
+    companies: list[str]                  # company names involved
+    fits_business: bool                   # the companies' known business explains the system
+    flagged: bool
+
+
+class ListedStaff(BaseModel):
+    person: str
+    company: str
+    past_employer: str
+    listed_name: str
+    status: Literal["exact_hit", "fuzzy_hit"]
+    source: str
+
+
+class NetworkResult(BaseModel):
+    company: str
+    linked_companies: list[str] = Field(default_factory=list)      # names, the cluster minus this buyer
+    links: list[NetworkLink] = Field(default_factory=list)
+    cluster_orders: list[str] = Field(default_factory=list)
+    systems: list[SystemFinding] = Field(default_factory=list)
+    listed_staff: list[ListedStaff] = Field(default_factory=list)
+    alerts: list[str] = Field(default_factory=list)                 # later orders that re-flagged this one
+    evidence_ids: list[str] = Field(default_factory=list)
+
+
 class OrderResults(BaseModel):
     """Everything decision.decide() needs. Built by pipeline from module outputs."""
     classifications: list[Classification] = Field(default_factory=list)
@@ -177,6 +224,7 @@ class OrderResults(BaseModel):
     end_use_requested: bool = False
     order_incomplete: bool = False
     llm_unavailable: bool = False
+    network: NetworkResult | None = None
 
 
 class ExplanationSentence(BaseModel):

@@ -118,6 +118,35 @@ PEERS = {
     "Wholesale": peers("Wholesale", 30, (25, 600), (0.0, 0.1), (4000, 250000)),
 }
 
+# --- Diversion ring (all synthetic): three ordinary-looking small firms sharing one director. -----------------
+# Each looks routine on its own; together they order most of a radar seeker front-end.
+RING = {
+    "orbit-electronics.example": ("Synthetic Orbit Electronics", "Repair and calibration of electronic test equipment.", 2015, 42,
+                                  {"Engineering": 14, "Operations": 14, "Sales": 10, "Finance": 4}, 9000),
+    "nimbus-instruments.example": ("Synthetic Nimbus Instruments", "Servicing and spares for laboratory instruments.", 2013, 55,
+                                   {"Engineering": 18, "Operations": 18, "Sales": 14, "Finance": 5}, 12000),
+    "delta-systems.example": ("Synthetic Delta Systems", "Embedded electronics design services for industrial clients.", 2016, 38,
+                              {"Engineering": 14, "Operations": 12, "Sales": 9, "Finance": 3}, 7000),
+}
+SHARED_DIRECTOR = person(777001, "Rakesh Varma", "Director", "Operations", "Owner / Partner", ["Business Strategy"],
+                         ["Gulf Swift Cargo FZE", "Demo General Trading"])
+for i, (dom, (name, desc, founded, total, roles, visitors)) in enumerate(RING.items()):
+    COMPANIES[dom] = company(9100 + i, name, dom, "India", "Computer Hardware Manufacturing", desc, founded, total,
+                             roles, 4.0, visitors)
+    ENGINEER_SKILLS[dom] = [["Embedded C", "PCB Design"], ["Test Equipment", "Calibration"], ["Firmware", "Electronics"]]
+    PEOPLE[dom] = [SHARED_DIRECTOR] + people_for(dom, 4, 2, 2, ["Demo Electronics Pvt Ltd"], ["Demo Trading Co"])
+
+# --- A firm whose managing director came from a listed entity (synthetic name on data/csl_demo.csv). -------------
+COMPANIES["apex-components.example"] = company(
+    9200, "Synthetic Apex Components", "apex-components.example", "India", "Computer Hardware Manufacturing",
+    "Design of power electronics for industrial drives.", 2012, 60,
+    {"Engineering": 26, "Operations": 18, "Sales": 12, "Finance": 4}, 2.0, 15000)
+ENGINEER_SKILLS["apex-components.example"] = [["Power Electronics", "PCB Design"], ["Embedded C", "Motor Control"]]
+PEOPLE["apex-components.example"] = [person(777101, "Imran Qureshi", "Managing Director", "Operations", "CXO",
+                                            ["Business Development"], ["Prohibited Microwave Systems Private Limited",
+                                                                       "Demo Electronics Pvt Ltd"])] + \
+    people_for("apex-components.example", 6, 2, 2, ["Demo Industrial Electronics"], ["Demo Electronics Pvt Ltd"])
+
 if __name__ == "__main__":
     OUT.mkdir(parents=True, exist_ok=True)
     for name, data in [("companies.json", COMPANIES), ("people.json", PEOPLE), ("peers.json", PEERS)]:

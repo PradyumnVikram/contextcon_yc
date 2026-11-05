@@ -62,7 +62,7 @@ cp .env.example .env            # defaults work offline; add keys only if you ha
 python -m clearance.screening.csl
 
 # 6. Check everything works
-pytest                          # 72 passed
+pytest                          # 104 passed
 ```
 
 ### `.env` settings
@@ -80,31 +80,47 @@ pytest                          # 72 passed
 
 ---
 
-## Getting started
+## Getting started: the two-window demo
 
-### Run the officer app
+Open two terminals and run both apps. They share the `mailbox/` folders:
 
 ```bash
-streamlit run app.py
+streamlit run app.py                              # window 1: Clearance  -> http://localhost:8501
+streamlit run buyer_app.py --server.port 8502     # window 2: buyer mail -> http://localhost:8502
 ```
 
-Then try the main demo flow:
+**Window 1, Clearance**, is the service, laid out in three panes:
 
-1. **Inbox:** open *Compose test email*, pick the preset **"Radar firm order (clean)"**, and click **Drop into inbox**.
-2. Click **📥 Process inbox** in the sidebar. The local LLM parses the email, and the order moves through classification, screening and the capability check.
-3. **Ready to sign:** enter your name in the sidebar (*Officer name*) and click **✍️ Sign RELEASE**.
-4. **Customers:** the buyer now appears as a watched customer. Click **Simulate Crustdata event** to re-tier it.
-
-Other presets to try:
-
-| Preset | What should happen |
+| Pane | What it shows |
 |---|---|
-| Shell trader order | **AWAITING_END_USE**. An end-use request is sent (see *Inbox → Sent by Clearance*). Reply with the same `[CLR-…]` subject and a vague answer: you get one follow-up, then **HOLD** |
-| Unknown company (no data) | **HOLD**: no company data, so an end-use statement is requested and never auto-released |
-| Close spelling of a listed name | **HOLD**, with both records side by side under *Order detail → Screening* |
-| Order with missing destination | Clearance emails the buyer for the missing field. Reply, and the order continues |
+| 📨 **Inbox** | Every order as a card with its status, and the full email conversation for the selected order |
+| 🔍 **Processing** | Everything Clearance checked: pipeline steps, the extracted order, parts and licence, restricted-list screening, the Crustdata capability check (company data, employee background, peer percentiles, triggered rules), the end-use statement, and every piece of evidence |
+| ✍️ **Action** | The recommendation with its cited explanation, **Sign**, **Override** (reason required), the audit file, and the queues *Ready to sign / Exceptions / Waiting on buyer* |
 
-*Order detail* shows the state timeline, every evidence item, the rule trace, the capability features with peer percentiles, the audit file download, and override with a required note.
+**Auto-process inbox** is on by default, so the service picks up new mail by itself. You can pause it from the sidebar.
+
+**Window 2, Buyer mail**, is a simple mail client:
+1. Pick who you are writing as (**Write as**), edit the subject and message, and click **Send ➤**.
+2. Within a few seconds Clearance processes the email. When it needs something (missing details, an end-use statement, a follow-up), its email arrives in this window's **Inbox**.
+3. Click **↩️ Reply**. The reply keeps the `[CLR-…]` tag and `In-Reply-To`, so Clearance links it to the original order automatically. Pick a **Quick answer** or type your own.
+
+### Demo script
+
+| Write as | Expected |
+|---|---|
+| **Astra Microwave (REAL)** | Live Crustdata lookup by the sender's domain (`astramwp.com`): clear on the screening list, *Consistent* against real Indian defence peers → **Release**. Sign it in the Action pane |
+| **Data Patterns (REAL)**, export to Germany | **Licence required**, with the documents to collect listed |
+| **Synthetic shell Traders** | Capability mismatch → end-use request in the buyer inbox. Reply "civilian use only" → one targeted follow-up arrives. Reply vaguely again → **Hold** in Exceptions |
+| **Synthetic nodata Enterprises** | No company data → **Hold**, with an end-use statement requested. The officer decides |
+| **Listed Electronic Tradng** | Close spelling of a listed entity → **Hold**, with both names side by side in Processing |
+| **Ring 1 → Ring 2 → Ring 3** (send in that order) | Each order looks routine on its own (licence paperwork). When Ring 3 arrives, the **Network** tab links the three buyers through a shared director and the same small Dubai forwarder: together they ordered 3 of 4 functions of a **radar seeker front-end** that nothing in their business explains → all three **Hold**, and the earlier two get a network alert |
+| **Synthetic Apex Components** | Its managing director previously worked at a listed entity (found by screening the staff's past employers) → **Hold** |
+
+**Using real companies:** send from the company's real domain (for example `procurement@<company>.com`). Clearance identifies the buyer by the sender's corporate domain; free-mail addresses are ignored, and a website written in the email takes precedence. The first live check of a new company costs about **70 Crustdata credits** (company record, 25 employees, about 20 peers), and repeats come from the cache. Check your key and balance with `python -m clearance.crustdata_client`.
+
+> **Ethics rule:** use real companies only as *legitimate* buyers. Never present a real company that isn't on a restricted list as suspicious. The suspicious and listed-entity scenarios use synthetic companies.
+
+Before a demo run, `python -m clearance.reset_demo` clears orders and mail but **keeps the paid Crustdata cache**. Don't delete `clearance.db` for this. No UI at all? `python -m clearance.worker` processes the mailbox headlessly and prints each decision.
 
 ### Other entry points
 
@@ -140,9 +156,12 @@ clearance/
   llm/          local Ollama adapter, optional Claude client, prompts, evidence-ID validator
   mail/         folder mailbox, order parsing, reply matching
   enduse/       end-use request, follow-up, extraction, consistency check
+  network/      memory across orders: linked buyers, parts combined across orders, staff from listed entities
+                (data/systems.csv holds the controlled-system templates)
   decision/     12-row rules table, cited explanation, HTML audit
   pipeline.py   the order state machine (the only orchestrator)
-app.py          Streamlit officer UI
+app.py          Clearance officer workspace (3 panes)
+buyer_app.py    simulated buyer mail client (the other demo window)
 data/           catalog, licence rules, demo list, synthetic Crustdata fixtures
 eval/           hand-written end-use replies + scorer
 tests/          pytest suite (offline: no network, fake LLM, fixtures)

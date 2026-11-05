@@ -32,6 +32,12 @@ CREATE TABLE IF NOT EXISTS evidence (
 CREATE TABLE IF NOT EXISTS emails (
     msg_id TEXT PRIMARY KEY, direction TEXT, order_id TEXT, subject TEXT, body TEXT,
     in_reply_to TEXT, received_at TEXT);
+CREATE TABLE IF NOT EXISTS network_links (
+    company_key TEXT, company_name TEXT, kind TEXT, value TEXT, order_id TEXT, source TEXT, created_at TEXT,
+    PRIMARY KEY (company_key, kind, value));
+CREATE TABLE IF NOT EXISTS network_orders (
+    order_id TEXT, line INTEGER, company_key TEXT, company_name TEXT, part_number TEXT, function TEXT,
+    quantity INTEGER, controlled INTEGER, created_at TEXT, PRIMARY KEY (order_id, line));
 CREATE TABLE IF NOT EXISTS customers (
     company_key TEXT PRIMARY KEY, name TEXT, tier TEXT, watcher_id TEXT, updated_at TEXT);
 """

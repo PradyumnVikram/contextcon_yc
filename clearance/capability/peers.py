@@ -29,8 +29,16 @@ def peer_set(client: CrustdataClient, conn: sqlite3.Connection, profile: Company
     if row:
         raw = json.loads(row["peer_set_json"])
     else:
-        raw = client.search_companies(_filters(profile), limit=config.PEER_SET_MAX, fixture_industry=profile.industry)
+        # Synthetic peers only for synthetic demo companies; a real company is always compared with real peers.
+        is_demo = client.fixtures.company(profile.domain or profile.name or "") is not None
+        raw = client.search_companies(_filters(profile), limit=config.PEER_SET_MAX,
+                                      fixture_industry=profile.industry if is_demo else None)
         raw = [c for c in raw if norm_key((c.get("basic_info") or {}).get("primary_domain") or "") != key]
+        if not is_demo and raw and config.PEER_ENRICH_MAX:
+            # search can't return engineering share or traffic: enrich the first peers in ONE batched request
+            doms = [(c.get("basic_info") or {}).get("primary_domain") for c in raw[: config.PEER_ENRICH_MAX]]
+            full = client.enrich_companies([d for d in doms if d])
+            raw = [full.get(norm_key((c.get("basic_info") or {}).get("primary_domain") or ""), c) for c in raw]
         conn.execute("INSERT OR REPLACE INTO peers VALUES (?,?,?)",
                      (key, json.dumps(raw), datetime.now(timezone.utc).isoformat()))
         conn.commit()
@@ -43,6 +51,35 @@ def percentile(value: float | None, others: list[float | None]) -> float | None:
     if value is None or len(vals) < config.PEER_SET_MIN:
         return None
     return round(100 * sum(v < value for v in vals) / len(vals), 1)
+
+
+def comparison(value: float | None, peers: list[CompanyProfile], attr: str) -> dict | None:
+    """This company's value against peers that have the same field. None when the peer set is too small."""
+    pairs = []
+    for p in peers:
+        v = getattr(p, attr)
+        if isinstance(v, (int, float)):
+            pairs.append((p.name or "?", float(v)))
+    if value is None or len(pairs) < config.PEER_SET_MIN:
+        return None
+    nums = sorted(v for _, v in pairs)
+    mid = nums[len(nums) // 2]
+    return {
+        "value": round(float(value), 3),
+        "peer_count": len(nums),
+        "median": round(mid, 3),
+        "low": round(nums[0], 3),
+        "high": round(nums[-1], 3),
+        "percentile": percentile(float(value), nums),
+        "examples": [name for name, _ in pairs[:5]],
+    }
+
+
+def fade_points(percentile_value: float | None, full: float, zero_at: float) -> float:
+    """Full points at the 0th percentile, falling in a straight line to 0 at `zero_at`."""
+    if percentile_value is None or percentile_value >= zero_at:
+        return 0
+    return round(full * (zero_at - percentile_value) / zero_at, 1)
 
 
 def peer_percentiles(profile: CompanyProfile, peers: list[CompanyProfile]) -> tuple[dict[str, float], int]:

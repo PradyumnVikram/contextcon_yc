@@ -13,8 +13,17 @@ load_dotenv()
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
-DB_PATH = Path(os.getenv("CLEARANCE_DB", ROOT / "clearance.db"))
-MAILBOX_DIR = Path(os.getenv("CLEARANCE_MAILBOX", ROOT / "mailbox"))
+
+
+def _repo_path(value: str | Path) -> Path:
+    """Relative paths in .env resolve against the repo root, so every window shares the same files
+    no matter which directory it was started from."""
+    p = Path(value).expanduser()
+    return p if p.is_absolute() else ROOT / p
+
+
+DB_PATH = _repo_path(os.getenv("CLEARANCE_DB", "clearance.db"))
+MAILBOX_DIR = _repo_path(os.getenv("CLEARANCE_MAILBOX", "mailbox"))
 
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 CRUSTDATA_API_KEY = os.getenv("CRUSTDATA_API_KEY", "")
@@ -44,6 +53,7 @@ CRUSTDATA_API_VERSION = "2025-11-01"
 CRUSTDATA_ENRICH_PER_MIN = 15
 PEOPLE_CAP_PER_COMPANY = 25
 PEER_SET_MIN, PEER_SET_MAX = 20, 50
+PEER_ENRICH_MAX = 20   # peers enriched in one batch for engineering share + traffic (~2 credits each, cached)
 
 # --- Screening (§4.2) --------------------------------------------------------
 SCREEN_WEIGHTS = {"token_set": 0.60, "jaro_winkler": 0.25, "address": 0.15}
@@ -53,34 +63,48 @@ NAME_SUFFIXES = ["pvt ltd", "private limited", "pvt. ltd.", "llc", "limited", "l
 FORWARDER_KEYWORDS = ["freight", "logistics", "cargo", "forwarding", "shipping", "courier"]
 
 # --- Buyer type (§4.4) -------------------------------------------------------
-DISTRIBUTOR_KEYWORDS = ["trading", "wholesale", "distribution", "distributor", "import", "export house"]
-MANUFACTURER_KEYWORDS = ["manufacturer", "manufacturing", "laboratory", "design", "radar", "telecom equipment"]
+# Description is a guide, not the decision. "manufacturing" and "design" match industry
+# labels (Digi-Key is "Electronics Manufacturing") so they are not manufacturer proof.
+DISTRIBUTOR_KEYWORDS = ["trading", "wholesale", "distribution", "distributor", "reseller", "import", "export house"]
+MANUFACTURER_KEYWORDS = ["manufactures", "fabrication", "factory", "semiconductor manufacturer"]
 PEOPLE_VOTE_MANUFACTURER_ENG_SHARE = 0.30
 PEOPLE_VOTE_DISTRIBUTOR_SALES_OPS_SHARE = 0.60
 PEOPLE_VOTE_DISTRIBUTOR_MAX_ENG_SHARE = 0.10
 
 # --- Capability scoring (§4.6) -----------------------------------------------
 TRANSSHIPMENT_HUBS = ["AE", "HK", "TR", "SG"]  # ISO-3166 alpha-2
-LOW_PERCENTILE = 10
+# Vishay is about 28% engineering and TE about 31%. Below this, a manufacturer
+# with no other evidence of the work takes C1 points.
+TECHNICAL_SHARE_CLEAR = 0.25
+# C2 fades from this many points at the 0th percentile of peers to 0 points at the 50th.
+# There is no cliff at the old 10th-percentile line.
+C2_FADE_UNTIL = 50
 
 CAPABILITY_POINTS = {
-    "C1_no_matching_people": 40,
+    "C1_not_a_technical_business": 40,
     "C2_low_engineering_share": 20,
-    "C3_young_company": 15,
+    "C3_small_staff": 15,
     "C4_headcount_decline": 10,
-    "C5_low_traffic": 10,
-    "O1_units_per_engineer": 20,
-    "O2_transshipment_hub": 15,
-    "O3_ship_to_mismatch": 5,
-    "D1_young_distributor": 25,
-    "D2_small_distributor": 15,
-    "D3_low_traffic_distributor": 15,
+    # Tracked against peers, not scored. A small team that orders too much is already C1/O1/D4.
+    "C5_low_traffic": 0,
+    "O1_quantity_vs_technical_staff": 20,
+    # Recorded on the file, not added to the score. A normal distributor ships to these countries.
+    "O2_transshipment_hub": 0,
+    "O3_ship_to_mismatch": 0,
+    "D1_small_staff": 25,
+    "D2_small_distributor": 0,
+    "D3_low_traffic_distributor": 0,
     "D4_large_order_small_distributor": 15,
 }
-YOUNG_COMPANY_YEARS = 2
-YOUNG_DISTRIBUTOR_YEARS = 3
+# Small-staff points fade to 0 at this headcount. A sample that covers the whole
+# company raises them, because we are not missing a hidden engineering team.
+SMALL_STAFF_FADE_AT = 80
+SMALL_STAFF_SAMPLE_COVERS = 0.7
 HEADCOUNT_DECLINE_PCT = 20
-SMALL_DISTRIBUTOR_HEADCOUNT = 20
+# Quantity points reach the full value at this many times a reasonable order.
+OVER_ORDER_FULL_AT = 5
+# 10,000 high-end parts (5 per technical person) looks normal only around 2,000
+# engineers. 10,000 commodity FPGAs (50 per person) looks normal around 200.
 
 TIER_MEDIUM_MIN = 30
 TIER_HIGH_MIN = 60

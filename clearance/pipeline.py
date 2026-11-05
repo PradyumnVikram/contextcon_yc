@@ -23,7 +23,7 @@ from clearance import config, store
 from clearance import screening as _screening
 from clearance import watch as _watch
 from clearance import decision as dec
-from clearance import enduse
+from clearance import enduse, network
 from clearance.evidence import Ledger
 from clearance.llm import LLM, LLMUnavailable
 from clearance.mail import Mailbox, match_reply, merge_details, missing_details_email, parse_order
@@ -44,6 +44,7 @@ class OrderContext(BaseModel):
     end_use_requested: bool = False
     followups_sent: int = 0
     last_end_use_reasons: list[str] = Field(default_factory=list)
+    network_alerts: list[str] = Field(default_factory=list)     # later orders that re-flagged this one
 
 
 class Pipeline:
@@ -140,7 +141,7 @@ class Pipeline:
 
     # ------------------------------------------------------------------ assessment
     def _assess(self, oid: str, order: Order, ledger: Ledger, ctx: OrderContext) -> None:
-        cls = [self.catalog.classify(l.part_number, ledger) for l in order.lines]
+        cls = [self.catalog.classify(l.part_number, ledger, l.description) for l in order.lines]
         lic = [self.catalog.licence(c, order.ship_to_country, ledger) for c in cls if c.found]
         store.set_state(self.conn, oid, OrderState.CLASSIFIED)
         scr = [self.screening.screen(p, ledger) for p in order.parties]
@@ -148,8 +149,37 @@ class Pipeline:
         cap = self.capability.assess(order.buyer, cls, order.lines, order.ship_to_country, ledger)
         store.set_state(self.conn, oid, OrderState.CAPABILITY_CHECKED)
         ctx.results = OrderResults(classifications=cls, licences=lic, screenings=scr, buyer_capability=cap)
+        # memory across orders: leave this order's identifiers behind, then look at the buyer's network
+        email_text = ""
+        if order.source_email_id:
+            row = self.conn.execute("SELECT body FROM emails WHERE msg_id=?", (order.source_email_id,)).fetchone()
+            email_text = row["body"] if row else ""
+        network.record(self.conn, order, cls, email_text)
+        ctx.results.network = network.analyse(self.conn, order, self.screening.screen, ledger)
         self._save_ledger(oid, ledger)
         self._finish(oid, order, ledger, ctx)
+        self._recheck_linked(oid, ctx.results.network)
+
+    def _recheck_linked(self, oid: str, net) -> None:
+        """When this order completes a controlled set, re-examine the earlier orders that supplied it."""
+        for finding in [s for s in (net.systems if net else []) if s.flagged]:
+            for other in finding.orders:
+                if other == oid:
+                    continue
+                ctx2 = self._ctx(other)
+                if ctx2.results is None or oid in ctx2.network_alerts:
+                    continue
+                order2, ledger2 = store.load_order(self.conn, other), self._ledger(other)
+                ctx2.results.network = network.analyse(self.conn, order2, self.screening.screen, ledger2)
+                ledger2.add(f"Network alert: order {oid} completed a {finding.system} together with this order",
+                            {"orders": finding.orders, "companies": finding.companies}, f"network:alert/{oid}")
+                ctx2.network_alerts.append(oid)
+                if store.get_state(self.conn, other) == OrderState.SIGNED:
+                    # never silently undo a signature: the alert goes on the file for the officer
+                    self._save_ledger(other, ledger2)
+                    self._save_ctx(other, ctx2)
+                else:
+                    self._finish(other, order2, ledger2, ctx2)
 
     def _finish(self, oid: str, order: Order, ledger: Ledger, ctx: OrderContext) -> Decision:
         """Decide, send any end-use request the decision calls for, explain, persist."""
