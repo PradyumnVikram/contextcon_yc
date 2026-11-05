@@ -15,14 +15,14 @@ import httpx
 import pandas as pd
 import streamlit as st
 
-from clearance import config, crustdata_client, store, watch
+from clearance import config, crustdata_client, store
 from clearance.decision.rules import RULES_BY_ID
 from clearance.evidence import Ledger
 from clearance.llm import make_llm
 from clearance.mail import Mailbox
-from clearance.models import OrderState, Party
+from clearance.models import OrderState
 from clearance.pipeline import Pipeline
-from clearance.ui import crustdata_snapshot, evidence_groups, md_escape, readable_value
+from clearance.ui import crustdata_snapshot, crustdata_summary, evidence_groups, md_escape, readable_value
 
 st.set_page_config(page_title="Clearance", page_icon=":material/verified_user:", layout="wide")
 
@@ -149,13 +149,7 @@ with st.sidebar:
         else:
             st.table({c["name"]: f":{TIER.get(c['tier'], ('', 'gray'))[1]}-badge[{TIER.get(c['tier'], (c['tier'],))[0]}]"
                       for c in cust}, border="horizontal", alt="Watched customers and their risk tier")
-            by_name = {c["name"]: c["company_key"] for c in cust}
-            name = st.selectbox("Customer", list(by_name), key="sim_customer")
-            tier = st.selectbox("Crustdata reports", ["medium_risk", "high_risk", "consistent"],
-                                format_func=lambda t: TIER[t][0], key="sim_tier")
-            if st.button("Simulate watcher event", icon=":material/notifications_active:", width="stretch"):
-                watch.simulate_event(conn, Party(role="buyer", name=name, domain=by_name[name]), tier)
-                st.rerun()
+            st.caption("Re-rated automatically when Crustdata reports a change.")
     st.caption("Prototype, not legal advice. An officer signs every release and block.")
 
 orders = all_orders()
@@ -281,6 +275,14 @@ with p2:
             snap = crustdata_snapshot(crustdata_client.get_client(), order.buyer)
             if cap is None:
                 st.caption("The capability check has not run yet for this order.")
+            else:
+                with st.container(border=True):
+                    st.markdown("**What Crustdata returned**" + (f" :{'green' if snap['source'] == 'live Crustdata' else 'gray'}"
+                                                                f"-badge[{snap['source']}]" if snap["source"] else ""))
+                    icons = {"Company record": ":material/apartment:", "Employees": ":material/groups:",
+                             "Peer comparison": ":material/compare_arrows:", "Verdict": ":material/gavel:"}
+                    for heading, sentence in crustdata_summary(snap, cap):
+                        st.markdown(f"{icons.get(heading, '')} **{heading}.** {sentence}")
             if cap:
                 tier_label, tier_color = TIER.get(cap.tier, (cap.tier, "gray"))
                 m1, m2 = st.columns(2)
@@ -293,7 +295,7 @@ with p2:
                 st.markdown("**Rules triggered:** " + (" ".join(f":orange-badge[{r}]" for r in cap.triggered_rules)
                                                       or ":green-badge[None]"))
             if snap["profile"]:
-                st.markdown(f"**Company record** :{'green' if snap['source'] == 'live Crustdata' else 'gray'}-badge[{snap['source']}]")
+                st.markdown("**Company record**")
                 st.table(snap["profile"], border="horizontal", alt="Company record retrieved from Crustdata")
                 if snap["description"]:
                     st.caption(md_escape(snap["description"][:400]))
@@ -322,9 +324,9 @@ with p2:
                                      min_value=0, max_value=1, format="percent"),
                                      "Headcount": st.column_config.NumberColumn(format="localized"),
                                      "Monthly visitors": st.column_config.NumberColumn(format="compact")})
-            elif cap:
-                st.info("Crustdata has no record for this company, so Clearance treats it as a risk signal "
-                        "(never a pass) and asks for an end-use statement.", icon=":material/help:")
+            if snap["profile"]:
+                with st.expander("Raw Crustdata response (company record)", icon=":material/data_object:"):
+                    st.json(snap["company_data"], expanded=1)
 
         with t_ev:
             cited = {e.id for e in d.evidence} if d else set()

@@ -127,7 +127,109 @@ def crustdata_snapshot(client: CrustdataClient, party: Party) -> dict[str, Any]:
         peers.append({"Company": q.name, "Headcount": q.headcount, "Engineering share": q.engineering_share,
                       "Monthly visitors": q.monthly_visitors})
     by_fn = dict(sorted(p.by_role.items(), key=lambda kv: -kv[1])) if p.by_role and not p.by_role_is_pct else {}
-    return {"profile": {k: v for k, v in profile.items() if v not in (None, "—")}, "source": source,
+    eng = sum(v for k, v in p.by_role.items() if "engineer" in k.lower() or "research" in k.lower()) \
+        if p.by_role and not p.by_role_is_pct else None
+    raw = {"name": p.name, "domain": p.domain, "industry": p.industry, "country": p.country, "year": p.year_founded,
+           "headcount": p.headcount, "engineers": eng, "eng_share": p.engineering_share, "growth": p.growth_yoy_pct,
+           "visitors": p.monthly_visitors}
+    return {"raw": raw, "company_data": cd, "profile": {k: v for k, v in profile.items() if v not in (None, "—")}, "source": source,
             "by_function": by_fn, "people": people, "peers": peers, "description": p.description or "",
             "self": {"Company": f"★ {p.name}", "Headcount": p.headcount, "Engineering share": p.engineering_share,
                      "Monthly visitors": p.monthly_visitors}}
+
+
+# --------------------------------------------------------------------------- plain-English Crustdata report
+RULE_TEXT = {
+    "C1_no_matching_people": "no sampled employee has the skills these parts need",
+    "C2_low_engineering_share": "engineering share is in the bottom 10% of similar companies",
+    "C3_young_company": "the company is less than 2 years old",
+    "C4_headcount_decline": "headcount fell by more than 20% in a year",
+    "C5_low_traffic": "web traffic is in the bottom 10% of similar companies",
+    "O1_units_per_engineer": "the order is too large for the number of matching engineers",
+    "O2_transshipment_hub": "goods ship to a transshipment hub in another country",
+    "O3_ship_to_mismatch": "goods ship to a different country from the buyer's",
+    "D1_young_distributor": "the distributor is less than 3 years old",
+    "D2_small_distributor": "the distributor is smaller than 90% of similar distributors",
+    "D3_low_traffic_distributor": "the distributor's web traffic is in the bottom 10%",
+    "D4_large_order_small_distributor": "a small distributor is ordering a large quantity",
+}
+
+
+def _ord(n: float) -> str:
+    n = int(round(n))
+    suffix = "th" if 10 <= n % 100 <= 20 else {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
+    return f"{n}{suffix}"
+
+
+def crustdata_summary(snap: dict[str, Any], cap: Any | None) -> list[tuple[str, str]]:
+    """What Crustdata returned, as (heading, sentence) pairs a compliance officer can read aloud."""
+    if not snap.get("profile"):
+        return [("Company record", "Crustdata returned no record for this company. Clearance treats missing data as a "
+                                   "risk signal, never a pass, and asks the buyer for an end-use statement.")]
+    r = snap["raw"]
+    out: list[tuple[str, str]] = []
+    parts = [f"Crustdata returned a company record for **{md_escape(r['name'] or '')}**"
+             + (f" ({r['domain']})" if r["domain"] else "") + ":"]
+    desc = []
+    if r["industry"]:
+        desc.append(f"a {r['industry']} company")
+    if r["country"]:
+        desc.append(f"headquartered in {r['country']}")
+    if r["year"]:
+        desc.append(f"founded in {r['year']}")
+    parts.append(", ".join(desc) + "." if desc else "")
+    if r["headcount"] is not None:
+        s = f"It has {readable_value(r['headcount'])} employees"
+        if r["engineers"] is not None and r["eng_share"] is not None:
+            s += f", {readable_value(int(r['engineers']))} in engineering and research ({r['eng_share']:.0%})"
+        parts.append(s + ".")
+    if r["growth"] is not None:
+        g = r["growth"]
+        parts.append("Headcount was flat over the last 12 months." if abs(g) < 0.5 else
+                     f"Headcount {'grew' if g > 0 else 'fell'} {abs(g):.0f}% over the last 12 months.")
+    if r["visitors"] is not None:
+        parts.append(f"Its website gets about {readable_value(r['visitors'])} visitors a month.")
+    out.append(("Company record", " ".join(x for x in parts if x)))
+
+    f = (cap.features if cap else {}) or {}
+    people = snap.get("people") or []
+    if people:
+        mix = {}
+        for person in people:
+            mix[person["Function"]] = mix.get(person["Function"], 0) + 1
+        top = ", ".join(f"{n} in {fn.lower()}" for fn, n in sorted(mix.items(), key=lambda kv: -kv[1])[:3] if fn != "—")
+        s = f"An employee search returned {len(people)} employee profiles" + (f" ({top})" if top else "") + "."
+        if f.get("matching_people") is not None:
+            s += f" {f['matching_people']} have skills matching what the ordered parts need."
+        pe = f.get("past_employer_profile") or {}
+        if pe.get("employers_seen"):
+            if pe.get("tech_share", 0) >= pe.get("trading_share", 0):
+                s += f" Their past employers are mostly technical firms ({pe['tech_share']:.0%} electronics, defence or telecom)."
+            else:
+                s += f" Their past employers are mostly trading firms ({pe['trading_share']:.0%})."
+        out.append(("Employees", s))
+    else:
+        out.append(("Employees", "The employee search returned no profiles for this company."))
+
+    peers = snap.get("peers") or []
+    pct = (cap.percentiles if cap else {}) or {}
+    if peers and pct:
+        names = {"engineering_share": "engineering share", "headcount": "headcount", "monthly_visitors": "web traffic"}
+        ranks = "; ".join(f"{_ord(v)} percentile for {names.get(k, k)}" for k, v in pct.items())
+        low = [names.get(k, k) for k, v in pct.items() if v < 10]
+        s = (f"Compared with {len(peers)} similar companies (same industry, similar size, same country), the buyer "
+             f"ranks at the {ranks}.")
+        s += f" Low compared with peers: {', '.join(low)}." if low else " Nothing is unusually low compared with peers."
+        out.append(("Peer comparison", s))
+    elif peers:
+        out.append(("Peer comparison", f"Crustdata returned {len(peers)} similar companies, but too few had comparable "
+                                       "data to rank the buyer."))
+
+    if cap:
+        tier = {"consistent": "Consistent", "medium_risk": "Medium risk", "high_risk": "High risk",
+                "no_data": "No data"}.get(cap.tier, cap.tier)
+        reasons = [RULE_TEXT.get(x, x) for x in cap.triggered_rules]
+        s = f"From this data Clearance scored **{cap.mismatch_score:g} points: {tier}** (buyer type: {cap.buyer_type})."
+        s += (" Reasons: " + "; ".join(reasons) + ".") if reasons else " No capability rule was triggered."
+        out.append(("Verdict", s))
+    return out

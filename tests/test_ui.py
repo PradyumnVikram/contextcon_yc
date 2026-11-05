@@ -45,3 +45,26 @@ def test_crustdata_snapshot_reads_cache_and_fixtures_only(offline):
 
 def test_md_escape_keeps_text_literal():
     assert ui.md_escape("2 * 3 = [six]") == "2 \\* 3 = \\[six\\]"
+
+
+def test_crustdata_summary_reads_like_a_report(offline):
+    from clearance import capability, catalog
+    from clearance.evidence import Ledger
+    from clearance.models import OrderLine
+    party = Party(role="buyer", name="Synthetic Radar Systems", domain="synthetic-radar.example", country="IN")
+    led = Ledger()
+    cap = capability.assess(party, [catalog.classify("PA-77G-HE", led)], [OrderLine(part_number="PA-77G-HE", quantity=4)],
+                            "IN", led)
+    lines = ui.crustdata_summary(ui.crustdata_snapshot(offline, party), cap)
+    text = " ".join(t for _, t in lines)
+    assert [h for h, _ in lines] == ["Company record", "Employees", "Peer comparison", "Verdict"]
+    assert "founded in 2009" in text and "180 employees" in text and "115 in engineering and research (64%)" in text
+    assert "25 employee profiles" in text and "16 have skills matching" in text
+    assert "30 similar companies" in text and "percentile" in text
+    assert "Consistent" in text
+
+
+def test_crustdata_summary_when_nothing_found(offline):
+    lines = ui.crustdata_summary(ui.crustdata_snapshot(offline, Party(role="buyer", name="Nobody Ltd")), None)
+    assert lines == [("Company record", "Crustdata returned no record for this company. Clearance treats missing data as a "
+                                        "risk signal, never a pass, and asks the buyer for an end-use statement.")]
