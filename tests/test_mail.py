@@ -76,3 +76,25 @@ def test_sender_corporate_domain_identifies_buyer_when_no_website_given():
     stated = Email(msg_id="<o>", from_addr="a@astramwp.com", to_addr="c@y", subject="PO", body="...")
     o = parse_order(stated, "11", FakeLLM({"parse_order": {**FULL, "buyer_website": "www.other.example"}}), Ledger())
     assert o.buyer.domain == "www.other.example"     # a website stated in the email wins
+
+
+def test_drafted_subject_is_never_just_the_tag():
+    bare = FakeLLM({"draft_email": {"subject": "[CLR-7]", "body": "Please send the destination country."}})
+    d = missing_details_email("7", ["ship_to_country"], bare)
+    assert d.subject.startswith("[CLR-7] ") and len(d.subject) > len("[CLR-7] ") + 5
+    assert d.body == "Please send the destination country."      # the model's body is kept
+
+
+def test_relative_paths_in_env_resolve_to_the_repo(monkeypatch):
+    import importlib
+
+    from clearance import config
+    monkeypatch.setenv("CLEARANCE_MAILBOX", "mailbox")
+    monkeypatch.setenv("CLEARANCE_DB", "clearance.db")
+    cfg = importlib.reload(config)
+    try:
+        assert cfg.MAILBOX_DIR.is_absolute() and cfg.MAILBOX_DIR == cfg.ROOT / "mailbox"
+        assert cfg.DB_PATH.is_absolute() and cfg.DB_PATH == cfg.ROOT / "clearance.db"
+    finally:
+        monkeypatch.undo()
+        importlib.reload(config)

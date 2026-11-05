@@ -73,3 +73,13 @@ def test_buyer_window_sends_and_receives(env):
     service.run()                                        # evasive reply -> one follow-up, still waiting
     buyer.run()
     assert sum(b.label == "↩️ Reply" for b in buyer.button) == 2
+
+
+def test_buyer_inbox_shows_replies_even_after_switching_identity(env):
+    env.send("Procurement <procurement@astramwp.com>", "[CLR-O0001] Additional order details needed", "Destination?")
+    buyer = AppTest.from_file(str(ROOT / "buyer_app.py"), default_timeout=30)
+    buyer.run()
+    buyer.selectbox(key="b_identity").set_value("Synthetic shell Traders (demo, suspicious)").run()
+    assert any("Additional order details needed" in m.value for m in buyer.markdown)   # not hidden by the switch
+    next(b for b in buyer.button if b.label == "↩️ Reply").click().run()
+    assert buyer.text_input(key="b_from").value == "Procurement <procurement@astramwp.com>"  # replies as the addressee

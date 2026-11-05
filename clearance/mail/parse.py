@@ -42,6 +42,13 @@ def tag(order_id: str) -> str:
     return f"[CLR-{order_id}]"
 
 
+def finalize_subject(subject: str, order_tag: str, fallback: str) -> str:
+    """The subject must start with the tag AND say what the email is about (a bare tag is easy to miss)."""
+    s = (subject or "").strip()
+    rest = s[len(order_tag):].strip(" :-–") if s.startswith(order_tag) else ""
+    return f"{order_tag} {rest}" if len(rest) >= 3 else f"{order_tag} {fallback}"
+
+
 def match_reply(email: Email, conn: sqlite3.Connection | None = None) -> str | None:
     """Order id from the [CLR-id] subject tag, else from In-Reply-To pointing at one of our sent emails."""
     if m := TAG_RE.search(email.subject):
@@ -123,8 +130,9 @@ def missing_details_email(order_id: str, missing: list[str], llm: LLM) -> DraftO
     ask = [FIELD_LABELS.get(f, f) for f in missing]
     try:
         d = llm.structured("draft_email", DraftOut, {"kind": "missing_details", "tag": tag(order_id), "ask_for": ask})
-        if d.subject.startswith(tag(order_id)):
-            return d
+        if d.body.strip():
+            return DraftOut(subject=finalize_subject(d.subject, tag(order_id), "Additional order details needed"),
+                            body=d.body)
     except LLMUnavailable:
         pass
     body = ("Thank you for your order. Before we can process it, please reply with:\n- "

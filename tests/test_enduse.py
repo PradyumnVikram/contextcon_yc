@@ -63,3 +63,9 @@ def test_generic_end_user_placeholder_counts_as_not_named():
     claim = extract(Email(msg_id="<r>", from_addr="", to_addr="", subject="", body="..."), _cls(led), llm, led)
     assert claim.end_user_name is None and claim.end_user_country is None
     assert "no end user named" in _check(claim).reasons
+
+
+def test_end_use_request_subject_is_never_just_the_tag():
+    bare = FakeLLM({"draft_email": {"subject": "[CLR-C6]", "body": "Please describe the end use."}})
+    req = draft_request(ORDER, bare)
+    assert req.subject.startswith("[CLR-C6] ") and "end-use" in req.subject.lower()

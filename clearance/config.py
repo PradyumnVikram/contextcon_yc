@@ -13,8 +13,17 @@ load_dotenv()
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
-DB_PATH = Path(os.getenv("CLEARANCE_DB", ROOT / "clearance.db"))
-MAILBOX_DIR = Path(os.getenv("CLEARANCE_MAILBOX", ROOT / "mailbox"))
+
+
+def _repo_path(value: str | Path) -> Path:
+    """Relative paths in .env resolve against the repo root, so every window shares the same files
+    no matter which directory it was started from."""
+    p = Path(value).expanduser()
+    return p if p.is_absolute() else ROOT / p
+
+
+DB_PATH = _repo_path(os.getenv("CLEARANCE_DB", "clearance.db"))
+MAILBOX_DIR = _repo_path(os.getenv("CLEARANCE_MAILBOX", "mailbox"))
 
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 CRUSTDATA_API_KEY = os.getenv("CRUSTDATA_API_KEY", "")

@@ -96,7 +96,8 @@ def _pick_identity() -> None:
 
 
 def _reply(e) -> None:
-    ss.update(b_subj=e.subject if e.subject.lower().startswith("re:") else f"Re: {e.subject}",
+    """Reply as the buyer the message was addressed to (not whoever is in the compose box)."""
+    ss.update(b_from=e.to_addr, b_subj=e.subject if e.subject.lower().startswith("re:") else f"Re: {e.subject}",
               b_body="", b_reply_to=e.msg_id, b_reply_tpl="(write my own)")
 
 
@@ -143,25 +144,30 @@ with left:
 
 @st.fragment(run_every=f"{REFRESH_S}s")
 def inbox() -> None:
-    me = addr(ss["b_from"])
-    received = [e for e in mb.outbox_messages() if addr(e.to_addr) == me]
-    sent = [m for path in sorted(mb.inbox.glob("*.eml")) if addr((m := mb.read_eml(path)).from_addr) == me]
+    """Every buyer's mail from the compliance desk, independent of the compose box; optional per-address filter."""
+    received = mb.outbox_messages()
+    addresses = sorted({addr(e.to_addr) for e in received})
+    show = st.selectbox("Show mail for", ["All buyers"] + addresses, key="b_filter")
+    if show != "All buyers":
+        received = [e for e in received if addr(e.to_addr) == show]
     seen = ss.setdefault("b_seen", set())
-    st.markdown(f"**Inbox · {escape(me) or 'no address'}** · {len(received)}")
+    st.markdown(f"**Inbox** · {len(received)} message(s) from the compliance desk")
     if not received:
         st.caption("Nothing yet. Replies from the compliance desk appear here automatically.")
     for e in reversed(received):
         new = e.msg_id not in seen
-        st.markdown(f"<div class='mail{' new' if new else ''}'><div class='from'>From {escape(e.from_addr)} · "
-                    f"{e.received_at:%d %b %H:%M}{' · <span class=tag>new</span>' if new else ''}</div>"
+        st.markdown(f"<div class='mail{' new' if new else ''}'><div class='from'>To <b>{escape(e.to_addr)}</b> · "
+                    f"from {escape(e.from_addr)} · {e.received_at:%d %b %H:%M}"
+                    f"{' · <span class=tag>new</span>' if new else ''}</div>"
                     f"<div class='subj'>{escape(e.subject)}</div><div class='body'>{escape(e.body)}</div></div>",
                     unsafe_allow_html=True)
         st.button("↩️ Reply", key=f"r-{e.msg_id}", on_click=_reply, args=(e,))
         seen.add(e.msg_id)
-    with st.expander(f"Sent ({len(sent)})"):
-        for e in reversed(sent):
-            st.markdown(f"<div class='from'>{e.received_at:%d %b %H:%M}</div><div class='subj'>{escape(e.subject)}</div>",
-                        unsafe_allow_html=True)
+    sent = [m for path in sorted(mb.inbox.glob("*.eml")) if (m := mb.read_eml(path))]
+    with st.expander(f"Sent to the compliance desk ({len(sent)})"):
+        for m in reversed(sent):
+            st.markdown(f"<div class='from'>{m.received_at:%d %b %H:%M} · from {escape(m.from_addr)}</div>"
+                        f"<div class='subj'>{escape(m.subject)}</div>", unsafe_allow_html=True)
     st.caption(f"⏱️ refreshes every {REFRESH_S}s")
 
 
