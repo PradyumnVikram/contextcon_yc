@@ -42,3 +42,9 @@ def test_convert_raw_csl(tmp_path):
     assert csl.convert(raw, out) == 1
     [e] = csl._read(out)
     assert e.countries == {"AE", "IN"} and e.alt_names == ["XC"]
+
+
+def test_one_word_listed_name_does_not_flag_longer_company_names():
+    # a listed entity called just "NOVA" must not flag every company with "Nova" in its name
+    assert _s("Nova Microwave Products Limited", "IN").status == "clear"
+    assert _s("Nova", "RU").status == "exact_hit"

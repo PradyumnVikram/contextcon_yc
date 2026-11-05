@@ -1,7 +1,8 @@
 """Restricted-party screening against the US CSL (task A5). OWNER: Person A.
 
 normalize -> block (same country, or shared first token) -> score -> threshold (AGENTS §4.2):
-    score = 0.60*token_set + 0.25*jaro_winkler + 0.15*address   (address weight re-spread when unknown)
+    score = 0.60*token + 0.25*jaro_winkler + 0.15*address   (address weight re-spread when unknown)
+    token = mean(token_set_ratio, token_sort_ratio), so a one-word listed name can't match every longer name
     exact_hit: normalised names identical (or score >= 97) AND country matches
     fuzzy_hit: score >= 85
 """
@@ -61,7 +62,9 @@ def _index():
 
 def _score(q: str, cand: str, q_addr: str | None, cand_addrs: list[str]) -> tuple[float, dict[str, float]]:
     qt, ct = _translit(q), _translit(cand)
-    ts = float(fuzz.token_set_ratio(qt, ct))
+    # token_set alone scores 100 whenever one name's words are a subset of the other's ("astra" vs
+    # "astra microwave products"); averaging with token_sort keeps typo tolerance but penalises extra words.
+    ts = (float(fuzz.token_set_ratio(qt, ct)) + float(fuzz.token_sort_ratio(qt, ct))) / 2
     jw = 100.0 * JaroWinkler.normalized_similarity(qt, ct)
     w = config.SCREEN_WEIGHTS
     if q_addr and cand_addrs:
