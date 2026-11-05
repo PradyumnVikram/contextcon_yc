@@ -60,3 +60,95 @@ def test_units_per_engineer_rule():
 def test_no_record_is_no_data():
     r, led = _assess("Synthetic nodata Enterprises", "ADC-12G-HE", 10)
     assert (r.coverage, r.tier) == ("missing", "no_data") and r.evidence_ids
+
+
+def test_real_company_never_gets_synthetic_peers():
+    import json as _json
+
+    import httpx
+
+    from clearance import store
+    from clearance.capability.peers import peer_set
+    from clearance.capability.profile import parse_company
+    from clearance.crustdata_client import CrustdataClient
+
+    sent = []
+
+    def handler(req):
+        sent.append(_json.loads(req.content))
+        return httpx.Response(200, json={"companies": [{"basic_info": {"name": f"Real peer {i}"},
+                                                        "headcount": {"total": 100 + i}} for i in range(25)]})
+
+    client = CrustdataClient(store.connect(":memory:"), api_key="k", transport=httpx.MockTransport(handler))
+    real = parse_company({"basic_info": {"name": "Real Defence Co", "primary_domain": "realdefence.example"},
+                          "taxonomy": {"professional_network_industry": "Defense and Space Manufacturing"},
+                          "headcount": {"total": 1500}, "locations": {"country": "IND"}})
+    peers = peer_set(client, client.conn, real)
+    assert len(sent) == 1 and len(peers) == 25 and peers[0].name == "Real peer 0"
+    conds = {c["field"]: c["value"] for c in sent[0]["filters"]["conditions"]}
+    assert conds["taxonomy.professional_network_industry"] == ["Defense and Space Manufacturing"]
+
+
+def _live_client(handler):
+    import httpx
+
+    from clearance import store
+    from clearance.crustdata_client import CrustdataClient
+    return CrustdataClient(store.connect(":memory:"), api_key="k", transport=httpx.MockTransport(handler))
+
+
+REAL = {"basic_info": {"name": "Real Defence Co", "primary_domain": "realdefence.example",
+                       "description": "Designs radar systems"},
+        "taxonomy": {"professional_network_industry": "Defense and Space Manufacturing"},
+        "headcount": {"total": 1500, "by_role_absolute": {"Engineering": 900, "Sales": 600}},
+        "locations": {"country": "IND"}}
+
+
+def test_peers_are_batch_enriched_for_engineering_share_and_traffic():
+    import json as _json
+
+    import httpx
+
+    from clearance.capability.peers import peer_set
+    from clearance.capability.profile import parse_company
+    calls = []
+
+    def handler(req):
+        body = _json.loads(req.content)
+        calls.append((req.url.path, body))
+        if req.url.path == "/company/search":
+            return httpx.Response(200, json={"companies": [
+                {"basic_info": {"name": f"P{i}", "primary_domain": f"p{i}.example"}, "headcount": {"total": 100}}
+                for i in range(25)]})
+        return httpx.Response(200, json=[{"matched_on": d, "matches": [{"company_data": {
+            "basic_info": {"name": d, "primary_domain": d}, "headcount": {"total": 100, "by_role_absolute": {"Engineering": 40, "Sales": 60}},
+            "web_traffic": {"domain_traffic": {d: {"monthly_visitors": 1000}}}}}]} for d in body["domains"]])
+
+    client = _live_client(handler)
+    peers = peer_set(client, client.conn, parse_company(REAL))
+    paths = [p for p, _ in calls]
+    assert paths == ["/company/search", "/company/enrich"]           # one search + ONE batched enrich
+    assert "web_traffic" not in calls[0][1]["fields"]                # search rejects web_traffic
+    assert len(calls[1][1]["domains"]) == 20                          # capped
+    enriched = [p for p in peers if p.monthly_visitors is not None]
+    assert len(enriched) == 20 and enriched[0].engineering_share == 0.4
+
+
+def test_crustdata_error_degrades_instead_of_crashing(offline, monkeypatch):
+    import httpx
+
+    from clearance import crustdata_client
+    from clearance.capability import assess
+    from clearance.evidence import Ledger
+    from clearance.models import Party
+
+    def handler(req):
+        if req.url.path == "/company/enrich":
+            return httpx.Response(200, json=[{"matches": [{"company_data": REAL}]}])
+        return httpx.Response(400, json={"error": {"type": "invalid_request"}})   # people + peers fail
+
+    crustdata_client.set_client(_live_client(handler))
+    led = Ledger()
+    r = assess(Party(role="buyer", name="Real Defence Co", domain="realdefence.example", country="IN"), [], [], "IN", led)
+    assert r.coverage == "rich" and r.percentiles == {}
+    assert any("unavailable" in e.claim for e in led.items)

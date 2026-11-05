@@ -25,7 +25,8 @@ log = logging.getLogger(__name__)
 FIXTURES_DIR = config.DATA_DIR / "demo_crustdata"
 
 ENRICH_FIELDS = ["basic_info", "headcount", "taxonomy", "locations", "web_traffic"]
-PEER_FIELDS = ["basic_info", "headcount", "web_traffic"]
+PEER_FIELDS = ["basic_info", "headcount", "taxonomy", "locations"]   # /company/search rejects web_traffic (live, 2026-11-06)
+PEER_ENRICH_FIELDS = ["basic_info", "headcount", "web_traffic"]
 PERSON_FIELDS = [
     "crustdata_person_id",
     "basic_profile.name",
@@ -185,6 +186,20 @@ class CrustdataClient:
             return None
         matches = (data[0] or {}).get("matches") or []
         return matches[0]["company_data"] if matches else None
+
+    def enrich_companies(self, domains: list[str], fields: list[str] = PEER_ENRICH_FIELDS) -> dict[str, dict]:
+        """ONE batched enrich request for several domains -> {domain: company_data}. Missing ones are left out."""
+        doms = sorted({norm_key(d) for d in domains if d and is_domain(norm_key(d))})
+        if not doms or not self.live:
+            return {}
+        data = self.post("/company/enrich", {"domains": doms, "fields": fields}) or []
+        out = {}
+        for entry in data:
+            matches = (entry or {}).get("matches") or []
+            if matches:
+                cd = matches[0]["company_data"]
+                out[norm_key((cd.get("basic_info") or {}).get("primary_domain") or entry.get("matched_on") or "")] = cd
+        return out
 
     def search_companies(self, filters: dict[str, Any], fields: list[str] = PEER_FIELDS, limit: int = 50,
                          fixture_industry: str | None = None) -> list[dict]:

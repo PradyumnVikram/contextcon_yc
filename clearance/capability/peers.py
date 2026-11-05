@@ -29,8 +29,16 @@ def peer_set(client: CrustdataClient, conn: sqlite3.Connection, profile: Company
     if row:
         raw = json.loads(row["peer_set_json"])
     else:
-        raw = client.search_companies(_filters(profile), limit=config.PEER_SET_MAX, fixture_industry=profile.industry)
+        # Synthetic peers only for synthetic demo companies; a real company is always compared with real peers.
+        is_demo = client.fixtures.company(profile.domain or profile.name or "") is not None
+        raw = client.search_companies(_filters(profile), limit=config.PEER_SET_MAX,
+                                      fixture_industry=profile.industry if is_demo else None)
         raw = [c for c in raw if norm_key((c.get("basic_info") or {}).get("primary_domain") or "") != key]
+        if not is_demo and raw and config.PEER_ENRICH_MAX:
+            # search can't return engineering share or traffic: enrich the first peers in ONE batched request
+            doms = [(c.get("basic_info") or {}).get("primary_domain") for c in raw[: config.PEER_ENRICH_MAX]]
+            full = client.enrich_companies([d for d in doms if d])
+            raw = [full.get(norm_key((c.get("basic_info") or {}).get("primary_domain") or ""), c) for c in raw]
         conn.execute("INSERT OR REPLACE INTO peers VALUES (?,?,?)",
                      (key, json.dumps(raw), datetime.now(timezone.utc).isoformat()))
         conn.commit()
