@@ -50,7 +50,7 @@ def test_mail_is_processed_without_clicks_and_signed(env):
     env.compose("Procurement <procurement@synthetic-radar.example>", "PO 4411", "4 pcs PA-77G-HE, Pune, India")
     at = _service(env)                                   # auto-processing picks the email up on its own
     at.sidebar.text_input(key="officer").set_value("A. Officer").run()
-    next(b for b in at.button if b.label.startswith("✍️ Sign")).click().run()
+    next(b for b in at.button if b.label.startswith("Sign")).click().run()
     assert not at.exception
     assert any("Signed by A. Officer" in s.value for s in at.success)
 
@@ -59,20 +59,22 @@ def test_buyer_window_sends_and_receives(env):
     buyer = AppTest.from_file(str(ROOT / "buyer_app.py"), default_timeout=30)
     buyer.run()
     buyer.selectbox(key="b_identity").set_value("Synthetic shell Traders (demo, suspicious)").run()
-    next(b for b in buyer.button if b.label == "Send ➤").click().run()
+    next(b for b in buyer.button if b.label == "Send").click().run()
     assert not buyer.exception and len(list(env.inbox.glob("*.eml"))) == 1
 
     service = _service(env)                              # Clearance processes it and emails an end-use request
-    assert any("Awaiting end-use" in m.value for m in service.markdown)
+    assert service.session_state["sel"] == "O0001"
+    from clearance import store
+    assert store.load_decision(store.connect(config.DB_PATH), "O0001").outcome == "AWAITING_END_USE"
     buyer.run()
-    reply = next(b for b in buyer.button if b.label == "↩️ Reply")   # the request arrived in the buyer's inbox
+    reply = next(b for b in buyer.button if b.label == "Reply")   # the request arrived in the buyer's inbox
     reply.click().run()
     assert buyer.text_input(key="b_subj").value.startswith("Re: [CLR-O0001]")
     buyer.selectbox(key="b_reply_tpl").set_value("Evasive: 'civilian use only'").run()
-    next(b for b in buyer.button if b.label == "Send ➤").click().run()
+    next(b for b in buyer.button if b.label == "Send").click().run()
     service.run()                                        # evasive reply -> one follow-up, still waiting
     buyer.run()
-    assert sum(b.label == "↩️ Reply" for b in buyer.button) == 2
+    assert sum(b.label == "Reply" for b in buyer.button) == 2
 
 
 def test_buyer_inbox_shows_replies_even_after_switching_identity(env):
@@ -81,5 +83,5 @@ def test_buyer_inbox_shows_replies_even_after_switching_identity(env):
     buyer.run()
     buyer.selectbox(key="b_identity").set_value("Synthetic shell Traders (demo, suspicious)").run()
     assert any("Additional order details needed" in m.value for m in buyer.markdown)   # not hidden by the switch
-    next(b for b in buyer.button if b.label == "↩️ Reply").click().run()
+    next(b for b in buyer.button if b.label == "Reply").click().run()
     assert buyer.text_input(key="b_from").value == "Procurement <procurement@astramwp.com>"  # replies as the addressee

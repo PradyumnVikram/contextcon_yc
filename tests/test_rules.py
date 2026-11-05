@@ -58,7 +58,7 @@ def test_explain_validates_and_falls_back():
     assert explain(d, led, good)[0].evidence_ids == [good_id]
     bad = FakeLLM({"explain": {"sentences": [{"text": "Made up.", "evidence_ids": ["E999"]}]}})
     fallback = explain(d, led, bad)
-    assert fallback[0].text.startswith("Recommendation: BLOCK") and all(led.has(i) for i in fallback[0].evidence_ids)
+    assert fallback[0].text.startswith("Block:") and all(led.has(i) for i in fallback[0].evidence_ids)
 
 
 def test_audit_html_contains_everything():

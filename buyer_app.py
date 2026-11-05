@@ -8,28 +8,14 @@ Both windows share the mailbox/ folders (config.MAILBOX_DIR).
 from __future__ import annotations
 
 from email.utils import parseaddr
-from html import escape
-
 import streamlit as st
 
 from clearance import config
 from clearance.mail import COMPLIANCE_ADDRESS, Mailbox
+from clearance.ui import md_escape
 
-st.set_page_config(page_title="Buyer mail", page_icon="✉️", layout="wide")
+st.set_page_config(page_title="Buyer mail", page_icon=":material/mail:", layout="wide")
 REFRESH_S = 3
-
-st.markdown("""
-<style>
-#MainMenu, footer {visibility: hidden;}
-.block-container {padding-top: 1.2rem; max-width: 1150px;}
-.mail {border:1px solid #e5e7eb; border-radius:10px; padding:10px 13px; margin-bottom:8px; background:#fff;}
-.mail.new {border-color:#6366f1; box-shadow:0 0 0 2px #e0e7ff;}
-.from {font-size:0.8rem; color:#6b7280;}
-.subj {font-weight:650; margin:2px 0 4px;}
-.body {white-space:pre-wrap; font-size:0.9rem; line-height:1.5;}
-.tag {display:inline-block; font-size:0.7rem; padding:0 7px; border-radius:999px; background:#eef2ff; color:#4338ca;}
-</style>
-""", unsafe_allow_html=True)
 
 # Real companies only in clean scenarios (ethics rule); suspicious buyers stay synthetic.
 IDENTITIES = {
@@ -114,32 +100,33 @@ def _send() -> None:
     ss.update(b_subj="", b_body="", b_reply_to=None)
 
 
-st.markdown("### ✉️ Buyer mail")
-st.caption(f"You are writing to **{COMPLIANCE_ADDRESS}**, the exporter's compliance desk (the Clearance window).")
+st.title("Buyer mail", icon=":material/mail:")
+st.caption(f"You are writing to {COMPLIANCE_ADDRESS}, the exporter's compliance desk (the Clearance window). "
+           "Real company addresses are looked up live in Crustdata by their email domain.")
 
 left, right = st.columns([1, 1], gap="large")
 
 with left:
     with st.container(border=True):
         replying = ss["b_reply_to"]
-        st.markdown("**↩️ Reply**" if replying else "**New message**")
+        st.subheader("Reply" if replying else "New message", icon=":material/reply:" if replying else ":material/edit_square:")
         if not replying:
-            st.selectbox("Write as", list(IDENTITIES), key="b_identity", on_change=_pick_identity,
-                         help="REAL companies are looked up live in Crustdata by their email domain.")
+            st.selectbox("Write as", list(IDENTITIES), key="b_identity", on_change=_pick_identity)
         st.text_input("From", key="b_from")
-        st.text_input("To", COMPLIANCE_ADDRESS, disabled=True)
+        st.markdown(f"**To:** {COMPLIANCE_ADDRESS}")
         st.text_input("Subject", key="b_subj")
         if replying:
             st.selectbox("Quick answer", list(REPLIES), key="b_reply_tpl", on_change=_reply_tpl)
         st.text_area("Message", key="b_body", height=220)
-        c1, c2 = st.columns([1, 1])
-        c1.button("Send ➤", type="primary", on_click=_send, width="stretch")
-        if replying:
-            c2.button("Cancel reply", on_click=lambda: ss.update(b_reply_to=None, b_subj="", b_body=""), width="stretch")
+        with st.container(horizontal=True):
+            st.button("Send", type="primary", icon=":material/send:", on_click=_send)
+            if replying:
+                st.button("Cancel reply", icon=":material/close:",
+                          on_click=lambda: ss.update(b_reply_to=None, b_subj="", b_body=""))
         if err := ss.pop("b_error", None):
-            st.error(err)
+            st.error(err, icon=":material/error:")
         if sent := ss.pop("b_sent", None):
-            st.success(f"Sent “{sent}”. Watch the Clearance window.")
+            st.success(f"Sent “{sent}”. Watch the Clearance window.", icon=":material/check_circle:")
 
 
 @st.fragment(run_every=f"{REFRESH_S}s")
@@ -147,28 +134,27 @@ def inbox() -> None:
     """Every buyer's mail from the compliance desk, independent of the compose box; optional per-address filter."""
     received = mb.outbox_messages()
     addresses = sorted({addr(e.to_addr) for e in received})
-    show = st.selectbox("Show mail for", ["All buyers"] + addresses, key="b_filter")
+    with st.container(horizontal=True, vertical_alignment="bottom"):
+        st.subheader("Inbox", icon=":material/inbox:")
+        show = st.selectbox("Show mail for", ["All buyers"] + addresses, key="b_filter")
     if show != "All buyers":
         received = [e for e in received if addr(e.to_addr) == show]
     seen = ss.setdefault("b_seen", set())
-    st.markdown(f"**Inbox** · {len(received)} message(s) from the compliance desk")
     if not received:
         st.caption("Nothing yet. Replies from the compliance desk appear here automatically.")
     for e in reversed(received):
         new = e.msg_id not in seen
-        st.markdown(f"<div class='mail{' new' if new else ''}'><div class='from'>To <b>{escape(e.to_addr)}</b> · "
-                    f"from {escape(e.from_addr)} · {e.received_at:%d %b %H:%M}"
-                    f"{' · <span class=tag>new</span>' if new else ''}</div>"
-                    f"<div class='subj'>{escape(e.subject)}</div><div class='body'>{escape(e.body)}</div></div>",
-                    unsafe_allow_html=True)
-        st.button("↩️ Reply", key=f"r-{e.msg_id}", on_click=_reply, args=(e,))
+        with st.container(border=True, gap="small"):
+            st.markdown(f"**{md_escape(e.subject)}**" + (" :blue-badge[New]" if new else ""))
+            st.caption(f"To {md_escape(e.to_addr)} · from {e.from_addr} · {e.received_at:%d %b %H:%M}")
+            st.markdown(md_escape(e.body).replace("\n", "  \n"))
+            st.button("Reply", key=f"r-{e.msg_id}", on_click=_reply, args=(e,), icon=":material/reply:")
         seen.add(e.msg_id)
     sent = [m for path in sorted(mb.inbox.glob("*.eml")) if (m := mb.read_eml(path))]
-    with st.expander(f"Sent to the compliance desk ({len(sent)})"):
+    with st.expander(f"Sent to the compliance desk ({len(sent)})", icon=":material/outbox:"):
         for m in reversed(sent):
-            st.markdown(f"<div class='from'>{m.received_at:%d %b %H:%M} · from {escape(m.from_addr)}</div>"
-                        f"<div class='subj'>{escape(m.subject)}</div>", unsafe_allow_html=True)
-    st.caption(f"⏱️ refreshes every {REFRESH_S}s")
+            st.markdown(f"**{md_escape(m.subject)}**  \n{md_escape(m.from_addr)} · {m.received_at:%d %b %H:%M}")
+    st.caption(f":material/schedule: Refreshes every {REFRESH_S}s")
 
 
 with right:

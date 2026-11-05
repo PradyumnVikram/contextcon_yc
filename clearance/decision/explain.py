@@ -23,7 +23,9 @@ def template(decision: Decision) -> list[ExplanationSentence]:
     rule = RULES_BY_ID.get(decision.rule_fired)
     label = rule.label if rule else decision.rule_fired
     ids = [e.id for e in decision.evidence][:5]
-    return [ExplanationSentence(text=f"Recommendation: {decision.outcome}. {label}.", evidence_ids=ids)]
+    words = {"RELEASE": "Release", "HOLD": "Hold", "BLOCK": "Block", "LICENCE_REQUIRED": "Licence required",
+             "AWAITING_END_USE": "Awaiting the end-use statement"}.get(decision.outcome, decision.outcome)
+    return [ExplanationSentence(text=f"{words}: {label[0].lower() + label[1:]}.", evidence_ids=ids)]
 
 
 def explain(decision: Decision, ledger: Ledger, llm: LLM) -> list[ExplanationSentence]:
