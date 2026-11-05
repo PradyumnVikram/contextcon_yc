@@ -290,7 +290,20 @@ Tables:
 ### 5.5 Crustdata integration notes (owned by A)
 - Base URL `https://api.crustdata.com`. Headers: `authorization: Bearer $CRUSTDATA_API_KEY` and `x-api-version: 2025-11-01`.
 - Confirmed endpoints: `POST /company/enrich`, `POST /company/search`, `POST /company/identify`, `POST /watch/company/search`, `POST /watch/person/search`.
-- **Check in the docs before use:** the person search path, the company watcher path, and the exact `fields` names for headcount-by-function, past employers and traffic. Record findings in §5.5 of both files.
+- **Confirmed from docs.crustdata.com (A2, 2026-11-06)** and implemented in `crustdata_client.py` / `capability/profile.py`:
+  - **Enrich:** `POST /company/enrich` with exactly one identifier key (`domains` or `names`) and `fields` as section groups (`basic_info, headcount, taxonomy, locations, web_traffic`). The response is an array; read `[0].matches[0].company_data`, where an empty `matches` list means no data.
+  - **Enrich field names:** `basic_info.{name, primary_domain, description, year_founded}`, `headcount.total`, `headcount.by_role_absolute`, `headcount.growth_percent.yoy` (12 months), `taxonomy.professional_network_industry`, `locations.country`, and `web_traffic` (per-domain `monthly_visitors`).
+  - **Company search:** `POST /company/search` takes `{filters:{op,conditions:[{field,type,value}]}, fields, limit}` and returns `{companies, next_cursor}`. Use the operators `=>` and `=<`; `>=` and `<=` are not supported.
+  - **Person search:** `POST /person/search`, scoped by `experience.employment_details.current.company_website_domain` or `...current.company_name`, returns `{profiles}`. Fields: `basic_profile.{name,current_title}`, `...current.{function_category,seniority_level}`, `...past[].name`, `skills.professional_network_skills` (premium).
+  - **Watcher:** `POST /watch/company` with `{entities:{domains}, track, config:{trigger:{type:interval,every_hours}}, notifications:[{type:webhook,url}]}`. The webhook body is `{metadata, results:[{changes, record}]}`, with header `x-crustdata-signature: t=..,v1=..` (HMAC-SHA256 of `t.body`).
+  - **Rate limits:** enrich 15/min, search 30/min, person 30/min, watch 10/min.
+  - **Credits:** enrich 2 per record, search 0.03 per result plus premium groups, watch notification 5 per changed company.
+- **Still unconfirmed (check with a live key):**
+  - the key names inside `by_role_absolute`;
+  - the nested shape of `web_traffic`;
+  - the `sorts` key name (`field` vs `column`).
+
+  The parser is defensive about all three.
 - **Rate limit:** company enrich allows 15 requests/min. Throttle on our side and rely on the cache.
 - Always pass `fields`. Budget about 30 credits per deep screening and 1,000–1,500 in total.
 - Use the Crustdata MCP server only for exploring data during preparation. The product makes fixed, cached API calls.
