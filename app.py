@@ -13,7 +13,7 @@ import streamlit as st
 from clearance import config, store, watch
 from clearance.decision.rules import RULES_BY_ID
 from clearance.evidence import Ledger
-from clearance.llm import ClaudeLLM, validate
+from clearance.llm import make_llm, validate
 from clearance.mail import Mailbox
 from clearance.models import OrderState, Party
 from clearance.pipeline import Pipeline
@@ -42,7 +42,7 @@ PRESETS = {
 # --------------------------------------------------------------------------- wiring
 def pipeline() -> Pipeline:
     conn = store.connect(config.DB_PATH)  # per rerun: sqlite connections are not shared across threads
-    return Pipeline(conn, ClaudeLLM(conn), Mailbox(config.MAILBOX_DIR))
+    return Pipeline(conn, make_llm(conn), Mailbox(config.MAILBOX_DIR))
 
 
 P = pipeline()
@@ -80,9 +80,12 @@ def explanation_lines(oid: str, decision) -> list[str]:
 # --------------------------------------------------------------------------- sidebar
 st.sidebar.title("🛃 Clearance")
 officer = st.sidebar.text_input("Officer name", value=st.session_state.get("officer", ""), key="officer")
-if not config.ANTHROPIC_API_KEY:
-    st.sidebar.warning("ANTHROPIC_API_KEY is not set. Claude steps use cached responses only; "
-                       "uncached ones HOLD (rule R10).")
+if config.LLM_PROVIDER == "claude":
+    st.sidebar.caption(f"LLM: Claude API ({config.LLM_MODEL})")
+    if not config.ANTHROPIC_API_KEY:
+        st.sidebar.warning("ANTHROPIC_API_KEY is not set: uncached LLM steps HOLD (rule R10).")
+else:
+    st.sidebar.caption(f"LLM: local {config.OLLAMA_MODEL} via Ollama ({config.OLLAMA_URL}). Nothing leaves this machine.")
 if st.sidebar.button("📥 Process inbox", type="primary", use_container_width=True):
     with st.spinner("Processing new emails…"):
         touched = P.process_inbox()

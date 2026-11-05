@@ -61,3 +61,13 @@ def test_validator_rejects_unknown_and_uncited():
         validate.check([ExplanationSentence(text="x", evidence_ids=["E9"])], led)
     with pytest.raises(validate.ExplanationRejected):
         validate.check([ExplanationSentence(text="x", evidence_ids=[])], led)
+
+
+def test_validator_rejects_raw_numbers_but_allows_part_numbers():
+    led = Ledger()
+    e1 = led.add("Buyer headcount", 4, "crustdata:test")
+    with pytest.raises(validate.ExplanationRejected):
+        validate.check([ExplanationSentence(text="The buyer has 4 employees.", evidence_ids=[e1])], led)
+    with pytest.raises(validate.ExplanationRejected):
+        validate.check([ExplanationSentence(text="Engineering share is 3.5% of staff.", evidence_ids=[e1])], led)
+    validate.check([ExplanationSentence(text="The PA-77G-HE order passed rule R12_release.", evidence_ids=[e1])], led)

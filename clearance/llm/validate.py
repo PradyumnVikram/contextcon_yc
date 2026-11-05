@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import re
 
 from clearance.evidence import Ledger
 from clearance.models import ExplanationSentence
@@ -9,6 +10,11 @@ from clearance.models import ExplanationSentence
 
 class ExplanationRejected(ValueError):
     pass
+
+
+# A standalone number ("4", "3.5%", "1,200") - design rule 3: values come from cited evidence, never the model.
+# Digits inside identifiers (PA-77G-HE, R12_release, CLR-O0004) are not standalone and are allowed.
+_RAW_NUMBER = re.compile(r"(?<![\w-])\d+(?:[.,]\d+)*%?(?![\w-])")
 
 
 def unknown_ids(sentences: list[ExplanationSentence], ledger: Ledger) -> list[str]:
@@ -26,6 +32,9 @@ def check(sentences: list[ExplanationSentence], ledger: Ledger) -> None:
         raise ExplanationRejected("a sentence cites no evidence")
     if bad := unknown_ids(sentences, ledger):
         raise ExplanationRejected(f"unknown evidence IDs: {sorted(set(bad))}")
+    for s in sentences:
+        if m := _RAW_NUMBER.search(s.text):
+            raise ExplanationRejected(f"raw number {m.group()!r} in explanation text; cite evidence instead")
 
 
 def _fmt(value) -> str:

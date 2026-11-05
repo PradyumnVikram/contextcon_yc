@@ -48,3 +48,18 @@ def test_drafts_carry_tag_with_template_fallback():
     fol = draft_followup(ORDER, ["no end user named"], FakeLLM())
     assert req.subject.startswith("[CLR-C6]") and fol.subject.startswith("[CLR-C6]")
     assert "organisation that will use the parts" in fol.body
+
+
+def test_vague_use_with_filler_words_is_still_vague():
+    res = _check(EndUseClaim(claimed_use="Civilian use only", mapped_needs=[], end_user_name="Synthetic Radar Systems",
+                             end_user_country="IN"))
+    assert "claimed use is blank or vague" in res.reasons
+
+
+def test_generic_end_user_placeholder_counts_as_not_named():
+    led = Ledger()
+    llm = FakeLLM({"extract_end_use": {"claimed_use": "civilian use only", "mapped_needs": [],
+                                       "end_user_name": "our customer", "end_user_country": "", "evasive": False}})
+    claim = extract(Email(msg_id="<r>", from_addr="", to_addr="", subject="", body="..."), _cls(led), llm, led)
+    assert claim.end_user_name is None and claim.end_user_country is None
+    assert "no end user named" in _check(claim).reasons

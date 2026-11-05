@@ -2,6 +2,7 @@
 Any failure (Claude unavailable, unknown IDs, uncited sentence) falls back to a deterministic template."""
 from __future__ import annotations
 
+import json
 import logging
 
 from clearance.decision.rules import RULES_BY_ID
@@ -11,6 +12,11 @@ from clearance.llm.schemas import ExplanationOut
 from clearance.models import Decision, ExplanationSentence
 
 log = logging.getLogger(__name__)
+
+
+def _short(value) -> str:
+    s = value if isinstance(value, str) else json.dumps(value, default=str)
+    return s if len(s) <= 200 else s[:197] + "..."
 
 
 def template(decision: Decision) -> list[ExplanationSentence]:
@@ -27,8 +33,9 @@ def explain(decision: Decision, ledger: Ledger, llm: LLM) -> list[ExplanationSen
     payload = {
         "decision": {"outcome": decision.outcome, "rule": decision.rule_fired, "rule_label": rule.label if rule else "",
                      "capability_rules_triggered": decision.rules_triggered},
-        # Claims only, no values: the model cites IDs and the renderer supplies the numbers (design rule 3).
-        "evidence": [{"id": e.id, "claim": e.claim, "source": e.source.split(":")[0]} for e in decision.evidence],
+        # Values are given so the model doesn't guess; the validator rejects any number it writes (design rule 3).
+        "evidence": [{"id": e.id, "claim": e.claim, "value": _short(e.value), "source": e.source.split(":")[0]}
+                     for e in decision.evidence],
     }
     try:
         out = llm.structured("explain", ExplanationOut, payload)

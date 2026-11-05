@@ -7,14 +7,14 @@ An autonomous export-compliance agent for Indian electronics exporters, built fo
 |---|---|---|
 | Brief | `AGENTS_DATA.md` | `AGENTS_PRODUCT.md` |
 | Branch | `dev2` | `dev` |
-| Job | Data and risk signals: Crustdata, catalog and licence, CSL screening, capability engine, watcher | Agent and product: Claude, mail, end-use loop, decisions and audit, pipeline, UI |
+| Job | Data and risk signals: Crustdata, catalog and licence, CSL screening, capability engine, watcher | Agent and product: local LLM (Ollama), mail, end-use loop, decisions and audit, pipeline, UI |
 | Tasks | S1–S5, A1–A12, I1–I3 | S1–S5, B1–B9, I1–I3 |
 
 Open your own brief and start at the "★ Your job" section.
 
 ## Agent briefs
 - [`AGENTS_DATA.md`](AGENTS_DATA.md): Person A, data and risk signals (Crustdata, catalog, screening, capability, watcher).
-- [`AGENTS_PRODUCT.md`](AGENTS_PRODUCT.md): Person B, agent, LLM and product (Claude, mail, end-use loop, decision, pipeline, UI).
+- [`AGENTS_PRODUCT.md`](AGENTS_PRODUCT.md): Person B, agent, LLM and product (local LLM, mail, end-use loop, decision, pipeline, UI).
 
 §1–§15 are shared and identical in both files. Change them in both files in the same commit.
 

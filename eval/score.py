@@ -9,9 +9,9 @@ import sys
 from pathlib import Path
 
 from clearance import config, store
-from clearance.enduse import extract
+from clearance.enduse import extract, is_vague
 from clearance.evidence import Ledger
-from clearance.llm import ClaudeLLM, LLMUnavailable
+from clearance.llm import LLMUnavailable, make_llm
 from clearance.models import Classification, Email
 
 FIELDS = ["end_user_name", "end_user_country", "evasive", "use_specific"]
@@ -23,7 +23,7 @@ def _norm(v):
 
 def main(path: str) -> int:
     rows = [json.loads(l) for l in Path(path).read_text().splitlines() if l.strip()]
-    llm = ClaudeLLM(store.connect(config.DB_PATH))
+    llm = make_llm(store.connect(config.DB_PATH))
     hits = {f: 0 for f in FIELDS}
     misses, errors = [], 0
     for r in rows:
@@ -36,14 +36,15 @@ def main(path: str) -> int:
             print(f"{r['id']}: LLM unavailable ({e})")
             continue
         got = {"end_user_name": c.end_user_name, "end_user_country": c.end_user_country, "evasive": c.evasive,
-               "use_specific": c.claimed_use.lower() not in config.VAGUE_USE_PHRASES and bool(c.mapped_needs)}
+               "use_specific": not is_vague(c.claimed_use) and bool(c.mapped_needs)}
         for f in FIELDS:
             if _norm(got[f]) == _norm(r["expected"][f]):
                 hits[f] += 1
             else:
                 misses.append((r["id"], f, r["expected"][f], got[f]))
     n = len(rows) - errors
-    print(f"\n{n} scored, {errors} errors, model {config.LLM_MODEL}")
+    model = config.OLLAMA_MODEL if config.LLM_PROVIDER == "ollama" else config.LLM_MODEL
+    print(f"\n{n} scored, {errors} errors, {config.LLM_PROVIDER}:{model}")
     for f in FIELDS:
         print(f"  {f:18s} {hits[f]}/{n}  ({100 * hits[f] / n:.0f}%)" if n else f"  {f}: n/a")
     for m in misses:

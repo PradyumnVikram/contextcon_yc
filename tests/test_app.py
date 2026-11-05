@@ -19,7 +19,7 @@ def app(tmp_path, monkeypatch):
     monkeypatch.setattr(config, "DB_PATH", tmp_path / "t.db")
     monkeypatch.setattr(config, "MAILBOX_DIR", tmp_path / "mailbox")
     fake = llm_client.FakeLLM({"parse_order": PARSED})
-    monkeypatch.setattr("clearance.llm.ClaudeLLM", lambda conn: fake)
+    monkeypatch.setattr("clearance.llm.make_llm", lambda conn: fake)
     at = AppTest.from_file(str(APP), default_timeout=30)
     at.run()
     assert not at.exception

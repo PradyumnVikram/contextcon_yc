@@ -6,6 +6,7 @@ the pipeline sends ONE draft_followup; a second failure is final (decision rule 
 """
 from __future__ import annotations
 
+import re
 from typing import Callable
 
 from clearance import config
@@ -21,6 +22,22 @@ AssessFn = Callable[[Party, list[Classification], list[OrderLine], str, Ledger],
 
 BASE_NEEDS = ["rf", "antenna", "radar", "fpga", "mixed_signal", "test_lab", "telecom", "satellite", "defence",
               "industrial_control", "consumer_electronics", "research"]
+
+_FILLER = re.compile(r"\b(only|purely|strictly|for|the|our|of|purpose|purposes|goods|items|are|is|will|be)\b")
+GENERIC_END_USERS = {"customer", "our customer", "client", "our client", "end user", "buyer", "consignee",
+                     "my customer", "a customer", "user", "company", "n a", "na", "none", "unknown"}
+
+
+def is_vague(claimed_use: str) -> bool:
+    """Blank, or a stock phrase like "civilian use only" once filler words are removed."""
+    core = " ".join(_FILLER.sub(" ", re.sub(r"[^a-z ]+", " ", claimed_use.lower())).split())
+    return core in {" ".join(_FILLER.sub(" ", v).split()) for v in config.VAGUE_USE_PHRASES}
+
+
+def _real_name(name: str | None) -> str | None:
+    n = (name or "").strip()
+    return n if n and " ".join(re.sub(r"[^a-z ]+", " ", n.lower()).split()) not in GENERIC_END_USERS else None
+
 
 REQUEST_ASKS = ["the name and country of the final end user of the parts",
                 "the specific intended use (application) of the parts",
@@ -67,8 +84,8 @@ def extract(reply: Email, classifications: list[Classification], llm: LLM, ledge
     claim = EndUseClaim(
         claimed_use=out.claimed_use.strip(),
         mapped_needs=[n for n in out.mapped_needs if n in vocab],
-        end_user_name=(out.end_user_name or "").strip() or None,
-        end_user_country=(out.end_user_country or "").strip().upper()[:2] or None,
+        end_user_name=_real_name(out.end_user_name),
+        end_user_country=((out.end_user_country or "").strip().upper()[:2] or None) if _real_name(out.end_user_name) else None,
         evasive=out.evasive,
     )
     src = f"email:{reply.msg_id}"
@@ -85,7 +102,7 @@ def check(claim: EndUseClaim, order: Order, classifications: list[Classification
     list, not a forwarder, at most medium risk, and the reply is not evasive."""
     reasons: list[str] = []
     part_needs = {n for c in classifications for n in c.needs}
-    if claim.claimed_use.strip().lower() in config.VAGUE_USE_PHRASES:
+    if is_vague(claim.claimed_use):
         reasons.append("claimed use is blank or vague")
     elif part_needs and not part_needs.intersection(claim.mapped_needs):
         reasons.append("claimed use does not match what the parts are for")

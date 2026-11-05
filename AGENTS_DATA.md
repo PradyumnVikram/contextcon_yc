@@ -45,13 +45,13 @@ List screening only catches buyers whose names are already listed, and shell com
 
 ## 2. Non-negotiable design rules
 
-1. **The LLM never makes a decision.** Every recommendation comes from deterministic rules over computed features. Claude only extracts, maps, drafts emails, and explains.
+1. **The LLM never makes a decision.** Every recommendation comes from deterministic rules over computed features. The LLM only extracts, maps, drafts emails, and explains.
 2. **Every claim cites evidence.** Each evidence item has an ID (`E1`, `E2`, …), a source (Crustdata endpoint and fetch time, CSL entry ID, catalog row, email message ID), and a value.
 3. **The LLM cites evidence IDs only, never raw numbers.** Code checks that every cited ID exists and renders the real values. An explanation that cites an unknown ID is rejected.
 4. **Missing data is a risk signal, never a pass.** No Crustdata record, or only a thin one, means HOLD plus an end-use request.
 5. **Unknown parts escalate.** A part not in the catalog means HOLD. Never guess a classification.
-6. **Cache every external response** (Crustdata and Claude) in SQLite, keyed by endpoint and normalized request. Never make the same call twice. Tests never touch the network.
-7. **Send the LLM only what the task needs.** Claude (through the Anthropic API) is the only LLM. Each call gets only the fields its task needs, never the whole order record or any secrets.
+6. **Cache every external response** (Crustdata and LLM) in SQLite, keyed by endpoint and normalized request. Never make the same call twice. Tests never touch the network.
+7. **Data stays local by default.** The LLM is a local model (Ollama, `qwen3:8b`), so order data and replies never leave the machine. The Claude API is an opt-in alternative (`CLEARANCE_LLM=claude`). Either way, each call gets only the fields its task needs, never the whole order record or any secrets.
 8. **A human signs every RELEASE and BLOCK.** A HOLD takes effect immediately on its own. The officer can override any outcome, and every override is logged.
 9. **Ethics:** never present a real company that is *not* on a restricted list as suspicious, in the demo or in test data. Use synthetic companies or entities that are already listed.
 
@@ -62,10 +62,10 @@ List screening only catches buyers whose names are already listed, and shell com
 **Entry point: a simulated email inbox.** The mailbox is local: `mailbox/inbox/*.eml` and `mailbox/outbox/*.eml`. A poller picks up new inbox files. For the demo, a "compose test email" panel in the UI writes into the inbox.
 
 **Flow:**
-1. **An order email arrives.** Claude extracts `{buyer_name, buyer_website, buyer_country, ship_to_address, ship_to_country, middleman?, shipper?, lines[part_number, qty], stated_purpose?}` using structured outputs. Each field becomes evidence sourced to `email:<msg-id>`.
+1. **An order email arrives.** The LLM extracts `{buyer_name, buyer_website, buyer_country, ship_to_address, ship_to_country, middleman?, shipper?, lines[part_number, qty], stated_purpose?}` using structured outputs. Each field becomes evidence sourced to `email:<msg-id>`.
 2. **Missing or unclear fields:** Clearance auto-replies to the buyer asking for exactly those fields (state `AWAITING_ORDER_DETAILS`). If the reply is still incomplete after one round, the order goes to HOLD. Nothing is guessed.
 3. **Classify, screen and check capability** with no human involved.
-4. **End-use loop** (when needed): Claude drafts the request, which goes to `outbox/` with the subject `[CLR-<order_id>] End-use statement request`. If the first reply is vague or evasive, one targeted follow-up is sent. The named end user is screened and capability-checked the same way as the buyer.
+4. **End-use loop** (when needed): the LLM drafts the request, which goes to `outbox/` with the subject `[CLR-<order_id>] End-use statement request`. If the first reply is vague or evasive, one targeted follow-up is sent. The named end user is screened and capability-checked the same way as the buyer.
 5. **Reply matching:** a reply is matched to its order by the `[CLR-<order_id>]` tag in the subject (or `In-Reply-To`). A reply that can't be matched goes to Exceptions.
 6. **Recommendation:** an outcome comes out of the rules table, and the officer then acts on it.
 
@@ -152,7 +152,7 @@ If `buyer_type` is `unclear`, score both branches and take the higher score.
 **Tiers:** 0–29 `consistent` · 30–59 `medium_risk` · ≥ 60 `high_risk`. When coverage is `missing` or `thin`, the tier is `no_data`.
 
 ### 4.7 End-use consistency
-Claude extracts `{claimed_use, end_user_name, end_user_country, evasive}` and maps `claimed_use` onto the catalog's `needs` vocabulary. A reply is **consistent** only if all of these hold:
+The LLM extracts `{claimed_use, end_user_name, end_user_country, evasive}` and maps `claimed_use` onto the catalog's `needs` vocabulary. A reply is **consistent** only if all of these hold:
 - the mapped needs overlap the part's `needs`;
 - the claimed use is not blank and not just "civilian use";
 - the end user screens `clear` and is not a freight forwarder;
@@ -171,7 +171,7 @@ Claude extracts `{claimed_use, end_user_name, end_user_country, evasive}` and ma
 | 7 | Tier is `medium_risk` or `high_risk`, and the end-use loop hasn't run yet | **AWAITING_END_USE** |
 | 8 | End-use reply inconsistent after the follow-up | **HOLD** (catch-all concern) |
 | 9 | End-use reply consistent but the buyer's tier is `high_risk` | **HOLD** |
-| 10 | Claude unavailable and no cached response | **HOLD** |
+| 10 | LLM unavailable and no cached response | **HOLD** |
 | 11 | Licence required | **LICENCE_REQUIRED** (lists the documents to collect) |
 | 12 | Otherwise | **RELEASE** → officer signs |
 
@@ -269,19 +269,23 @@ Tables:
 - `emails(msg_id, direction, order_id, subject, body, received_at)`
 - `customers(company_key, name, tier, watcher_id, updated_at)`
 
-### 5.4 Claude usage (owned by B, consumed by nobody else)
-- One SDK client in `clearance/llm/client.py`. The model is `claude-opus-5-5`, set once in `config.py`. Every task uses structured outputs into a pydantic schema.
-- Effort is set explicitly per task: `low` for order parsing, extraction and needs mapping; `medium` for explanations and drafting emails.
-- Check `stop_reason` before reading content (handle `refusal` and `max_tokens`), and enable the server-side refusal fallback.
-- Fixed system prompts and few-shot examples go first so prompt caching applies. Per-order data goes last.
-- **Claude's tasks:**
+### 5.4 LLM usage (owned by B, consumed by nobody else)
+- **Default: a local model.** `qwen3:8b` runs through Ollama (`http://localhost:11434`), fits an 8 GB GPU at Q4, and takes about 5–10 s per call. Order data and end-use replies never leave the machine. The adapter is `clearance/llm/local.py`.
+- **Optional: the Claude API.** Set `CLEARANCE_LLM=claude` with an `ANTHROPIC_API_KEY` to use `claude-opus-5-5` instead, through `clearance/llm/client.py`, which keeps its per-task effort, refusal handling and server-side fallback.
+- **One seam.** Every caller uses `llm.structured(task, schema, payload)` and gets the provider from `make_llm(conn)`. Nothing else knows which provider is running.
+- **Every task uses structured outputs into a pydantic schema.** For Ollama, that's `format=<JSON schema>`, `think: false` and temperature 0, and invalid JSON is retried once.
+- **Prompt layout:** fixed system prompts and few-shot examples go first, and per-order data goes last.
+- **The LLM's tasks:**
   - parse order emails
   - extract end-use replies
   - map `claimed_use` onto `needs`
   - draft emails (missing details, end-use request, follow-up)
   - write explanations as `[{text, evidence_ids}]`
-- Claude never decides `buyer_type`.
-- Responses are cached in `api_cache`, keyed by model, prompt version and input. If the API fails and nothing is cached, the order goes to HOLD (rule 10).
+- **The LLM never decides `buyer_type`.**
+- **Guards that don't trust the model:**
+  - **Explanations:** the validator rejects unknown evidence IDs and any standalone number in the text, and a rejected explanation falls back to a deterministic template.
+  - **End-use replies:** stock phrases like "civilian use only" count as vague, and placeholder end users like "our customer" count as not named. Both checks happen in code.
+- **Caching:** responses are cached in `api_cache`, keyed by provider, model, prompt version and input. If the LLM fails and nothing is cached, the order goes to HOLD (rule 10).
 
 ### 5.5 Crustdata integration notes (owned by A)
 - Base URL `https://api.crustdata.com`. Headers: `authorization: Bearer $CRUSTDATA_API_KEY` and `x-api-version: 2025-11-01`.
@@ -317,7 +321,7 @@ Tables:
 | Tabular | pandas |
 | Fuzzy matching | rapidfuzz |
 | Data | Crustdata REST API |
-| LLM | Claude API via the `anthropic` SDK, model `claude-opus-5-5` |
+| LLM | Local: Ollama + `qwen3:8b` (default). Optional: Claude API via the `anthropic` SDK, `claude-opus-5-5` |
 | Email | Python `email` stdlib, folder mailbox |
 | Tests | pytest |
 | Config | `.env` + python-dotenv (never committed) |
@@ -370,7 +374,7 @@ Full procedure in `WORKFLOW.md` §6.
 |---|---|---|
 | I1 | Replace the stubs with real modules in `pipeline` | `pytest` passes with real modules and cached data |
 | I2 | The 9 acceptance cases pass end to end | `tests/test_cases.py` passes |
-| I3 | Pre-warm the Crustdata and Claude caches for the demo buyers, run 3 rehearsals, feature freeze at 6:45 | Three clean rehearsals |
+| I3 | Pre-warm the Crustdata and LLM caches for the demo buyers, run 3 rehearsals, feature freeze at 6:45 | Three clean rehearsals |
 
 ## 11. Timeline (8 hours)
 | Time | Person A | Person B |
@@ -392,7 +396,7 @@ If coverage turns out poor at the go/no-go, switch the demo buyers to well-cover
 3. **Shell trading company** (synthetic, or an already-listed entity) → capability mismatch, end-use email sent, reply arrives, end user extracted and checked → HOLD with the full evidence trail.
 4. **Misspelled listed name** → HOLD, with the two records side by side.
 5. Optional: a simulated watcher event re-tiers an approved customer.
-6. Close: "The agent does all of the evidence work. The officer signs a clean release in one click and only digs into exceptions. The model explains; the rules decide."
+6. Close: "The agent does all of the evidence work, on a local model, so customer data never leaves the building. The officer signs a clean release in one click and only digs into exceptions. The model explains; the rules decide."
 
 ## 13. Out of scope
 Real ERP or email integration · full SCOMET and EAR coverage · UN and EU lists (stretch) · filing licence applications · multi-user auth · job postings (stretch).

@@ -104,7 +104,8 @@ git clone https://github.com/PradyumnVikram/contextcon_yc.git && cd contextcon_y
 python3 -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"            # shared layer + pytest
 pip install -e ".[data]"           # Person A extras (httpx, pandas, rapidfuzz, fastapi, uvicorn)
-pip install -e ".[product]"        # Person B extras (anthropic, streamlit)
+pip install -e ".[product]"        # Person B extras (httpx, streamlit, anthropic)
+ollama pull qwen3:8b                # local LLM (default provider); needs Ollama running
 cp .env.example .env               # fill in keys, never commit
 python -m clearance.screening.csl  # download the US CSL into data/csl.csv (git-ignored, ~10 MB)
 pytest                             # must be green before every merge
@@ -154,11 +155,11 @@ Person B's checkpoints (run on `dev`, offline unless noted):
 
 | # | After | Run | Expect |
 |---|---|---|---|
-| CP-B1 | B1–B2 Claude client, validator | `pytest tests/test_llm.py` | 5 passed: cache hit makes no second call; refusal/max_tokens → `LLMUnavailable`; unknown IDs rejected |
-| CP-B1-live | Live Claude call (needs `ANTHROPIC_API_KEY`) | `python -c "from clearance import store; from clearance.llm import ClaudeLLM; from clearance.llm.schemas import DraftOut; print(ClaudeLLM(store.connect()).structured('draft_email', DraftOut, {'kind':'end_use_request','tag':'[CLR-T1]','ask_for':['end user']}))"` | A `DraftOut` whose subject starts `[CLR-T1]`. Run it twice: the second run is instant (cached) |
+| CP-B1 | B1–B2 LLM layer, validator | `pytest tests/test_llm.py tests/test_llm_local.py` | 10 passed: Ollama adapter caches, retries invalid JSON once, server down → `LLMUnavailable`; cache hit makes no second call; refusal/max_tokens → `LLMUnavailable`; unknown IDs rejected |
+| CP-B1-live | Live LLM call (local Ollama by default; `CLEARANCE_LLM=claude` + key for Claude) | `python -c "from clearance import store; from clearance.llm import make_llm; from clearance.llm.schemas import DraftOut; print(make_llm(store.connect()).structured('draft_email', DraftOut, {'kind':'end_use_request','tag':'[CLR-T1]','ask_for':['end user']}))"` | A `DraftOut` whose subject starts `[CLR-T1]`. Run it twice: the second run is instant (cached) |
 | CP-B3 | B3 mail | `pytest tests/test_mail.py` | 5 passed: .eml round trip, missing field → `Incomplete` → reply merges, tag/In-Reply-To matching |
 | CP-B4 | B4–B5 end-use, eval | `pytest tests/test_enduse.py`, then (live) `python eval/score.py` | 4 passed. With a key: per-field accuracy on `eval/replies.jsonl` |
 | CP-B6 | B6 decision | `pytest tests/test_rules.py` | 14 passed, including all 9 acceptance cases |
 | CP-B7 | B7 pipeline | `pytest tests/test_pipeline.py` | 8 passed: clean release + sign, end-use loop with exactly one follow-up, no-data HOLD, missing details, LLM-down HOLD, override audited |
 | CP-B8 | B8 UI | `pytest tests/test_app.py`, then `streamlit run app.py` | 2 passed. In the browser: Inbox → preset "Radar firm order" → Drop into inbox → Process inbox → Ready to sign → enter officer name → Sign → Customers lists the buyer |
-| CP-B9 | Everything | `pytest` | 64 passed |
+| CP-B9 | Everything | `pytest` | 72 passed |
