@@ -1,11 +1,11 @@
 # AGENTS_DATA.md: Clearance, Person A (data and risk signals)
 
-> **Who reads this:** Person A and any coding agent working on the **`data`** branch.
+> **Who reads this:** Person A and any coding agent working on the **`dev`** branch.
 > **Your scope:** Crustdata client, catalog and licence rules, restricted-list screening, the capability engine (employee background check, buyer type, peer comparison, scoring), test companies, and the watcher.
 > **The other half:** Person B builds the Claude client, mail, end-use loop, decision, pipeline and UI, and their brief is `AGENTS_PRODUCT.md`. §1–§15 are identical in both files. If you change anything in §1–§15, make the same change in both files in the same commit.
-> Read this whole file before writing code.
+> Read this whole file and `WORKFLOW.md` before writing code.
 
-## ★ Your job (Person A: data and risk signals, branch `data`)
+## ★ Your job (Person A: data and risk signals, branch `dev`)
 
 **Your job is to build every deterministic data and risk signal Clearance relies on.** Given a party and an order, your modules answer:
 - What is this part, and does it need a licence?
@@ -15,7 +15,7 @@
 The pipeline built by Person B calls your modules, and you never call Claude.
 
 **Do these tasks, in this order** (full details in §16):
-1. **S1–S5** (shared, with Person B, on `dev`): scaffold, contracts, storage, fixtures, stubs.
+1. **S1–S5** ✅ already on `main` (scaffold, contracts, storage, fixtures, your stubs). Start at A1 on `dev`.
 2. **A1–A3**: Crustdata client, field discovery, coverage go/no-go.
 3. **A4–A5**: catalog and licence rules, CSL screening.
 4. **A6–A9**: employee background check, buyer type, peer comparison, capability scoring.
@@ -334,23 +334,23 @@ contextcon_yc/
 ```
 
 ## 8. Branching and collaboration
-- `main`: stable. Receives `dev` by pull request when a feature is complete.
-- `dev`: the integration branch. The shared tasks (S1–S5) are done together here.
-- `data`: Person A's branch. `product`: Person B's branch. Both are cut from `dev`.
-- **Merge often:** after every finished task with tests passing, rebase on `dev`, then merge into `dev`. Pull `dev` into your branch at least every hour.
-- **Contract changes** (`models.py`, `store.py` schema, `config.py` keys) need agreement from both people, go to `dev` in their own commit, and both branches pull immediately.
-- **Stay in your own folders** (see §7). If you need something from the other side, use the stub and fixtures, and don't edit their module.
-- Every module ships with pytest tests that run against fixtures with no network. `pytest` must pass before any merge.
+Full procedure in `WORKFLOW.md` §6.
+- `main`: **the integration branch, always green.** The shared foundation (S1–S4 and A's stubs) is already here.
+- `dev`: Person A's working branch. `dev2`: Person B's working branch.
+- **Feature loop:** finish a task with its tests → `git merge origin/main` into your branch → `pytest` green → PR (or agreed direct merge) into `main` → your teammate pulls `main` straight away.
+- **Shared files** (`models.py`, `evidence.py`, `store.py`, `config.py`, `pyproject.toml`, `tests/fixtures/`, `WORKFLOW.md`, §1–§15 here) change only after both people agree, in a commit of their own, merged to `main` first.
+- **Stay in your own folders** (see §7). If you need something from the other side, use their stub, and don't edit their module.
+- Every module ships with pytest tests that run with no network. `pytest` must pass before any merge to `main`.
 - Secrets live only in `.env`. Never commit keys, `clearance.db`, or real customer data.
 
-## 9. Shared tasks (pair, about 1 hour, on `dev`)
+## 9. Shared tasks (S1–S4 done on `main`)
 | ID | Task | Done when |
 |---|---|---|
-| S1 | Scaffold: `pyproject.toml`, `.env.example` (`ANTHROPIC_API_KEY`, `CRUSTDATA_API_KEY`), package folders, pytest config | `pip install -e .` works and `pytest` runs |
-| S2 | `clearance/models.py` with every contract in §5.1 | Both people sign off. Frozen |
-| S3 | `evidence.py` (Ledger), `store.py` (all tables in §5.3), `config.py` (all weights and thresholds in §4) | Unit tests for the Ledger and store pass |
-| S4 | `tests/fixtures/`: fake results for every module, plus the 9 acceptance cases (§4.9) as orders | Fixtures load into the models without errors |
-| S5 | Stub for each module returning fixture data. `pipeline.run(fake_order)` works end to end | `tests/test_pipeline_stub.py` passes |
+| S1 ✅ | Scaffold: `pyproject.toml`, `.env.example` (`ANTHROPIC_API_KEY`, `CRUSTDATA_API_KEY`), package folders, pytest config | `pip install -e .` works and `pytest` runs |
+| S2 ✅ | `clearance/models.py` with every contract in §5.1 | Both people sign off. Frozen |
+| S3 ✅ | `evidence.py` (Ledger), `store.py` (all tables in §5.3), `config.py` (all weights and thresholds in §4) | Unit tests for the Ledger and store pass |
+| S4 ✅ | `tests/fixtures/`: fake results for every module, plus the 9 acceptance cases (§4.9) as orders | Fixtures load into the models without errors |
+| S5 | Stubs: Person A's modules (`catalog`, `screening`, `capability`, `watch`, `crustdata_client`) are **done on `main`**. Person B writes stubs for `llm`, `mail`, `enduse`, `decision` and a stub `pipeline.run` on `dev2` | `tests/test_data_stubs.py` passes (A). B's stub pipeline runs the 9 cases (B) |
 
 ## 10. Integration tasks (both)
 | ID | Task | Done when |
@@ -362,7 +362,7 @@ contextcon_yc/
 ## 11. Timeline (8 hours)
 | Time | Person A | Person B |
 |---|---|---|
-| 0:00–1:00 | S1–S5 together | S1–S5 together |
+| 0:00–1:00 | S1–S4 ✅ on `main`; start A1 | S5 stubs (llm, mail, enduse, decision, pipeline) |
 | 1:00–1:45 | A1, A2, A3 (**coverage go/no-go**) | B1, B2 |
 | 1:45–3:00 | A4, A5 | B3 |
 | 3:00–4:45 | A6, A7, A8, A9 | B4, B6 |
@@ -395,9 +395,9 @@ Clearance is a hackathon prototype that automates a compliance workflow. It is n
 
 ---
 
-## 16. Your tasks (Person A, branch `data`)
+## 16. Your tasks (Person A, branch `dev`)
 
-Do S1–S5 with Person B first (§9). "→" marks a dependency.
+S1–S5 are already on `main` (§9). Work on `dev`. "→" marks a dependency.
 
 | ID | Task | Depends on | Done when |
 |---|---|---|---|
