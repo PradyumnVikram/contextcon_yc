@@ -65,7 +65,7 @@ contextcon_yc/
 │   ├── evidence.py             SHARED, Ledger
 │   ├── store.py                SHARED, SQLite schema + helpers
 │   ├── config.py               SHARED, every weight, threshold, model id
-│   ├── crustdata_client.py     A
+│   ├── crustdata_client.py     A (+ data/demo_crustdata fixtures, scripts/make_demo_crustdata.py)
 │   ├── catalog/                A
 │   ├── screening/              A
 │   ├── capability/             A
@@ -74,8 +74,8 @@ contextcon_yc/
 │   ├── mail/                   B
 │   ├── enduse/                 B
 │   ├── decision/               B
-│   └── pipeline.py             B (not created yet)
-├── app.py                      B (not created yet)
+│   └── pipeline.py             B
+├── app.py                      B
 ├── data/                       A: catalog.csv, licence_rules.csv, csl.csv, test_companies.csv
 ├── mailbox/inbox, outbox/      B: simulated email (.eml files are git-ignored)
 ├── eval/                       B: hand-written end-use replies + scorer
@@ -86,17 +86,16 @@ contextcon_yc/
     └── test_*.py               one file per module, owned by that module's owner
 ```
 
-## 4. What exists today (shared foundation on `main`)
+## 4. What exists today
 
 | File | Status |
 |---|---|
 | `models.py`, `evidence.py`, `store.py`, `config.py` | **Done.** Shared contracts, ledger, all SQLite tables, all tunables |
 | `tests/fixtures/cases.py`, `tests/test_shared.py` | **Done.** 9 acceptance cases, shared-layer tests |
-| `catalog/`, `screening/`, `capability/`, `watch/`, `crustdata_client.py` | **Stubs** (`STUB = True`). Correct signatures and fake data; A replaces them |
-| `llm/`, `mail/`, `enduse/`, `decision/` | **Empty packages.** B writes their stubs and real code |
-| `pipeline.py`, `app.py` | **Not created.** B creates them (B7, B8) |
+| `catalog/`, `screening/`, `capability/`, `watch/`, `crustdata_client.py`, `data/`, `scripts/` | **Done (A1–A12)** on `dev`: real implementations; synthetic demo companies served from `data/demo_crustdata/` fixtures |
+| `llm/`, `mail/`, `enduse/`, `decision/`, `pipeline.py`, `app.py`, `eval/` | **Done (B1–B8)** on `dev` |
 
-A module's stub keeps the exact function signature from AGENTS §5.2. When the real implementation lands, delete `STUB = True`.
+Every module keeps the exact function signature from AGENTS §5.2. Still open: live Crustdata/Claude verification (needs keys), and the hand-written eval set (`eval/replies.jsonl`).
 
 ## 5. Setup (both)
 
@@ -105,8 +104,10 @@ git clone https://github.com/PradyumnVikram/contextcon_yc.git && cd contextcon_y
 python3 -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"            # shared layer + pytest
 pip install -e ".[data]"           # Person A extras (httpx, pandas, rapidfuzz, fastapi, uvicorn)
-pip install -e ".[product]"        # Person B extras (anthropic, streamlit)
+pip install -e ".[product]"        # Person B extras (httpx, streamlit, anthropic)
+ollama pull qwen3:8b                # local LLM (default provider); needs Ollama running
 cp .env.example .env               # fill in keys, never commit
+python -m clearance.screening.csl  # download the US CSL into data/csl.csv (git-ignored, ~10 MB)
 pytest                             # must be green before every merge
 ```
 
@@ -117,8 +118,8 @@ If a system install adds its own pytest plugins (for example ROS through `PYTHON
 | Branch | Who | Purpose |
 |---|---|---|
 | `main` | both | **Integration branch. Always green.** The shared foundation lives here, and every finished feature lands here |
-| `dev` | Person A | A's working branch |
-| `dev2` | Person B | B's working branch |
+| `dev2` | Person A | A's working branch |
+| `dev` | Person B | B's working branch |
 
 **Feature loop (both people, every finished task):**
 1. Finish a task on your branch, with its tests.
@@ -140,15 +141,25 @@ Each checkpoint is a command you can run plus what you should see. Person A's ch
 
 | # | After | Run | Expect |
 |---|---|---|---|
-| CP0 | Shared foundation | `pytest` | 7 passed |
-| CP1 | A1 Crustdata client | `pytest tests/test_crustdata_client.py`, then one live `enrich_company` called twice | Second call served from `api_cache` (no HTTP) |
-| CP2 | A2–A3 coverage | `python -m clearance.capability.coverage_report` | `missing/thin/rich` for 5 companies, go/no-go recorded |
-| CP3 | A4 catalog | `pytest tests/test_catalog.py` | Unknown part → `found=False`. India + US-origin part → EAR reason |
-| CP4 | A5 screening | `pytest tests/test_screening.py` | Exact / fuzzy (with breakdown) / clear / forwarder |
-| CP5 | A6–A7 background check, buyer type | `pytest tests/test_capability.py -k people` | One person-search per company. Buyer-type votes correct |
-| CP6 | A8 peers | `pytest tests/test_capability.py -k peers` | Percentiles with peer count in evidence |
-| CP7 | A9 capability scoring | `pytest tests/test_capability.py` | Radar `consistent`, distributor `consistent`, shell `high_risk`, no record `no_data` |
-| CP8 | A10–A12 | `pytest` | All green. Every acceptance case has a buyer in `data/test_companies.csv` |
-| CP9 | I1–I2 integration | `pytest tests/test_cases.py` | 9/9 acceptance cases produce the §4.8 recommendation |
+| CP0 | Shared foundation | `pytest tests/test_shared.py` | 4 passed |
+| CP1 | A1 Crustdata client | `pytest tests/test_crustdata_client.py`; live (key set): `python -c "from clearance.crustdata_client import get_client as g; c=g(); print(c.enrich_company('stripe.com')['basic_info']['name']); print(c.enrich_company('stripe.com')['basic_info']['name'])"` | 5 passed. Live: the name printed twice; the second call comes from `api_cache` (no HTTP) |
+| CP2 | A2–A3 coverage | `python -m clearance.capability.coverage` (or pass real domains) | `missing/thin/rich` per company; offline: 5 rich synthetic buyers, 3 missing |
+| CP3 | A4 catalog | `pytest tests/test_catalog.py` | 2 passed: unknown part → `found=False`; India + US-origin → EAR in-country reason; DE → SCOMET licence |
+| CP4 | A5 screening | `python -m clearance.screening.csl`, then `pytest tests/test_screening.py` | ~18,600 entries written. 5 passed: exact / fuzzy (with breakdown) / clear / forwarder |
+| CP5 | A6–A9 capability | `pytest tests/test_capability.py` | 7 passed: one person-search per company, buyer-type votes, peer percentiles, radar/distributor/hardware `consistent`, shell `high_risk`, no record `no_data` |
+| CP6 | A11 watcher | `pytest tests/test_watch.py`; `uvicorn clearance.watch.webhook:app --port 8000` + `curl localhost:8000/health` | 3 passed; `{"ok":true}` |
 
-Person B defines their checkpoints in `AGENTS_PRODUCT.md` §16 as they go.
+Integration: `pytest tests/test_rules.py -k acceptance` → the 9 acceptance cases pass through the real Person A modules.
+
+Person B's checkpoints (run on `dev`, offline unless noted):
+
+| # | After | Run | Expect |
+|---|---|---|---|
+| CP-B1 | B1–B2 LLM layer, validator | `pytest tests/test_llm.py tests/test_llm_local.py` | 10 passed: Ollama adapter caches, retries invalid JSON once, server down → `LLMUnavailable`; cache hit makes no second call; refusal/max_tokens → `LLMUnavailable`; unknown IDs rejected |
+| CP-B1-live | Live LLM call (local Ollama by default; `CLEARANCE_LLM=claude` + key for Claude) | `python -c "from clearance import store; from clearance.llm import make_llm; from clearance.llm.schemas import DraftOut; print(make_llm(store.connect()).structured('draft_email', DraftOut, {'kind':'end_use_request','tag':'[CLR-T1]','ask_for':['end user']}))"` | A `DraftOut` whose subject starts `[CLR-T1]`. Run it twice: the second run is instant (cached) |
+| CP-B3 | B3 mail | `pytest tests/test_mail.py` | 5 passed: .eml round trip, missing field → `Incomplete` → reply merges, tag/In-Reply-To matching |
+| CP-B4 | B4–B5 end-use, eval | `pytest tests/test_enduse.py`, then (live) `python eval/score.py` | 4 passed. With a key: per-field accuracy on `eval/replies.jsonl` |
+| CP-B6 | B6 decision | `pytest tests/test_rules.py` | 14 passed, including all 9 acceptance cases |
+| CP-B7 | B7 pipeline | `pytest tests/test_pipeline.py` | 8 passed: clean release + sign, end-use loop with exactly one follow-up, no-data HOLD, missing details, LLM-down HOLD, override audited |
+| CP-B8 | B8 UI | `pytest tests/test_app.py`, then `streamlit run app.py` | 2 passed. In the browser: Inbox → preset "Radar firm order" → Drop into inbox → Process inbox → Ready to sign → enter officer name → Sign → Customers lists the buyer |
+| CP-B9 | Everything | `pytest` | 72 passed |

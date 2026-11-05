@@ -19,8 +19,17 @@ MAILBOX_DIR = Path(os.getenv("CLEARANCE_MAILBOX", ROOT / "mailbox"))
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 CRUSTDATA_API_KEY = os.getenv("CRUSTDATA_API_KEY", "")
 
-# --- Claude (Person B) -------------------------------------------------------
+# --- LLM (Person B) ----------------------------------------------------------
+# "ollama" (default): local model, nothing leaves the machine. "claude": Anthropic API (needs ANTHROPIC_API_KEY).
+LLM_PROVIDER = os.getenv("CLEARANCE_LLM", "ollama")
+OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen3:8b")   # fits an 8 GB GPU at Q4
+OLLAMA_TIMEOUT_S = 180.0
+OLLAMA_NUM_CTX = 8192
+
 LLM_MODEL = "claude-opus-5-5"
+LLM_MAX_TOKENS = 16000
+LLM_SERVER_FALLBACK = True  # server-side refusal fallback (`fallbacks: "default"`); set False if the API rejects it
 LLM_EFFORT = {
     "parse_order": "low",
     "extract_end_use": "low",

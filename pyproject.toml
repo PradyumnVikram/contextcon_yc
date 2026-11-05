@@ -23,7 +23,8 @@ data = [
 ]
 # Person B: agent, LLM and product
 product = [
-    "anthropic",
+    "httpx>=0.27",        # local LLM (Ollama) client
+    "anthropic",          # optional: CLEARANCE_LLM=claude
     "streamlit>=1.35",
 ]
 dev = ["pytest>=8.0"]

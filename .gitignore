@@ -32,3 +32,4 @@ clearance.db
 *.db
 mailbox/inbox/*.eml
 mailbox/outbox/*.eml
+data/csl.csv
