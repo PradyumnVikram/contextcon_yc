@@ -127,23 +127,35 @@ def screen(party: Party, ledger: Ledger) -> ScreeningResult:
                            is_forwarder=is_forwarder, evidence_ids=ids)
 
 
+_NUMBER_RE = re.compile(r"\d+[a-z]?")
+
+
 def _address_match(party: Party, entries) -> Match | None:
-    """A listed address is its own hit, even when the company name is new."""
-    addr = (party.address or "").strip()
+    """A listed address is its own hit, even when the company name is new.
+
+    Only a *specific* listed address can match: it must carry a unit, plot, office or PO box number that also
+    appears in the buyer's address. A bare area ("Jebel Ali Free Zone, Dubai") is shared by thousands of real
+    companies, and token_set alone scores 100 whenever the listed words are a subset of the buyer's.
+    An address match is a close match for the officer to compare, never an exact hit (that needs the name).
+    """
+    addr = (party.address or "").strip().lower()
     if len(addr) < 10:
         return None
+    addr_numbers = set(_NUMBER_RE.findall(addr))
     country = (party.country or "").upper()
     best: Match | None = None
     for e in entries:
         if country and e.countries and country not in e.countries:
             continue
         for listed in e.addresses:
-            if len(listed) < 10:
+            low = listed.lower()
+            numbers = set(_NUMBER_RE.findall(low))
+            if len(low) < 10 or not numbers or not numbers <= addr_numbers:
                 continue
-            score = float(fuzz.token_set_ratio(addr.lower(), listed.lower()))
-            if score < 90:
+            score = round((float(fuzz.token_set_ratio(addr, low)) + float(fuzz.token_sort_ratio(addr, low))) / 2, 1)
+            if score < config.SCREEN_FUZZY_SCORE:
                 continue
-            exact = score >= 90
+            exact = False
             m = Match(csl_entry_id=e.id, listed_name=e.name, score=score,
                       breakdown={"address": round(score, 1)},
                       listed_record={"source": e.source, "name": e.name, "addresses": [listed],
