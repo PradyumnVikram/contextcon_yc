@@ -1,7 +1,14 @@
-"""Clearance officer UI (task B8). Run: streamlit run app.py
+"""Clearance officer workspace (task B8). Run: streamlit run app.py
 
-Screens: Inbox · Orders · Ready to sign · Exceptions · Order detail · Customers.
-Every screen reads from SQLite through store.py and acts through pipeline.Pipeline.
+Pair it with the buyer mail client (streamlit run buyer_app.py --server.port 8502): emails sent there land
+in this inbox and are processed automatically; Clearance's replies show up in the buyer's window.
+
+Three panes, one order at a time:
+  1. Inbox       - incoming orders and replies, the conversation per order
+  2. Processing  - everything Clearance checked: parsed order, parts and licence, list screening,
+                   Crustdata company + employee data and peer comparison, end-use statement
+  3. Action      - the recommendation, cited explanation, sign / override, audit file, work queues
+Sidebar: officer name, process / auto-process inbox, system status, watched customers.
 """
 from __future__ import annotations
 
@@ -31,46 +38,35 @@ OUTCOME = {  # label, colour, background
     "AWAITING_END_USE": ("Awaiting end-use", "#6b21a8", "#efe1fc"),
 }
 STATE_LABEL = {
-    "EMAIL_RECEIVED": "Email received", "PARSED": "Parsed", "AWAITING_ORDER_DETAILS": "Waiting for buyer details",
+    "EMAIL_RECEIVED": "Email received", "PARSED": "Order parsed", "AWAITING_ORDER_DETAILS": "Waiting for buyer details",
     "CLASSIFIED": "Parts classified", "SCREENED": "Parties screened", "CAPABILITY_CHECKED": "Capability checked",
-    "AWAITING_END_USE": "Waiting for end-use reply", "RECOMMENDED": "Recommended", "SIGNED": "Signed",
+    "AWAITING_END_USE": "Waiting for end-use reply", "RECOMMENDED": "Recommendation ready", "SIGNED": "Signed",
 }
 TIER_LABEL = {"consistent": "Consistent", "medium_risk": "Medium risk", "high_risk": "High risk", "no_data": "No data"}
+AUTO_POLL_S = 4
 
 st.markdown("""
 <style>
 #MainMenu, footer {visibility: hidden;}
-.block-container {padding-top: 1.6rem; max-width: 1200px;}
-h1, h2, h3 {letter-spacing: -0.01em;}
-.pill {display:inline-block; padding:2px 10px; border-radius:999px; font-size:0.78rem; font-weight:600;
-       line-height:1.5; white-space:nowrap; vertical-align:middle;}
-.muted {color:#6b7280; font-size:0.85rem;}
-.order-head {font-size:1.02rem; font-weight:600;}
-.route {font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size:0.85rem; color:#374151;}
+.block-container {padding-top: 1.2rem; padding-left: 1.4rem; padding-right: 1.4rem; max-width: 100%;}
+.pane-title {font-size:1.05rem; font-weight:700; margin:0 0 0.4rem 0; letter-spacing:-0.01em;}
+.pane-sub {color:#6b7280; font-size:0.8rem; margin-top:-0.3rem; margin-bottom:0.6rem;}
+.pill {display:inline-block; padding:1px 9px; border-radius:999px; font-size:0.74rem; font-weight:600;
+       line-height:1.55; white-space:nowrap; vertical-align:middle;}
+.muted {color:#6b7280; font-size:0.82rem;}
+.small {font-size:0.82rem;}
+.mono {font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size:0.8rem;}
 .cite {display:inline-block; margin-left:4px; padding:0 6px; border-radius:6px; background:#eef2f7; color:#334155;
-       font-size:0.72rem; font-family: ui-monospace, monospace; cursor:help; border:1px solid #d9e1ea;}
-.expl {margin:0.15rem 0 0.35rem 0; line-height:1.55;}
-.status-row {display:flex; justify-content:space-between; font-size:0.82rem; margin:2px 0;}
-.dot-ok {color:#15803d;} .dot-warn {color:#b45309;} .dot-off {color:#b91c1c;}
-.party {border:1px solid #e5e7eb; border-radius:10px; padding:10px 12px; background:#fafafa;}
+       font-size:0.7rem; font-family: ui-monospace, monospace; cursor:help; border:1px solid #d9e1ea;}
+.expl {margin:0.15rem 0 0.4rem 0; line-height:1.55; font-size:0.92rem;}
+.row {display:flex; justify-content:space-between; gap:8px; font-size:0.82rem; margin:2px 0;}
+.ok {color:#15803d;} .warn {color:#b45309;} .off {color:#b91c1c;} .todo {color:#9ca3af;}
+.card {border:1px solid #e5e7eb; border-radius:10px; padding:8px 11px; background:#fafafa; margin-bottom:6px;}
+.mail-in {border-left:3px solid #94a3b8; padding:4px 0 4px 9px; margin:6px 0;}
+.mail-out {border-left:3px solid #6366f1; padding:4px 0 4px 9px; margin:6px 0;}
+.big {font-size:1.15rem; font-weight:700;}
 </style>
 """, unsafe_allow_html=True)
-
-PRESETS = {
-    "Radar firm order (clean)": ("procurement@synthetic-radar.example", "PO 4411: mmWave amplifiers",
-                                 "Hello,\nPlease supply 4 pcs PA-77G-HE for our radar test bench.\n"
-                                 "Synthetic Radar Systems Pvt Ltd, Pune, India. Deliver to our Pune lab.\n\nRegards, Procurement"),
-    "Shell trader order (capability mismatch)": ("orders@synthetic-shell.example", "Urgent order PA-77G-HE",
-                                                 "Need 100 pcs PA-77G-HE asap. Synthetic shell Traders, Mumbai, India.\n"
-                                                 "Deliver to our warehouse in Dubai, UAE. Pay advance."),
-    "Unknown company (no data)": ("buy@synthetic-nodata.example", "Enquiry + PO ADC-12G-HE",
-                                  "Please send 10 x ADC-12G-HE. Synthetic nodata Enterprises, Delhi, India. Deliver Delhi."),
-    "Close spelling of a listed name": ("info@listed-tradng.example", "PO ADC",
-                                        "10 x ADC-12G-HE please. Listed Electronic Tradng LLC, Dubai, UAE. Deliver Dubai."),
-    "Order with missing destination": ("procurement@synthetic-radar.example", "PO 4412",
-                                       "Please supply 4 pcs PA-77G-HE. Synthetic Radar Systems, India."),
-}
-
 
 def pill(outcome: str | None) -> str:
     label, fg, bg = OUTCOME.get(outcome or "", (outcome or "Pending", "#374151", "#eceff3"))
@@ -80,6 +76,10 @@ def pill(outcome: str | None) -> str:
 def rule_label(rule_id: str) -> str:
     r = RULES_BY_ID.get(rule_id)
     return r.label if r else rule_id
+
+
+def html(s: str) -> None:
+    st.markdown(s, unsafe_allow_html=True)
 
 
 # --------------------------------------------------------------------------- wiring
@@ -99,7 +99,7 @@ def llm_status() -> tuple[str, str]:
     try:
         tags = httpx.get(f"{config.OLLAMA_URL}/api/tags", timeout=1.5).json()
         names = {m["name"] for m in tags.get("models", [])}
-        return ("ok", f"Local · {config.OLLAMA_MODEL}") if config.OLLAMA_MODEL in names else \
+        return ("ok", f"local {config.OLLAMA_MODEL}") if config.OLLAMA_MODEL in names else \
                ("warn", f"{config.OLLAMA_MODEL} not pulled")
     except Exception:
         return ("off", "Ollama not running")
@@ -120,18 +120,15 @@ def all_orders() -> list[dict]:
     for r in rows("SELECT order_id, order_json, state, decision_json FROM orders ORDER BY order_id DESC"):
         o = json.loads(r["order_json"])
         d = json.loads(r["decision_json"]) if r["decision_json"] else {}
-        parties = {p["role"]: p for p in o["parties"]}
-        buyer = parties.get("buyer", {})
+        buyer = next((p for p in o["parties"] if p["role"] == "buyer"), {})
         out.append({"order": r["order_id"], "buyer": buyer.get("name", ""),
                     "route": f"{buyer.get('country') or '?'} → {o['ship_to_country'] or '?'}",
                     "parts": ", ".join(f'{l["quantity"]}× {l["part_number"]}' for l in o["lines"]) or "—",
-                    "state": r["state"], "recommendation": d.get("outcome", ""), "rule": d.get("rule_fired", ""),
-                    "signed": (d.get("signature") or {}).get("by", "")})
+                    "state": r["state"], "recommendation": d.get("outcome", ""), "rule": d.get("rule_fired", "")})
     return out
 
 
-def explanation_html(oid: str, decision) -> str:
-    ledger = Ledger(store.load_evidence(conn, oid))
+def explanation_html(ledger: Ledger, decision) -> str:
     parts = []
     for s in decision.explanation:
         chips = []
@@ -139,298 +136,270 @@ def explanation_html(oid: str, decision) -> str:
             if ledger.has(eid):
                 ev = ledger.get(eid)
                 val = ev.value if isinstance(ev.value, str) else json.dumps(ev.value, default=str)
-                tip = escape(f"{ev.claim}: {val[:180]}", quote=True)
-                chips.append(f"<span class='cite' title='{tip}'>{eid}</span>")
+                chips.append(f"<span class='cite' title='{escape(f'{ev.claim}: {val[:180]}', quote=True)}'>{eid}</span>")
         parts.append(f"<div class='expl'>{escape(s.text)}{''.join(chips)}</div>")
     return "".join(parts) or "<div class='muted'>No explanation recorded.</div>"
 
 
-def open_detail(oid: str) -> None:
-    st.session_state.update(detail=oid, screen="Order detail")
+def select(oid: str) -> None:
+    st.session_state["sel"] = oid
+
+
+@st.fragment(run_every=f"{AUTO_POLL_S}s")
+def auto_poll() -> None:
+    """Own timer; fresh pipeline per tick so SQLite stays on one thread. Full rerun only when something changed."""
+    c = store.connect(config.DB_PATH)
+    touched = Pipeline(c, make_llm(c), Mailbox(config.MAILBOX_DIR)).process_inbox()
+    st.caption(f"⏱️ checking the inbox every {AUTO_POLL_S}s")
+    if touched:
+        st.session_state["sel"] = touched[-1]
+        st.toast(f"Processed {', '.join(touched)}")
+        st.rerun(scope="app")
 
 
 # --------------------------------------------------------------------------- sidebar
-with st.sidebar:
-    st.markdown("## 🛃 Clearance")
-    st.caption("Export-compliance agent")
-    officer = st.text_input("Officer name", value=st.session_state.get("officer", ""), key="officer",
-                            placeholder="Required to sign or override")
-    if st.button("📥 Process inbox", type="primary", width="stretch"):
-        with st.spinner("Reading new emails and running checks…"):
-            touched = P.process_inbox()
-        st.toast(f"Processed {len(touched)} email(s)" if touched else "No new emails")
+st.session_state.setdefault("auto", True)   # the service processes mail on its own; the toggle can pause it
 
-    # counts are computed after processing so the navigation labels are current
-    orders = all_orders()
-    todo_sign = [o for o in orders if o["recommendation"] in ("RELEASE", "BLOCK") and o["state"] == "RECOMMENDED"]
-    holds = [o for o in orders if o["recommendation"] == "HOLD" and o["state"] != "SIGNED"]
-    waiting = [o for o in orders if o["state"] in ("AWAITING_END_USE", "AWAITING_ORDER_DETAILS")]
-    nav_label = {"Inbox": "📨 Inbox", "Orders": "📋 Orders", "Ready": f"✍️ Ready to sign ({len(todo_sign)})",
-                 "Exceptions": f"⚠️ Exceptions ({len(holds)})", "Order detail": "🔎 Order detail",
-                 "Customers": "👁️ Customers"}
-    # stable option values (labels carry the live counts), so signing an order doesn't reset the selection
-    screen = st.radio("Navigate", list(nav_label), format_func=nav_label.get, key="screen",
-                      label_visibility="collapsed")
+with st.sidebar:
+    html("<div class='big'>🛃 Clearance</div><div class='muted'>Export-compliance agent</div>")
+    officer = st.text_input("Officer name", key="officer", placeholder="Required to sign or override")
+    if st.button("📥 Process inbox", type="primary", width="stretch"):
+        with st.spinner("Reading new emails and running every check…"):
+            touched = P.process_inbox()
+        if touched:
+            st.session_state["sel"] = touched[-1]
+        st.toast(f"Processed {', '.join(touched)}" if touched else "No new emails")
+    st.toggle("Auto-process inbox", key="auto", help="Poll the inbox and process new mail automatically.")
+    if st.session_state.get("auto"):
+        auto_poll()
     st.divider()
     lvl, txt = llm_status()
-    crust = ("ok", "Live API") if config.CRUSTDATA_API_KEY else ("warn", "Demo fixtures only")
     n_csl = csl_size()
-    csl_st = ("ok", f"{n_csl:,} entries") if n_csl > 100 else ("warn", "Demo list only: run csl download")
-    dot = {"ok": "dot-ok", "warn": "dot-warn", "off": "dot-off"}
-    st.markdown("".join(f"<div class='status-row'><span>{k}</span><span class='{dot[l]}'>● {escape(v)}</span></div>"
-                        for k, (l, v) in {"LLM": (lvl, txt), "Crustdata": crust, "Screening list": csl_st}.items()),
-                unsafe_allow_html=True)
+    status = {"LLM": (lvl, txt),
+              "Crustdata": ("ok", "live API") if config.CRUSTDATA_API_KEY else ("warn", "demo data only"),
+              "Screening list": ("ok", f"{n_csl:,} entries") if n_csl > 100 else ("warn", "demo list only")}
+    html("".join(f"<div class='row'><span>{k}</span><span class='{l}'>● {escape(v)}</span></div>"
+                 for k, (l, v) in status.items()))
+    st.divider()
+    cust = rows("SELECT company_key, name, tier, updated_at FROM customers ORDER BY updated_at DESC")
+    with st.expander(f"👁️ Watched customers ({len(cust)})"):
+        if not cust:
+            st.caption("A buyer is watched once its release is signed.")
+        for c in cust:
+            html(f"<div class='row'><span>{escape(c['name'])}</span><span>{TIER_LABEL.get(c['tier'], c['tier'])}</span></div>")
+        if cust:
+            by_name = {c["name"]: c["company_key"] for c in cust}
+            name = st.selectbox("Customer", list(by_name), key="sim_customer")
+            tier = st.selectbox("Crustdata reports", ["medium_risk", "high_risk", "consistent"],
+                                format_func=TIER_LABEL.get, key="sim_tier")
+            if st.button("Simulate watcher event", width="stretch"):
+                watch.simulate_event(conn, Party(role="buyer", name=name, domain=by_name[name]), tier)
+                st.rerun()
     st.caption("Prototype · not legal advice. An officer signs every release and block.")
 
+orders = all_orders()
+ids = [o["order"] for o in orders]
+if st.session_state.get("sel") not in ids:
+    st.session_state["sel"] = ids[0] if ids else None
+sel = st.session_state["sel"]
 
-# --------------------------------------------------------------------------- screens
-def metrics_row():
-    c = st.columns(4)
-    c[0].metric("Orders", len(orders))
-    c[1].metric("Ready to sign", len(todo_sign))
-    c[2].metric("Exceptions", len(holds))
-    c[3].metric("Waiting on buyer", len(waiting))
+p1, p2, p3 = st.columns([1.05, 1.55, 1.15], gap="medium")
 
+# --------------------------------------------------------------------------- pane 1: inbox
+with p1:
+    html("<div class='pane-title'>📨 Inbox</div><div class='pane-sub'>Mail from buyers, processed automatically · one conversation per order</div>")
+    pending = P.mailbox.poll(conn)
+    if pending:
+        html(f"<div class='muted' style='margin:6px 0'>⏳ {len(pending)} unprocessed: "
+             + ", ".join(escape(e.subject[:30]) for e in pending) + "</div>")
 
-def screen_inbox():
-    st.title("Inbox")
-    st.caption("Orders and replies arrive here as emails. Clearance reads them, runs every check, and drafts replies.")
-    left, right = st.columns([3, 2], gap="large")
-    with left:
-        with st.container(border=True):
-            st.markdown("**✉️ Compose a test email** <span class='muted'>(simulates a buyer)</span>",
-                        unsafe_allow_html=True)
-            preset = st.selectbox("Preset", ["(blank)"] + list(PRESETS))
-            f, s, b = PRESETS.get(preset, ("buyer@example.com", "", ""))
-            frm = st.text_input("From", f, key=f"from-{preset}")
-            subj = st.text_input("Subject", s, key=f"subj-{preset}",
-                                 help="When replying to Clearance, keep the [CLR-…] tag so the reply is matched.")
-            body = st.text_area("Body", b, height=150, key=f"body-{preset}")
-            if st.button("Drop into inbox"):
-                P.mailbox.compose(frm, subj, body)
-                st.success("Email delivered to the inbox. Click **📥 Process inbox** in the sidebar.")
-    with right:
-        pending = P.mailbox.poll(conn)
-        st.markdown(f"**Unprocessed** · {len(pending)}")
-        if pending:
-            for e in pending:
-                st.markdown(f"<div class='muted'>• <b>{escape(e.subject)}</b> — {escape(e.from_addr)}</div>",
-                            unsafe_allow_html=True)
-        else:
-            st.markdown("<div class='muted'>Nothing waiting.</div>", unsafe_allow_html=True)
-        out = P.mailbox.outbox_messages()
-        st.markdown(f"**Sent by Clearance** · {len(out)}")
-        for e in reversed(out[-8:]):
-            with st.expander(e.subject, expanded=False):
-                st.caption(f"To {e.to_addr} · {e.received_at:%d %b %H:%M}")
-                st.text(e.body)
-    log = rows("SELECT received_at AS time, direction, order_id AS order_, subject FROM emails ORDER BY received_at DESC")
-    with st.expander(f"Mail log ({len(log)})"):
-        if log:
-            st.dataframe(pd.DataFrame(log).rename(columns={"order_": "order"}), width="stretch", hide_index=True)
-        else:
-            st.caption("No mail yet.")
-
-
-def screen_orders():
-    st.title("Orders")
-    metrics_row()
     if not orders:
-        st.info("No orders yet. Compose a test email in the Inbox, then click **Process inbox**.")
-        return
-    df = pd.DataFrame([{
-        "Order": o["order"], "Buyer": o["buyer"], "Route": o["route"], "Parts": o["parts"],
-        "Recommendation": OUTCOME.get(o["recommendation"], (o["recommendation"] or "—",))[0],
-        "Why": rule_label(o["rule"]) if o["rule"] else "—",
-        "Status": STATE_LABEL.get(o["state"], o["state"]), "Signed by": o["signed"] or "—"} for o in orders])
-    st.dataframe(df, width="stretch", hide_index=True,
-                 column_config={"Why": st.column_config.TextColumn(width="large")})
+        st.info("No orders yet. Send an email from the buyer window (`streamlit run buyer_app.py --server.port 8502`).")
+    for o in orders:
+        is_sel = o["order"] == sel
+        with st.container(border=True):
+            html(f"<div class='row'><b>{escape(o['buyer'][:34])}</b>{pill(o['recommendation'] or None)}</div>"
+                 f"<div class='muted'>{o['order']} · {escape(o['route'])} · {escape(o['parts'][:40])}</div>"
+                 f"<div class='muted'>{STATE_LABEL.get(o['state'], o['state'])}</div>")
+            st.button("● Selected" if is_sel else "Open", key=f"open-{o['order']}", on_click=select, args=(o["order"],),
+                      disabled=is_sel, width="stretch")
 
+    if sel:
+        thread = rows("SELECT msg_id, direction, subject, body, received_at FROM emails WHERE order_id=? "
+                      "ORDER BY received_at", (sel,))
+        html(f"<div class='pane-title' style='margin-top:10px'>Conversation · {sel}</div>")
+        for m in thread:
+            cls = "mail-out" if m["direction"] == "out" else "mail-in"
+            who = "Clearance → buyer" if m["direction"] == "out" else "Buyer"
+            html(f"<div class='{cls}'><div class='muted'>{who} · {m['received_at'][11:16]}</div>"
+                 f"<div class='small'><b>{escape(m['subject'])}</b></div></div>")
+            with st.expander("Show message", expanded=False):
+                st.text(m["body"])
 
-def _order_card(o: dict, actions: bool, key: str):
-    d = store.load_decision(conn, o["order"])
-    with st.container(border=True):
-        st.markdown(f"<div class='order-head'>{pill(d.outcome)} &nbsp;{escape(o['buyer'])} "
-                    f"<span class='muted'>· {o['order']}</span></div>"
-                    f"<div class='route'>{escape(o['route'])} &nbsp;·&nbsp; {escape(o['parts'])}</div>",
-                    unsafe_allow_html=True)
-        st.markdown(f"<div class='muted' style='margin-top:6px'>{escape(rule_label(d.rule_fired))}</div>",
-                    unsafe_allow_html=True)
-        st.markdown(explanation_html(o["order"], d), unsafe_allow_html=True)
-        c1, c2, _ = st.columns([1.3, 1, 3])
-        if actions and c1.button(f"✍️ Sign {d.outcome}", key=f"sign-{key}", disabled=not officer, type="primary"):
-            P.sign(o["order"], officer)
-            st.rerun()
-        c2.button("Open detail", key=f"open-{key}", on_click=open_detail, args=(o["order"],))
+# --------------------------------------------------------------------------- pane 2: processing
+with p2:
+    html("<div class='pane-title'>🔍 Processing</div>"
+         "<div class='pane-sub'>Everything Clearance checked, with the evidence it recorded</div>")
+    if not sel:
+        st.caption("Select an order in the inbox.")
+    else:
+        order, d, ctx = store.load_order(conn, sel), store.load_decision(conn, sel), P.context(sel)
+        ledger = Ledger(store.load_evidence(conn, sel))
+        res = ctx.results
+        history = store.get_state_history(conn, sel)
+        reached = {s.value for s, _ in history}
+        when = {s.value: at for s, at in history}
 
+        with st.container(border=True):
+            steps = ["EMAIL_RECEIVED", "PARSED", "CLASSIFIED", "SCREENED", "CAPABILITY_CHECKED", "RECOMMENDED", "SIGNED"]
+            if "AWAITING_ORDER_DETAILS" in reached:
+                steps.insert(2, "AWAITING_ORDER_DETAILS")
+            if "AWAITING_END_USE" in reached or ctx.end_use_requested:
+                steps.insert(steps.index("RECOMMENDED"), "AWAITING_END_USE")
+            html("".join(
+                f"<div class='row'><span class='ok'>✓ {STATE_LABEL[s]}</span><span class='muted'>{when[s]:%H:%M:%S}</span></div>"
+                if s in when else f"<div class='row'><span class='todo'>○ {STATE_LABEL[s]}</span><span></span></div>"
+                for s in steps))
 
-def screen_sign():
-    st.title("Ready to sign")
-    st.caption("Recommended releases and blocks. Nothing ships, and nothing is refused, until an officer signs.")
-    if not officer:
-        st.warning("Enter your officer name in the sidebar to sign.")
-    for o in todo_sign:
-        _order_card(o, actions=True, key=o["order"])
-    if not todo_sign:
-        st.info("Nothing waiting for a signature.")
-
-
-def screen_exceptions():
-    st.title("Exceptions")
-    st.caption("Held orders. A hold takes effect immediately; resolve it from the order detail page.")
-    for o in holds:
-        _order_card(o, actions=False, key=f"exc-{o['order']}")
-    unmatched = rows("SELECT subject, msg_id, received_at FROM emails WHERE direction='in' AND order_id IS NULL")
-    if unmatched:
-        st.subheader("Replies that matched no order")
-        st.dataframe(pd.DataFrame(unmatched), width="stretch", hide_index=True)
-    if not holds and not unmatched:
-        st.info("No exceptions.")
-
-
-def screen_detail():
-    st.title("Order detail")
-    ids = [o["order"] for o in orders]
-    if not ids:
-        st.info("No orders yet.")
-        return
-    labels = {o["order"]: f"{o['order']} · {o['buyer']}" for o in orders}
-    default = ids.index(st.session_state["detail"]) if st.session_state.get("detail") in ids else 0
-    oid = st.selectbox("Order", ids, index=default, format_func=labels.get)
-    order, d, ctx = store.load_order(conn, oid), store.load_decision(conn, oid), P.context(oid)
-    ledger = Ledger(store.load_evidence(conn, oid))
-    state = store.get_state(conn, oid).value
-    if d is None:
-        st.info(f"{STATE_LABEL.get(state, state)}. No recommendation yet.")
-        return
-
-    head, side = st.columns([3, 1])
-    with head:
-        st.markdown(f"<div style='font-size:1.25rem;font-weight:650'>{pill(d.outcome)} &nbsp;"
-                    f"{escape(rule_label(d.rule_fired))}</div>"
-                    f"<div class='muted'>{STATE_LABEL.get(state, state)} · rule <code>{d.rule_fired}</code></div>",
-                    unsafe_allow_html=True)
-    with side:
-        st.download_button("⬇️ Audit file (HTML)", P.audit(oid), file_name=f"audit-{oid}.html", mime="text/html",
-                           width="stretch")
-    if d.signature:
-        st.success(f"Signed by {d.signature.by} · {d.signature.at:%d %b %Y %H:%M} UTC")
-    if d.override:
-        st.warning(f"Override by {d.override.by}: {d.override.original_outcome} → {d.override.new_outcome}. "
-                   f"Reason: {d.override.reason}")
-    with st.container(border=True):
-        st.markdown(explanation_html(oid, d), unsafe_allow_html=True)
-        st.caption("Hover a grey evidence tag to see the recorded value.")
-    if d.licence_documents:
-        st.info("**Documents to collect:** " + " · ".join(d.licence_documents))
-
-    res = ctx.results
-    t1, t2, t3, t4, t5 = st.tabs(["Timeline", "Screening", "Capability", "End-use", f"Evidence ({len(ledger)})"])
-    with t1:
-        c1, c2 = st.columns([1, 1], gap="large")
-        with c1:
-            for s, at in d.state_history:
-                st.markdown(f"<div class='status-row'><span>{STATE_LABEL.get(s.value, s.value)}</span>"
-                            f"<span class='muted'>{at:%d %b %H:%M:%S}</span></div>", unsafe_allow_html=True)
-        with c2:
+        with st.expander("🧾 Order (extracted from the email)", expanded=False):
             for p in order.parties:
-                st.markdown(f"<div class='muted'>{p.role.replace('_', ' ')}</div><b>{escape(p.name)}</b> "
-                            f"<span class='muted'>{p.country or ''}</span>", unsafe_allow_html=True)
-            st.markdown(f"<div class='muted' style='margin-top:8px'>parts</div>"
-                        + "<br>".join(f"{l.quantity}× <code>{escape(l.part_number)}</code>" for l in order.lines),
-                        unsafe_allow_html=True)
-    with t2:
-        if not res or not res.screenings:
-            st.caption("Not screened yet.")
-        for s in (res.screenings if res else []):
-            status = {"clear": "✅ clear", "fuzzy_hit": "⚠️ close match", "exact_hit": "⛔ exact match"}[s.status]
-            st.markdown(f"**{s.party_role.replace('_', ' ').title()}** · {escape(s.party_name)} — {status}"
-                        + (" · 🚚 freight forwarder" if s.is_forwarder else ""), unsafe_allow_html=True)
-            for m in s.matches:
-                a, b = st.columns(2)
-                a.markdown(f"<div class='party'><div class='muted'>Order party</div><b>{escape(s.party_name)}</b></div>",
-                           unsafe_allow_html=True)
-                b.markdown(f"<div class='party'><div class='muted'>Listed · {escape(m.listed_record.get('source', ''))[:60]}"
-                           f"</div><b>{escape(m.listed_name)}</b><div class='muted'>score {m.score} · "
-                           f"{', '.join(f'{k} {v}' for k, v in m.breakdown.items())}</div></div>", unsafe_allow_html=True)
-    with t3:
+                html(f"<div class='row'><span class='muted'>{p.role.replace('_', ' ')}</span>"
+                     f"<span><b>{escape(p.name)}</b> {p.country or ''}</span></div>")
+            html("<div class='row'><span class='muted'>parts</span><span>"
+                 + ", ".join(f"{l.quantity}× <span class='mono'>{escape(l.part_number)}</span>" for l in order.lines)
+                 + f"</span></div><div class='row'><span class='muted'>destination</span><span>{order.ship_to_country}</span></div>")
+
+        if res and res.classifications:
+            with st.expander("📦 Parts & licence", expanded=False):
+                for c in res.classifications:
+                    lic = next((l for l in res.licences if l.part_number == c.part_number), None)
+                    if not c.found:
+                        html(f"<div class='card'><b class='mono'>{escape(c.part_number)}</b> "
+                             f"<span class='off'>not in catalog → hold</span></div>")
+                        continue
+                    html(f"<div class='card'><b class='mono'>{c.part_number}</b> · {c.part_class or ''} · "
+                         f"{'controlled' if c.controlled else 'not controlled'} · ECCN {c.eccn or '—'}"
+                         f"<div class='muted'>needs: {', '.join(c.needs)}</div>"
+                         + (f"<div class='small'>{'🔐 licence required' if lic.required else '✓ no licence'}: "
+                            f"{escape(lic.reason)}</div>" if lic else "") + "</div>")
+
+        if res and res.screenings:
+            hits = [s for s in res.screenings if s.status != "clear"]
+            label = f"⚠️ {len(hits)} match(es)" if hits else "✓ all clear"
+            with st.expander(f"🛡️ Restricted-list screening · {label}", expanded=bool(hits)):
+                for s in res.screenings:
+                    mark = {"clear": "<span class='ok'>✓ clear</span>", "fuzzy_hit": "<span class='warn'>⚠ close match</span>",
+                            "exact_hit": "<span class='off'>⛔ exact match</span>"}[s.status]
+                    html(f"<div class='row'><span>{s.party_role.replace('_', ' ')} · {escape(s.party_name)}"
+                         f"{' · 🚚 forwarder' if s.is_forwarder else ''}</span>{mark}</div>")
+                    for m in s.matches:
+                        html(f"<div class='card small'>Listed: <b>{escape(m.listed_name)}</b> · score {m.score}"
+                             f"<div class='muted'>{escape(str(m.listed_record.get('source', ''))[:70])} · "
+                             f"{', '.join(f'{k} {v}' for k, v in m.breakdown.items())}</div></div>")
+
         cap = res.buyer_capability if res else None
-        if not cap:
-            st.caption("No capability check yet.")
-        else:
-            c = st.columns(4)
-            c[0].metric("Tier", TIER_LABEL.get(cap.tier, cap.tier))
-            c[1].metric("Mismatch score", f"{cap.mismatch_score:g}")
-            c[2].metric("Buyer type", cap.buyer_type.title())
-            c[3].metric("Data coverage", cap.coverage.title())
-            if cap.triggered_rules:
-                st.markdown("**Rules triggered:** " + " · ".join(f"`{r}`" for r in cap.triggered_rules))
-            if cap.features:
-                st.dataframe(pd.DataFrame([{"Feature": k.replace("_", " "), "Value": str(v),
-                                            "Peer percentile": cap.percentiles.get(k)} for k, v in cap.features.items()]),
-                             hide_index=True, width="stretch",
-                             column_config={"Peer percentile": st.column_config.ProgressColumn(
-                                 min_value=0, max_value=100, format="%.0f")})
-    with t4:
-        st.markdown(f"End-use requested: **{'yes' if ctx.end_use_requested else 'no'}** · "
-                    f"follow-ups sent: **{ctx.followups_sent}**")
-        if res and res.end_use:
-            eu = res.end_use
-            c1, c2 = st.columns(2)
-            c1.markdown(f"**Claimed use**  \n{escape(eu.claim.claimed_use or '—')}  \n"
-                        f"**End user**  \n{escape(eu.claim.end_user_name or 'not named')} {eu.claim.end_user_country or ''}")
-            c2.markdown(f"**Consistent:** {'✅ yes' if eu.consistent else '❌ no'}  \n"
-                        + ("  \n".join(f"• {escape(r)}" for r in eu.reasons) if eu.reasons else ""))
-    with t5:
-        cited = {e.id for e in d.evidence}
-        st.dataframe(pd.DataFrame([{"ID": e.id, "Cited": "★" if e.id in cited else "", "Claim": e.claim,
-                                    "Value": json.dumps(e.value, default=str)[:200], "Source": e.source}
-                                   for e in ledger.items]), hide_index=True, width="stretch",
-                     column_config={"Claim": st.column_config.TextColumn(width="large")})
+        if cap:
+            src = next((ledger.get(i).source for i in cap.evidence_ids if ledger.has(i)), "")
+            badge = "demo data" if src.startswith("crustdata-fixture") else "live Crustdata"
+            with st.expander(f"🏢 Crustdata capability check · {TIER_LABEL.get(cap.tier, cap.tier)} ({badge})",
+                             expanded=True):
+                m = st.columns(4)
+                m[0].metric("Tier", TIER_LABEL.get(cap.tier, cap.tier))
+                m[1].metric("Score", f"{cap.mismatch_score:g}")
+                m[2].metric("Buyer type", cap.buyer_type.title())
+                m[3].metric("Coverage", cap.coverage.title())
+                f = cap.features
+                if f:
+                    html("<div class='small'>"
+                         f"<b>Company:</b> headcount {f.get('headcount', '—')} · age {f.get('age_years', '—')} yrs · "
+                         f"12-month change {f.get('headcount_growth_yoy_pct', '—')}% · visitors/month {f.get('monthly_visitors', '—')}"
+                         f"<br><b>People ({f.get('people_sampled', 0)} sampled):</b> matching the parts' needs "
+                         f"{f.get('matching_people', '—')} · mix {f.get('function_mix', {})}"
+                         f"<br><b>Buyer type votes:</b> keywords {f.get('buyer_type_keyword_vote') or '—'} · "
+                         f"people {f.get('buyer_type_people_vote') or '—'}</div>")
+                    if cap.percentiles:
+                        st.dataframe(pd.DataFrame([{"vs peers": k.replace("_", " "), "percentile": v}
+                                                   for k, v in cap.percentiles.items()]), hide_index=True, width="stretch",
+                                     column_config={"percentile": st.column_config.ProgressColumn(
+                                         min_value=0, max_value=100, format="%.0f")})
+                        st.caption(f"Compared with {f.get('peer_count', 0)} similar companies.")
+                html("<div class='small'><b>Rules triggered:</b> "
+                     + (" · ".join(f"<span class='mono'>{r}</span>" for r in cap.triggered_rules) or "none") + "</div>")
 
-    st.subheader("Officer actions")
-    c1, c2 = st.columns([1, 2], gap="large")
-    with c1:
-        can_sign = d.outcome in ("RELEASE", "BLOCK") and state != OrderState.SIGNED.value
-        if st.button(f"✍️ Sign {d.outcome}", disabled=not (officer and can_sign), type="primary",
-                     width="stretch"):
-            P.sign(oid, officer)
-            st.rerun()
-        if not officer:
-            st.caption("Enter your officer name in the sidebar.")
-    with c2:
-        with st.form(f"override-{oid}"):
-            new = st.selectbox("Override to", ["RELEASE", "HOLD", "LICENCE_REQUIRED", "BLOCK"],
-                               format_func=lambda o: OUTCOME[o][0])
-            reason = st.text_area("Reason (required, recorded in the audit)", height=80)
-            if st.form_submit_button("Override", disabled=not officer):
-                try:
-                    P.override(oid, new, officer, reason)
-                    st.rerun()
-                except ValueError as e:
-                    st.error(str(e))
+        if ctx.end_use_requested or (res and res.end_use):
+            eu = res.end_use if res else None
+            with st.expander("📝 End-use statement", expanded=bool(eu)):
+                html(f"<div class='small'>Requested: <b>yes</b> · follow-ups sent: <b>{ctx.followups_sent}</b></div>")
+                if eu:
+                    html(f"<div class='small'><b>Claimed use:</b> {escape(eu.claim.claimed_use or '—')}<br>"
+                         f"<b>End user:</b> {escape(eu.claim.end_user_name or 'not named')} {eu.claim.end_user_country or ''}<br>"
+                         f"<b>Consistent:</b> {'<span class=ok>yes</span>' if eu.consistent else '<span class=off>no</span>'}"
+                         + "".join(f"<br>• {escape(r)}" for r in eu.reasons) + "</div>")
+                else:
+                    st.caption("Waiting for the buyer's reply.")
 
+        with st.expander(f"🔗 All evidence ({len(ledger)})", expanded=False):
+            cited = {e.id for e in d.evidence} if d else set()
+            st.dataframe(pd.DataFrame([{"ID": e.id, "★": "★" if e.id in cited else "", "Claim": e.claim,
+                                        "Value": json.dumps(e.value, default=str)[:160], "Source": e.source}
+                                       for e in ledger.items]), hide_index=True, width="stretch")
 
-def screen_customers():
-    st.title("Customers")
-    st.caption("Buyers whose release was signed are watched through Crustdata and re-rated when their data changes.")
-    cust = rows("SELECT company_key, name, tier, watcher_id, updated_at FROM customers ORDER BY updated_at DESC")
-    if not cust:
-        st.info("A buyer becomes a watched customer when an officer signs its release.")
-        return
-    st.dataframe(pd.DataFrame([{"Customer": c["name"], "Risk tier": TIER_LABEL.get(c["tier"], c["tier"]),
-                                "Watcher": c["watcher_id"], "Updated": c["updated_at"][:16].replace("T", " "),
-                                "Key": c["company_key"]} for c in cust]), hide_index=True, width="stretch")
-    with st.form("simulate"):
-        st.markdown("**Simulate a Crustdata watcher event**")
-        by_name = {c["name"]: c["company_key"] for c in cust}
-        name = st.selectbox("Customer", list(by_name))
-        tier = st.selectbox("New tier reported", ["medium_risk", "high_risk", "consistent"], format_func=TIER_LABEL.get)
-        if st.form_submit_button("Simulate Crustdata event"):
-            watch.simulate_event(conn, Party(role="buyer", name=name, domain=by_name[name]), tier)
-            st.rerun()
+# --------------------------------------------------------------------------- pane 3: action
+with p3:
+    html("<div class='pane-title'>✍️ Action</div><div class='pane-sub'>Recommendation and the officer's decision</div>")
+    if sel:
+        d = store.load_decision(conn, sel)
+        state = store.get_state(conn, sel).value
+        ledger = Ledger(store.load_evidence(conn, sel))
+        with st.container(border=True):
+            if d is None:
+                html(f"<div class='big'>{STATE_LABEL.get(state, state)}</div>"
+                     "<div class='muted'>No recommendation yet: Clearance is waiting for the buyer.</div>")
+            else:
+                html(f"<div class='big'>{pill(d.outcome)}</div>"
+                     f"<div class='small' style='margin:4px 0 8px'><b>{escape(rule_label(d.rule_fired))}</b> "
+                     f"<span class='muted mono'>{d.rule_fired}</span></div>")
+                html(explanation_html(ledger, d))
+                st.caption("Hover a grey tag to see the evidence value.")
+                if d.licence_documents:
+                    st.info("**Documents to collect:** " + " · ".join(d.licence_documents))
+                if d.signature:
+                    st.success(f"Signed by {d.signature.by} · {d.signature.at:%d %b %H:%M} UTC")
+                if d.override:
+                    st.warning(f"Override by {d.override.by}: {d.override.original_outcome} → "
+                               f"{d.override.new_outcome}. {d.override.reason}")
+                if d.outcome == "AWAITING_END_USE":
+                    st.caption("No action needed: Clearance has emailed the buyer and continues when they reply.")
+                if d.outcome in ("RELEASE", "BLOCK") and state != OrderState.SIGNED.value:
+                    if st.button(f"✍️ Sign {OUTCOME[d.outcome][0].lower()}", type="primary", width="stretch",
+                                 disabled=not officer, key="sign-sel"):
+                        P.sign(sel, officer)
+                        st.rerun()
+                    if not officer:
+                        st.caption("Enter your officer name in the sidebar to sign.")
+                with st.popover("Override recommendation", width="stretch", disabled=not officer):
+                    new = st.selectbox("New outcome", ["RELEASE", "HOLD", "LICENCE_REQUIRED", "BLOCK"],
+                                       format_func=lambda o: OUTCOME[o][0], key="ov_outcome")
+                    reason = st.text_area("Reason (required, recorded in the audit)", key="ov_reason")
+                    if st.button("Apply override", key="ov_apply"):
+                        try:
+                            P.override(sel, new, officer, reason)
+                            st.rerun()
+                        except ValueError as e:
+                            st.error(str(e))
+                st.download_button("⬇️ Audit file (HTML)", P.audit(sel), file_name=f"audit-{sel}.html",
+                                   mime="text/html", width="stretch")
 
-
-SCREENS = {"Inbox": screen_inbox, "Orders": screen_orders, "Ready": screen_sign, "Exceptions": screen_exceptions,
-           "Order detail": screen_detail, "Customers": screen_customers}
-SCREENS[screen]()
+    todo = [o for o in orders if o["recommendation"] in ("RELEASE", "BLOCK") and o["state"] == "RECOMMENDED"]
+    holds = [o for o in orders if o["recommendation"] == "HOLD" and o["state"] != "SIGNED"]
+    waiting = [o for o in orders if o["state"] in ("AWAITING_END_USE", "AWAITING_ORDER_DETAILS")]
+    for title, items in [("Ready to sign", todo), ("Exceptions", holds), ("Waiting on buyer", waiting)]:
+        html(f"<div class='pane-title' style='margin-top:12px'>{title} · {len(items)}</div>")
+        if not items:
+            html("<div class='muted'>None.</div>")
+        for o in items:
+            c1, c2 = st.columns([3, 1])
+            c1.markdown(f"{pill(o['recommendation'] or None)} <span class='small'>{escape(o['buyer'][:26])}</span>",
+                        unsafe_allow_html=True)
+            c2.button("Open", key=f"q-{title}-{o['order']}", on_click=select, args=(o["order"],),
+                      disabled=o["order"] == sel)
