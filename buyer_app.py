@@ -25,6 +25,10 @@ IDENTITIES = {
     "Synthetic shell Traders (demo, suspicious)": "Orders <orders@synthetic-shell.example>",
     "Synthetic nodata Enterprises (demo, unknown)": "Buyer <buy@synthetic-nodata.example>",
     "Listed Electronic Tradng (demo, near a listed name)": "Info <info@listed-tradng.example>",
+    "Ring 1 · Synthetic Orbit Electronics (demo network)": "Purchasing <purchasing@orbit-electronics.example>",
+    "Ring 2 · Synthetic Nimbus Instruments (demo network)": "Stores <stores@nimbus-instruments.example>",
+    "Ring 3 · Synthetic Delta Systems (demo network)": "Projects <projects@delta-systems.example>",
+    "Synthetic Apex Components (demo, staff from a listed entity)": "MD Office <md@apex-components.example>",
     "Custom address…": "",
 }
 TEMPLATES = {
@@ -49,6 +53,23 @@ TEMPLATES = {
         "Please send 10 x ADC-12G-HE. Synthetic nodata Enterprises, Delhi, India. Deliver Delhi."),
     "Listed Electronic Tradng (demo, near a listed name)": (
         "PO ADC", "10 x ADC-12G-HE please. Listed Electronic Tradng LLC, Dubai, UAE. Deliver Dubai."),
+    # The ring: each order is small and routine on its own (licence paperwork only). Send all three, in order.
+    "Ring 1 · Synthetic Orbit Electronics (demo network)": (
+        "PO 3307: amplifiers for calibration bench",
+        "Hello,\nPlease supply 6 pcs PA-77G-HE for our calibration bench.\nShip via Gulf Swift Cargo FZE to "
+        "Warehouse 14, Jebel Ali Free Zone, Dubai, UAE.\n\nSynthetic Orbit Electronics, Pune, India"),
+    "Ring 2 · Synthetic Nimbus Instruments (demo network)": (
+        "Spares order: LNA-77G-HE",
+        "Dear team,\nWe need 6 x LNA-77G-HE as instrument spares.\nShip via Gulf Swift Cargo FZE to "
+        "Warehouse 14, Jebel Ali Free Zone, Dubai, UAE.\n\nSynthetic Nimbus Instruments, Mumbai, India"),
+    "Ring 3 · Synthetic Delta Systems (demo network)": (
+        "PO D-118: high-speed ADCs",
+        "Hi,\nPlease send 8 x ADC-12G-HE for a client design project.\nDelivery to Warehouse 14, Jebel Ali Free "
+        "Zone, Dubai, UAE, via Gulf Swift Cargo FZE.\n\nSynthetic Delta Systems, Delhi, India"),
+    "Synthetic Apex Components (demo, staff from a listed entity)": (
+        "PO AX-52: FPGAs",
+        "Please supply 20 x FPGA-C10 for our motor-drive controllers. Deliver to our Bengaluru plant.\n\n"
+        "Synthetic Apex Components, Bengaluru, India"),
 }
 REPLIES = {
     "(write my own)": "",

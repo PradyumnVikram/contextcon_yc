@@ -62,7 +62,7 @@ cp .env.example .env            # defaults work offline; add keys only if you ha
 python -m clearance.screening.csl
 
 # 6. Check everything works
-pytest                          # 79 passed
+pytest                          # 104 passed
 ```
 
 ### `.env` settings
@@ -113,6 +113,8 @@ streamlit run buyer_app.py --server.port 8502     # window 2: buyer mail -> http
 | **Synthetic shell Traders** | Capability mismatch → end-use request in the buyer inbox. Reply "civilian use only" → one targeted follow-up arrives. Reply vaguely again → **Hold** in Exceptions |
 | **Synthetic nodata Enterprises** | No company data → **Hold**, with an end-use statement requested. The officer decides |
 | **Listed Electronic Tradng** | Close spelling of a listed entity → **Hold**, with both names side by side in Processing |
+| **Ring 1 → Ring 2 → Ring 3** (send in that order) | Each order looks routine on its own (licence paperwork). When Ring 3 arrives, the **Network** tab links the three buyers through a shared director and the same small Dubai forwarder: together they ordered 3 of 4 functions of a **radar seeker front-end** that nothing in their business explains → all three **Hold**, and the earlier two get a network alert |
+| **Synthetic Apex Components** | Its managing director previously worked at a listed entity (found by screening the staff's past employers) → **Hold** |
 
 **Using real companies:** send from the company's real domain (for example `procurement@<company>.com`). Clearance identifies the buyer by the sender's corporate domain; free-mail addresses are ignored, and a website written in the email takes precedence. The first live check of a new company costs about **70 Crustdata credits** (company record, 25 employees, about 20 peers), and repeats come from the cache. Check your key and balance with `python -m clearance.crustdata_client`.
 
@@ -154,6 +156,8 @@ clearance/
   llm/          local Ollama adapter, optional Claude client, prompts, evidence-ID validator
   mail/         folder mailbox, order parsing, reply matching
   enduse/       end-use request, follow-up, extraction, consistency check
+  network/      memory across orders: linked buyers, parts combined across orders, staff from listed entities
+                (data/systems.csv holds the controlled-system templates)
   decision/     12-row rules table, cited explanation, HTML audit
   pipeline.py   the order state machine (the only orchestrator)
 app.py          Clearance officer workspace (3 panes)

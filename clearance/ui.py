@@ -14,7 +14,7 @@ from clearance.capability.profile import parse_company
 from clearance.crustdata_client import CrustdataClient, norm_key
 from clearance.models import Evidence, Party
 
-GROUP_ORDER = ["Order email", "Parts & licence", "Screening", "Crustdata", "Analysis", "End-use", "Actions"]
+GROUP_ORDER = ["Order email", "Parts & licence", "Screening", "Crustdata", "Network", "Analysis", "End-use", "Actions"]
 
 _CRUST_ENDPOINT = {"/company/enrich": "company record", "/person/search": "employee search",
                    "/company/search": "peer companies"}
@@ -59,6 +59,9 @@ def friendly_source(source: str) -> str:
         return "Licence rules" + (f" · row {rest.split('/')[-1]}" if rest.startswith("row/") else "")
     if kind == "csl":
         return f"US screening list · entry {rest.split('/')[-1]}" if rest.startswith("entry/") else "US screening list"
+    if kind == "network":
+        what = {"links": "linked buyers", "systems": "parts across orders", "people": "staff background"}
+        return "Order network · " + (what.get(rest) or ("alert from a later order" if rest.startswith("alert") else rest))
     return {"screening": "Name check", "derived": "Clearance calculation", "enduse": "End-use check",
             "pipeline": "Clearance action", "officer": f"Officer {rest}".strip()}.get(kind, source)
 
@@ -69,7 +72,7 @@ def group_of(source: str) -> str:
         return "Analysis" if rest.startswith("derived") else "Crustdata"
     return {"email": "Order email", "catalog": "Parts & licence", "licence_rules": "Parts & licence",
             "csl": "Screening", "screening": "Screening", "derived": "Analysis", "enduse": "End-use",
-            "pipeline": "Actions", "officer": "Actions"}.get(kind, "Analysis")
+            "pipeline": "Actions", "officer": "Actions", "network": "Network"}.get(kind, "Analysis")
 
 
 def readable_claim(claim: str) -> str:
@@ -233,3 +236,65 @@ def crustdata_summary(snap: dict[str, Any], cap: Any | None) -> list[tuple[str, 
         s += (" Reasons: " + "; ".join(reasons) + ".") if reasons else " No capability rule was triggered."
         out.append(("Verdict", s))
     return out
+
+
+# --------------------------------------------------------------------------- plain-English network report
+FUNCTION_LABEL = {"mmwave_power_amp": "mmWave power amplifier", "mmwave_lna": "mmWave low-noise amplifier",
+                  "high_speed_adc": "high-speed ADC", "fpga": "FPGA", "rad_hard_fpga": "rad-hard FPGA",
+                  "rad_hard_adc": "rad-hard ADC", "imu": "IMU", "gnss": "GNSS receiver", "mcu": "microcontroller",
+                  "motor_driver": "motor driver", "rf_power_amp": "RF power amplifier", "adc": "ADC",
+                  "rf_transceiver": "RF transceiver", "rf_switch": "RF switch"}
+KIND_LABEL = {"person": "shared person", "email_domain": "shared email domain", "phone": "shared phone number",
+              "address": "shared ship-to address", "middleman": "shared middleman", "forwarder": "shared freight forwarder"}
+
+
+def function_label(token: str) -> str:
+    return " or ".join(FUNCTION_LABEL.get(t, t) for t in token.split("|"))
+
+
+def network_summary(net: Any) -> list[tuple[str, str]]:
+    out: list[tuple[str, str]] = []
+    if not net.linked_companies:
+        out.append(("Linked buyers", f"No other buyer shares a person, email domain, phone number, ship-to address or "
+                                     f"small forwarder with {md_escape(net.company)}."))
+    else:
+        by_company: dict[str, list[str]] = {}
+        for l in net.links:
+            by_company.setdefault(l.company_name, []).append(f"{KIND_LABEL.get(l.kind, l.kind)} {md_escape(l.value)}")
+        direct = "; ".join(f"**{md_escape(c)}** ({', '.join(v)})" for c, v in by_company.items())
+        indirect = [c for c in net.linked_companies if c not in by_company]
+        s = f"{md_escape(net.company)} is linked to {direct}."
+        if indirect:
+            s += f" Through them, also to {', '.join(md_escape(c) for c in indirect)}."
+        out.append(("Linked buyers", s))
+    for f in net.systems:
+        s = (f"Together, orders {', '.join(f.orders)} from {', '.join(md_escape(c) for c in f.companies)} supply "
+             f"{len(f.functions_present)} of {len(f.functions_present) + len(f.functions_missing)} functions of a "
+             f"**{f.system}** ({f.concern}): {', '.join(function_label(x) for x in f.functions_present)}.")
+        if f.functions_missing:
+            s += f" Still missing: {', '.join(function_label(x) for x in f.functions_missing)}."
+        s += (" Their known business explains this, so it is not flagged." if f.fits_business else
+              " **Nothing in their known business explains it**, so the orders are held for the officer.")
+        out.append(("Parts across orders", s))
+    for h in net.listed_staff:
+        out.append(("Staff background", f"**{md_escape(h.person)}** at {md_escape(h.company)} previously worked at "
+                                        f"{md_escape(h.past_employer)}, which matches the listed entity "
+                                        f"**{md_escape(h.listed_name)}** ({md_escape(h.source[:60])})."))
+    return out
+
+
+def network_dot(net: Any) -> str:
+    """Graphviz DOT for the link diagram: buyers as rounded boxes, shared identifiers as small notes."""
+    def q(s: str) -> str:
+        return '"' + s.replace('"', "'") + '"'
+    lines = ["graph G {", "rankdir=LR; bgcolor=transparent; node [fontname=Helvetica, fontsize=11];",
+             f'{q(net.company)} [shape=box, style="rounded,filled", fillcolor="#DBEAFE", color="#1D4ED8"];']
+    for c in net.linked_companies:
+        lines.append(f'{q(c)} [shape=box, style="rounded,filled", fillcolor="#F4F6F8", color="#475467"];')
+    for l in net.links:
+        ident = f"{KIND_LABEL.get(l.kind, l.kind)}: {l.value}"
+        lines.append(f'{q(ident)} [shape=note, style=filled, fillcolor="#FFEDD5", color="#C2410C", fontsize=10];')
+        lines.append(f"{q(net.company)} -- {q(ident)};")
+        lines.append(f"{q(ident)} -- {q(l.company_name)};")
+    lines.append("}")
+    return "\n".join(dict.fromkeys(lines))

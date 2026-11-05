@@ -22,7 +22,8 @@ from clearance.llm import make_llm
 from clearance.mail import Mailbox
 from clearance.models import OrderState
 from clearance.pipeline import Pipeline
-from clearance.ui import crustdata_snapshot, crustdata_summary, evidence_groups, md_escape, readable_value
+from clearance.ui import (crustdata_snapshot, crustdata_summary, evidence_groups, function_label, md_escape,
+                          network_dot, network_summary, readable_value)
 
 st.set_page_config(page_title="Clearance", page_icon=":material/verified_user:", layout="wide")
 
@@ -202,8 +203,11 @@ with p2:
         res = ctx.results
         history = store.get_state_history(conn, sel)
         when = {s.value: at for s, at in history}
-        t_checks, t_crust, t_ev = st.tabs([":material/checklist: Checks", ":material/apartment: Crustdata",
-                                           f":material/receipt_long: Evidence ({len(ledger)})"])
+        net = res.network if res else None
+        net_flag = bool(net and (net.listed_staff or any(s.flagged for s in net.systems)))
+        t_checks, t_crust, t_net, t_ev = st.tabs([":material/checklist: Checks", ":material/apartment: Crustdata",
+                                                  (":material/hub: Network · alert" if net_flag else ":material/hub: Network"),
+                                                  f":material/receipt_long: Evidence ({len(ledger)})"])
 
         with t_checks:
             steps = ["EMAIL_RECEIVED", "PARSED", "CLASSIFIED", "SCREENED", "CAPABILITY_CHECKED", "RECOMMENDED", "SIGNED"]
@@ -327,6 +331,42 @@ with p2:
             if snap["profile"]:
                 with st.expander("Raw Crustdata response (company record)", icon=":material/data_object:"):
                     st.json(snap["company_data"], expanded=1)
+
+        with t_net:
+            if net is None:
+                st.caption("The network check runs after the capability check.")
+            else:
+                with st.container(border=True):
+                    st.markdown("**Across orders and buyers**")
+                    icons = {"Linked buyers": ":material/hub:", "Parts across orders": ":material/memory:",
+                             "Staff background": ":material/badge:"}
+                    for heading, sentence in network_summary(net):
+                        st.markdown(f"{icons.get(heading, '')} **{heading}.** {sentence}")
+                    for alert_from in ctx.network_alerts:
+                        st.markdown(f":orange[:material/notifications_active:] **Alert.** Order {alert_from}, received "
+                                    f"later, completed a set together with this order.")
+                if net.links:
+                    st.markdown("**How the buyers are linked**")
+                    st.graphviz_chart(network_dot(net), alt="Diagram of buyers linked by shared people, addresses "
+                                                            "or forwarders")
+                for f in net.systems:
+                    with st.container(border=True):
+                        st.markdown(f"**{f.system}** " + (":red-badge[Not explained by their business]" if f.flagged
+                                                          else ":green-badge[Fits their business]"))
+                        st.progress(f.coverage, text=f"{len(f.functions_present)} of "
+                                                     f"{len(f.functions_present) + len(f.functions_missing)} functions present")
+                        st.markdown(" ".join(f":blue-badge[{function_label(x)}]" for x in f.functions_present)
+                                    + " " + " ".join(f":gray-badge[missing: {function_label(x)}]" for x in f.functions_missing))
+                        st.caption(f"Concern: {f.concern}. Orders {', '.join(f.orders)}.")
+                if net.cluster_orders:
+                    marks = ",".join("?" * len(net.cluster_orders))
+                    rows_ = rows(f"SELECT order_id AS 'Order', company_name AS 'Buyer', part_number AS 'Part', function, "
+                                 f"quantity AS 'Qty', substr(created_at,1,16) AS 'Received' FROM network_orders "
+                                 f"WHERE order_id IN ({marks}) ORDER BY created_at", tuple(net.cluster_orders))
+                    for r_ in rows_:
+                        r_["What it does"] = function_label(r_.pop("function") or "") or "—"
+                    st.markdown("**Orders from this buyer and its linked buyers (last 180 days)**")
+                    st.dataframe(pd.DataFrame(rows_), hide_index=True, alt="Recent orders across the linked buyers")
 
         with t_ev:
             cited = {e.id for e in d.evidence} if d else set()

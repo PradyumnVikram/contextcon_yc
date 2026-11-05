@@ -73,3 +73,23 @@ def test_crustdata_summary_when_nothing_found(offline):
 def test_every_capability_rule_has_plain_english_text():
     from clearance import config
     assert set(ui.RULE_TEXT) == set(config.CAPABILITY_POINTS)
+
+
+def test_network_summary_and_sources():
+    from clearance.models import ListedStaff, NetworkLink, NetworkResult, SystemFinding
+    assert ui.friendly_source("network:links") == "Order network · linked buyers"
+    assert ui.group_of("network:alert/O0003") == "Network"
+    lone = ui.network_summary(NetworkResult(company="Acme"))
+    assert lone[0][1].startswith("No other buyer shares")
+    net = NetworkResult(company="Delta", linked_companies=["Orbit", "Nimbus"],
+                        links=[NetworkLink(company="o", company_name="Orbit", kind="person", value="Rakesh Varma", weight=0.5)],
+                        systems=[SystemFinding(system="Radar seeker front-end", concern="guidance radar", coverage=0.75,
+                                               functions_present=["mmwave_power_amp", "mmwave_lna", "high_speed_adc"],
+                                               functions_missing=["fpga|rad_hard_fpga"], orders=["O1", "O2", "O3"],
+                                               companies=["Delta", "Nimbus", "Orbit"], fits_business=False, flagged=True)],
+                        listed_staff=[ListedStaff(person="Imran", company="Delta", past_employer="X", listed_name="X CORP",
+                                                  status="exact_hit", source="Entity List")])
+    text = " ".join(t for _, t in ui.network_summary(net))
+    assert "Orbit" in text and "shared person Rakesh Varma" in text
+    assert "3 of 4 functions" in text and "Radar seeker front-end" in text and "FPGA" in text
+    assert "Imran" in text and "X CORP" in text
