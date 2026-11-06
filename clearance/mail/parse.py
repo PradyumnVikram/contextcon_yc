@@ -69,6 +69,15 @@ def _clean(p: ParsedOrder) -> dict[str, Any]:
     return d
 
 
+def is_not_an_order(partial: dict[str, Any]) -> bool:
+    """Irrelevant mail goes to Trash. Never when a part line was read: those are orders, however odd."""
+    if partial.get("lines"):
+        return False
+    extracted = any(partial.get(f) for f in ("buyer_name", "buyer_country", "ship_to_country", "ship_to_address",
+                                             "buyer_address", "stated_purpose"))
+    return partial.get("is_order") is False or not extracted
+
+
 def _missing(d: dict[str, Any]) -> list[str]:
     missing = [f for f in REQUIRED if not d.get(f)]
     missing += [f for f in d.get("ambiguous_fields", []) if f in REQUIRED and f not in missing]
@@ -91,7 +100,7 @@ def _build(order_id: str, email_id: str, d: dict[str, Any]) -> Order:
 def _record(ledger: Ledger, d: dict[str, Any], email: Email) -> None:
     src = f"email:{email.msg_id}"
     for k, v in d.items():
-        if k != "ambiguous_fields" and v not in (None, [], ""):
+        if k not in ("ambiguous_fields", "is_order") and v not in (None, [], ""):
             ledger.add(f"Order field '{k}' from email", v, src, email.received_at)
 
 

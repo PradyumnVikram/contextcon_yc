@@ -18,6 +18,8 @@ ORDERS = {
     "PO partial": {"buyer_name": "Synthetic Radar Systems", "buyer_country": "IN", "ship_to_country": None,
                    "lines": [{"part_number": "PA-77G-HE", "quantity": 4}]},
     "details": {"ship_to_country": "IN"},
+    "Vbucks": {"is_order": False},
+    "Quote": {"buyer_name": "Synthetic Radar Systems", "buyer_country": "IN"},
 }
 EVASIVE = {"claimed_use": "civilian use", "mapped_needs": [], "end_user_name": None, "end_user_country": None,
            "evasive": True}
@@ -50,6 +52,23 @@ def test_clean_order_releases_and_signing_registers_customer(tmp_path):
     assert store.get_state(conn, oid) is OrderState.SIGNED
     assert conn.execute("SELECT tier FROM customers").fetchone()["tier"] == "consistent"
     assert "A. Officer" in p.audit(oid)
+
+
+def test_irrelevant_email_goes_to_trash_without_an_order_or_reply(tmp_path):
+    p, mb, conn = make(tmp_path)
+    mb.compose("kid@game.example", "Vbucks?", "free vbucks??")
+    assert p.process_inbox() == []
+    assert conn.execute("SELECT COUNT(*) FROM orders").fetchone()[0] == 0
+    assert conn.execute("SELECT order_id FROM emails").fetchone()["order_id"] == "TRASH"
+    assert mb.outbox_messages() == [] and mb.poll(conn) == []
+
+
+def test_a_vague_enquiry_is_not_trash(tmp_path):
+    p, mb, conn = make(tmp_path)
+    mb.compose("buyer@radar.example", "Quote please", "Need some amplifiers. Synthetic Radar Systems, India")
+    [oid] = p.process_inbox()
+    assert store.get_state(conn, oid) is OrderState.AWAITING_ORDER_DETAILS
+    assert len(mb.outbox_messages()) == 1
 
 
 def test_shell_end_use_loop_with_one_followup_then_hold(tmp_path):

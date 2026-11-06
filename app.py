@@ -21,7 +21,7 @@ from clearance.evidence import Ledger
 from clearance.llm import make_llm
 from clearance.mail import Mailbox
 from clearance.models import OrderState
-from clearance.pipeline import Pipeline
+from clearance.pipeline import TRASH, Pipeline
 from clearance.ui import (crustdata_snapshot, crustdata_summary, evidence_groups, function_label, md_escape,
                           network_dot, network_summary, readable_value)
 
@@ -109,8 +109,13 @@ def select(oid: str) -> None:
 def auto_poll() -> None:
     """Own timer; fresh pipeline per tick so SQLite stays on one thread. Full rerun only when something changed."""
     c = store.connect(config.DB_PATH)
+    trashed = lambda: c.execute("SELECT COUNT(*) FROM emails WHERE order_id=?", (TRASH,)).fetchone()[0]
+    before = trashed()
     touched = Pipeline(c, make_llm(c), Mailbox(config.MAILBOX_DIR)).process_inbox()
     st.caption(f":material/schedule: Checking the inbox every {AUTO_POLL_S}s")
+    if trashed() > before:
+        st.toast("Moved an email that is not an order to Trash", icon=":material/delete:")
+        st.rerun(scope="app")
     if touched:
         st.session_state["sel"] = touched[-1]
         st.toast(f"Processed {', '.join(touched)}", icon=":material/mark_email_read:")
@@ -179,6 +184,16 @@ with p1:
             st.button("Selected" if is_sel else "Open", key=f"open-{o['order']}", on_click=select, args=(o["order"],),
                       disabled=is_sel, icon=":material/radio_button_checked:" if is_sel else ":material/open_in_new:",
                       type="tertiary")
+
+    trash = rows("SELECT subject, body, received_at FROM emails WHERE order_id=? ORDER BY received_at DESC", (TRASH,))
+    with st.expander(f"Trash ({len(trash)})", icon=":material/delete:"):
+        st.caption("Emails that are not orders. No order was opened and no reply was sent.")
+        if not trash:
+            st.caption("None.")
+        for m in trash:
+            with st.container(border=True, gap="small"):
+                st.markdown(f"**{md_escape(m['subject'] or '(no subject)')}**")
+                st.caption(f"{m['received_at'][:16].replace('T', ' ')}  \n{md_escape(m['body'][:300])}")
 
     if sel:
         st.markdown(f"**Conversation · {sel}**")

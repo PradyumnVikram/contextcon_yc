@@ -26,7 +26,7 @@ from clearance import decision as dec
 from clearance import enduse, network
 from clearance.evidence import Ledger
 from clearance.llm import LLM, LLMUnavailable
-from clearance.mail import Mailbox, match_reply, merge_details, missing_details_email, parse_order
+from clearance.mail import Mailbox, is_not_an_order, match_reply, merge_details, missing_details_email, parse_order
 from clearance.models import (Decision, Email, Incomplete, Order, OrderResults, OrderState, Outcome, Override,
                               Party, Signature)
 
@@ -34,6 +34,7 @@ log = logging.getLogger(__name__)
 
 _CTX_SCHEMA = "CREATE TABLE IF NOT EXISTS order_context (order_id TEXT PRIMARY KEY, context_json TEXT)"
 SIGNABLE = ("RELEASE", "BLOCK")
+TRASH = "TRASH"   # emails.order_id for irrelevant mail: no order is created and the sender gets no reply
 
 
 class OrderContext(BaseModel):
@@ -98,14 +99,14 @@ class Pipeline:
             return None
         return self._new_order(email)
 
-    def _new_order(self, email: Email) -> str:
+    def _new_order(self, email: Email) -> str | None:
         oid = self._new_order_id()
-        store.save_email(self.conn, email, "in", order_id=oid)
         ctx = OrderContext(buyer_email=email.from_addr)
         ledger = Ledger()
         try:
             parsed = parse_order(email, oid, self.llm, ledger)
         except LLMUnavailable as e:
+            store.save_email(self.conn, email, "in", order_id=oid)
             log.warning("parse failed for %s: %s", oid, e)
             order = self._placeholder(oid, email, {})
             store.save_order(self.conn, order, OrderState.EMAIL_RECEIVED)
@@ -115,6 +116,11 @@ class Pipeline:
             self._finish(oid, order, ledger, ctx)
             return oid
 
+        if isinstance(parsed, Incomplete) and is_not_an_order(parsed.partial):
+            store.save_email(self.conn, email, "in", order_id=TRASH)
+            log.info("email %s is not an order: moved to trash", email.msg_id)
+            return None
+        store.save_email(self.conn, email, "in", order_id=oid)
         if isinstance(parsed, Incomplete):
             order = self._placeholder(oid, email, parsed.partial)
             store.save_order(self.conn, order, OrderState.EMAIL_RECEIVED)
