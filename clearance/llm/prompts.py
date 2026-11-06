@@ -24,6 +24,8 @@ Task: extract a purchase order from the email in `email.subject` and `email.body
 - middleman_* is an intermediary/agent/consignee other than the buyer; shipper_* is the freight forwarder or carrier.
 - Leave a field null if the email does not state it. Do not guess from the domain or signature alone.
 - List in ambiguous_fields any field whose value is stated unclearly (e.g. two different quantities).
+- is_order is false only when the email has nothing to do with buying electronic parts (spam, jokes, "Vbucks?",
+  unrelated questions). An incomplete or vague order or enquiry is still true.
 
 Example 1: "Please supply 4 pcs PA-77G-HE to our Pune lab. Synthetic Radar Systems, India."
 -> buyer_name "Synthetic Radar Systems", buyer_country "IN", ship_to_country "IN",

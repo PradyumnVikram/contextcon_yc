@@ -1,0 +1,50 @@
+# Clearance theme: based on Streamlit's bundled shadcn template, tuned for readability.
+# High-contrast text everywhere (captions use grayColor, so it is kept dark), blue accent for actions.
+
+[theme]
+base = "light"
+primaryColor = "#1D4ED8"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F4F6F8"
+textColor = "#0B1220"
+linkColor = "#1D4ED8"
+borderColor = "#D9DEE5"
+showWidgetBorder = true
+showSidebarBorder = true
+baseRadius = "8px"
+buttonRadius = "8px"
+font = "'Inter':https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+codeFont = "'JetBrains Mono':https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
+codeFontSize = "0.85rem"
+codeTextColor = "#0B1220"
+codeBackgroundColor = "#EEF1F5"
+baseFontSize = 15
+headingFontWeights = [700, 600, 600, 600, 600, 600]
+headingFontSizes = ["30px", "24px", "20px", "17px", "15px", "14px"]
+
+grayColor = "#475467"
+grayTextColor = "#344054"
+blueColor = "#1D4ED8"
+greenColor = "#15803D"
+greenTextColor = "#166534"
+greenBackgroundColor = "#DCFCE7"
+redColor = "#B91C1C"
+redTextColor = "#991B1B"
+redBackgroundColor = "#FEE2E2"
+orangeColor = "#C2410C"
+orangeTextColor = "#9A3412"
+orangeBackgroundColor = "#FFEDD5"
+violetColor = "#6D28D9"
+violetTextColor = "#5B21B6"
+violetBackgroundColor = "#EDE9FE"
+chartCategoricalColors = ["#1D4ED8", "#15803D", "#C2410C", "#6D28D9", "#B91C1C", "#0E7490", "#475467"]
+
+dataframeBorderColor = "#D9DEE5"
+dataframeHeaderBackgroundColor = "#EEF1F5"
+dataframeHeaderTextColor = "#0B1220"
+
+[theme.sidebar]
+backgroundColor = "#F7F8FA"
+secondaryBackgroundColor = "#EEF1F5"
+textColor = "#0B1220"
+borderColor = "#D9DEE5"

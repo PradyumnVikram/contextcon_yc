@@ -1,7 +1,8 @@
 """Restricted-party screening against the US CSL (task A5). OWNER: Person A.
 
 normalize -> block (same country, or shared first token) -> score -> threshold (AGENTS §4.2):
-    score = 0.60*token_set + 0.25*jaro_winkler + 0.15*address   (address weight re-spread when unknown)
+    score = 0.60*token + 0.25*jaro_winkler + 0.15*address   (address weight re-spread when unknown)
+    token = mean(token_set_ratio, token_sort_ratio), so a one-word listed name can't match every longer name
     exact_hit: normalised names identical (or score >= 97) AND country matches
     fuzzy_hit: score >= 85
 """
@@ -15,7 +16,7 @@ from functools import lru_cache
 from rapidfuzz import fuzz
 from rapidfuzz.distance import JaroWinkler
 
-from clearance import config
+from clearance import config, store
 from clearance.evidence import Ledger
 from clearance.models import Match, Party, ScreeningResult
 from clearance.screening import csl
@@ -61,7 +62,9 @@ def _index():
 
 def _score(q: str, cand: str, q_addr: str | None, cand_addrs: list[str]) -> tuple[float, dict[str, float]]:
     qt, ct = _translit(q), _translit(cand)
-    ts = float(fuzz.token_set_ratio(qt, ct))
+    # token_set alone scores 100 whenever one name's words are a subset of the other's ("astra" vs
+    # "astra microwave products"); averaging with token_sort keeps typo tolerance but penalises extra words.
+    ts = (float(fuzz.token_set_ratio(qt, ct)) + float(fuzz.token_sort_ratio(qt, ct))) / 2
     jw = 100.0 * JaroWinkler.normalized_similarity(qt, ct)
     w = config.SCREEN_WEIGHTS
     if q_addr and cand_addrs:
@@ -104,15 +107,22 @@ def screen(party: Party, ledger: Ledger) -> ScreeningResult:
 
     matches = sorted(best.values(), key=lambda m: -m.score)[:5]
     status = "exact_hit" if any(m.listed_record["exact"] for m in matches) else "fuzzy_hit" if matches else "clear"
+    lists_at = csl.downloaded_at()
     if matches:
         top = matches[0]
         eid = ledger.add(f"CSL screening of {party.role} '{party.name}': {status} vs '{top.listed_name}'",
                          {"score": top.score, "breakdown": top.breakdown, "list": top.listed_record["source"]},
-                         f"csl:entry/{top.csl_entry_id}")
+                         f"csl:entry/{top.csl_entry_id}", lists_at)
     else:
         eid = ledger.add(f"CSL screening of {party.role} '{party.name}': clear",
-                         {"candidates_checked": len(candidates)}, "csl:none")
+                         {"candidates_checked": len(candidates)}, "csl:none", lists_at)
     ids = [eid]
+    if lists_at is None:
+        ids.append(ledger.add("Only the demo restricted list is loaded; the official lists were not checked",
+                              None, "csl:lists"))
+    elif store.is_stale(lists_at, config.SCREENING_LIST_MAX_AGE_DAYS):
+        ids.append(ledger.add(f"Restricted lists are out of date: downloaded {lists_at:%d %b %Y}",
+                              lists_at.isoformat(), "csl:lists", lists_at))
     if is_forwarder:
         ids.append(ledger.add(f"'{party.name}' is a freight/logistics company", True, "screening:forwarder_keywords"))
     if (party.country or "").upper() == "IN":
@@ -124,23 +134,35 @@ def screen(party: Party, ledger: Ledger) -> ScreeningResult:
                            is_forwarder=is_forwarder, evidence_ids=ids)
 
 
+_NUMBER_RE = re.compile(r"\d+[a-z]?")
+
+
 def _address_match(party: Party, entries) -> Match | None:
-    """A listed address is its own hit, even when the company name is new."""
-    addr = (party.address or "").strip()
+    """A listed address is its own hit, even when the company name is new.
+
+    Only a *specific* listed address can match: it must carry a unit, plot, office or PO box number that also
+    appears in the buyer's address. A bare area ("Jebel Ali Free Zone, Dubai") is shared by thousands of real
+    companies, and token_set alone scores 100 whenever the listed words are a subset of the buyer's.
+    An address match is a close match for the officer to compare, never an exact hit (that needs the name).
+    """
+    addr = (party.address or "").strip().lower()
     if len(addr) < 10:
         return None
+    addr_numbers = set(_NUMBER_RE.findall(addr))
     country = (party.country or "").upper()
     best: Match | None = None
     for e in entries:
         if country and e.countries and country not in e.countries:
             continue
         for listed in e.addresses:
-            if len(listed) < 10:
+            low = listed.lower()
+            numbers = set(_NUMBER_RE.findall(low))
+            if len(low) < 10 or not numbers or not numbers <= addr_numbers:
                 continue
-            score = float(fuzz.token_set_ratio(addr.lower(), listed.lower()))
-            if score < 90:
+            score = round((float(fuzz.token_set_ratio(addr, low)) + float(fuzz.token_sort_ratio(addr, low))) / 2, 1)
+            if score < config.SCREEN_FUZZY_SCORE:
                 continue
-            exact = score >= 90
+            exact = False
             m = Match(csl_entry_id=e.id, listed_name=e.name, score=score,
                       breakdown={"address": round(score, 1)},
                       listed_record={"source": e.source, "name": e.name, "addresses": [listed],

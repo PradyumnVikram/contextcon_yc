@@ -26,16 +26,36 @@ def assess(party: Party, classifications: list[Classification], lines: list[Orde
            ship_to_country: str, ledger: Ledger) -> CapabilityResult:
     client = crustdata_client.get_client()
     conn = client.conn
-    key = party.domain or party.name
+    # identify the company by domain first (exact), then by name; the first key with data is used throughout
+    keys = [k for k in (party.domain, party.name) if k]
+    key = next((k for k in keys if client.fixtures.company(k) is not None), keys[0] if keys else party.name)
     src = "crustdata-fixture" if client.fixtures.company(key) is not None else "crustdata"
     now = datetime.now(timezone.utc)
     ids: list[str] = []
+    stamp = [now]   # when the Crustdata answers were fetched (a cached answer keeps its original date)
 
     def ev(claim, value, path):
-        ids.append(ledger.add(claim, value, f"{src}:{path}", now))
+        ids.append(ledger.add(claim, value, f"{src}:{path}", stamp[0]))
 
-    cd = client.enrich_company(key)
-    pc = background_check(client, conn, key) if cd is not None else None
+    client.fetched_at.pop("/company/enrich", None)
+    try:
+        cd = client.enrich_company(key)
+        if cd is None and len(keys) > 1 and key != keys[-1]:
+            key = keys[-1]
+            cd = client.enrich_company(key)
+        if cd is not None and (at := client.fetched_at.get("/company/enrich")):
+            stamp[0] = at
+            ev(f"Crustdata company record fetched {at:%d %b %Y %H:%M} UTC", at.isoformat(), "/company/enrich#fetched_at")
+    except crustdata_client.CrustdataError as e:
+        ev(f"Crustdata company lookup unavailable for '{party.name}'", str(e)[:200], "/company/enrich#error")
+        return CapabilityResult(party_name=party.name, coverage="missing", buyer_type="unclear", tier="no_data",
+                                evidence_ids=ids)
+    pc = None
+    if cd is not None:
+        try:
+            pc = background_check(client, conn, key)
+        except crustdata_client.CrustdataError as e:
+            ev("Employee background check unavailable", str(e)[:200], "/person/search#error")
 
     # ---- coverage -----------------------------------------------------------
     if cd is None:
@@ -54,7 +74,11 @@ def assess(party: Party, classifications: list[Classification], lines: list[Orde
     matching = pc.matching(needs) if pc and needs else []
     kw, pv = keyword_vote(prof), people_vote(pc)
     btype, buyer_basis = decide_buyer(prof, pc)
-    peers = peer_set(client, conn, prof)
+    try:
+        peers = peer_set(client, conn, prof)
+    except crustdata_client.CrustdataError as e:
+        peers = []
+        ev("Peer comparison unavailable", str(e)[:200], "/company/search#error")
     pcts, n_peers = peer_percentiles(prof, peers)
 
     feats = {"headcount": prof.headcount, "age_years": age, "headcount_growth_yoy_pct": prof.growth_yoy_pct,

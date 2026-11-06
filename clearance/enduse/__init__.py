@@ -14,6 +14,7 @@ from clearance.evidence import Ledger
 from clearance.llm import LLM, LLMUnavailable
 from clearance.llm.schemas import DraftOut, EndUseOut
 from clearance.mail import tag
+from clearance.mail.parse import finalize_subject
 from clearance.models import (CapabilityResult, Classification, Email, EndUseClaim, EndUseResult, Order,
                               OrderLine, Party, ScreeningResult)
 
@@ -53,8 +54,8 @@ def _draft(kind: str, order: Order, ask_for: list[str], llm: LLM, fallback_subje
     parts = ", ".join(f"{l.quantity} x {l.part_number}" for l in order.lines)
     try:
         d = llm.structured("draft_email", DraftOut, {"kind": kind, "tag": t, "ask_for": ask_for, "order_parts": parts})
-        if d.subject.startswith(t):
-            return d
+        if d.body.strip():
+            return DraftOut(subject=finalize_subject(d.subject, t, fallback_subject), body=d.body)
     except LLMUnavailable:
         pass
     body = f"{fallback_intro} ({parts}). Please reply with:\n- " + "\n- ".join(ask_for) + "\n\nCompliance Desk"

@@ -26,8 +26,27 @@ FIELD_LABELS = {
 }
 
 
+FREE_MAIL = {"gmail.com", "googlemail.com", "yahoo.com", "yahoo.co.in", "outlook.com", "hotmail.com", "live.com",
+             "icloud.com", "me.com", "aol.com", "proton.me", "protonmail.com", "rediffmail.com", "zoho.com",
+             "yandex.com", "mail.com", "gmx.com", "example.com"}
+
+
+def sender_domain(from_addr: str) -> str | None:
+    """Corporate domain of the sender ("Procurement <p@astramwp.com>" -> "astramwp.com"); None for free-mail."""
+    m = re.search(r"@([A-Za-z0-9.-]+\.[A-Za-z]{2,})", from_addr or "")
+    dom = m.group(1).lower() if m else None
+    return dom if dom and dom not in FREE_MAIL else None
+
+
 def tag(order_id: str) -> str:
     return f"[CLR-{order_id}]"
+
+
+def finalize_subject(subject: str, order_tag: str, fallback: str) -> str:
+    """The subject must start with the tag AND say what the email is about (a bare tag is easy to miss)."""
+    s = (subject or "").strip()
+    rest = s[len(order_tag):].strip(" :-–") if s.startswith(order_tag) else ""
+    return f"{order_tag} {rest}" if len(rest) >= 3 else f"{order_tag} {fallback}"
 
 
 def match_reply(email: Email, conn: sqlite3.Connection | None = None) -> str | None:
@@ -48,6 +67,15 @@ def _clean(p: ParsedOrder) -> dict[str, Any]:
         d[f] = v if re.fullmatch(r"[A-Z]{2}", v) else None
     d["lines"] = [l for l in d["lines"] if l["part_number"].strip() and l["quantity"] > 0]
     return d
+
+
+def is_not_an_order(partial: dict[str, Any]) -> bool:
+    """Irrelevant mail goes to Trash. Never when a part line was read: those are orders, however odd."""
+    if partial.get("lines"):
+        return False
+    extracted = any(partial.get(f) for f in ("buyer_name", "buyer_country", "ship_to_country", "ship_to_address",
+                                             "buyer_address", "stated_purpose"))
+    return partial.get("is_order") is False or not extracted
 
 
 def _missing(d: dict[str, Any]) -> list[str]:
@@ -72,12 +100,16 @@ def _build(order_id: str, email_id: str, d: dict[str, Any]) -> Order:
 def _record(ledger: Ledger, d: dict[str, Any], email: Email) -> None:
     src = f"email:{email.msg_id}"
     for k, v in d.items():
-        if k != "ambiguous_fields" and v not in (None, [], ""):
+        if k not in ("ambiguous_fields", "is_order") and v not in (None, [], ""):
             ledger.add(f"Order field '{k}' from email", v, src, email.received_at)
 
 
-def _finish(order_id: str, email: Email, d: dict[str, Any], ledger: Ledger) -> Order | Incomplete:
+def _finish(order_id: str, email: Email, d: dict[str, Any], ledger: Ledger, sender: str | None = None) -> Order | Incomplete:
     _record(ledger, d, email)
+    if not d.get("buyer_website") and (dom := sender_domain(sender or email.from_addr)):
+        # a corporate sender address identifies the company for Crustdata (a website in the email still wins)
+        d["buyer_website"] = dom
+        ledger.add("Buyer domain taken from sender address", dom, f"email:{email.msg_id}#from", email.received_at)
     if missing := _missing(d):
         return Incomplete(order_id=order_id, missing_fields=missing, partial=d)
     return _build(order_id, email.msg_id, d)
@@ -100,15 +132,16 @@ def merge_details(partial: dict[str, Any], reply: Email, order_id: str, llm: LLM
             merged[k] = v
         elif v not in (None, [], "") and not merged.get(k):
             merged[k] = v
-    return _finish(order_id, reply, merged, ledger)
+    return _finish(order_id, reply, merged, ledger, sender=reply.from_addr)
 
 
 def missing_details_email(order_id: str, missing: list[str], llm: LLM) -> DraftOut:
     ask = [FIELD_LABELS.get(f, f) for f in missing]
     try:
         d = llm.structured("draft_email", DraftOut, {"kind": "missing_details", "tag": tag(order_id), "ask_for": ask})
-        if d.subject.startswith(tag(order_id)):
-            return d
+        if d.body.strip():
+            return DraftOut(subject=finalize_subject(d.subject, tag(order_id), "Additional order details needed"),
+                            body=d.body)
     except LLMUnavailable:
         pass
     body = ("Thank you for your order. Before we can process it, please reply with:\n- "

@@ -6,7 +6,7 @@ import json
 import sqlite3
 from datetime import datetime, timezone
 
-from clearance import config
+from clearance import config, store
 from clearance.capability.profile import CompanyProfile, parse_company
 from clearance.crustdata_client import CrustdataClient, norm_key
 
@@ -25,12 +25,20 @@ def _filters(p: CompanyProfile) -> dict:
 
 def peer_set(client: CrustdataClient, conn: sqlite3.Connection, profile: CompanyProfile) -> list[CompanyProfile]:
     key = norm_key(profile.domain or profile.name or "")
-    row = conn.execute("SELECT peer_set_json FROM peers WHERE company_key=?", (key,)).fetchone()
-    if row:
+    row = conn.execute("SELECT peer_set_json, fetched_at FROM peers WHERE company_key=?", (key,)).fetchone()
+    if row and not store.is_stale(row["fetched_at"], config.CRUSTDATA_MAX_AGE_DAYS):
         raw = json.loads(row["peer_set_json"])
     else:
-        raw = client.search_companies(_filters(profile), limit=config.PEER_SET_MAX, fixture_industry=profile.industry)
+        # Synthetic peers only for synthetic demo companies; a real company is always compared with real peers.
+        is_demo = client.fixtures.company(profile.domain or profile.name or "") is not None
+        raw = client.search_companies(_filters(profile), limit=config.PEER_SET_MAX,
+                                      fixture_industry=profile.industry if is_demo else None)
         raw = [c for c in raw if norm_key((c.get("basic_info") or {}).get("primary_domain") or "") != key]
+        if not is_demo and raw and config.PEER_ENRICH_MAX:
+            # search can't return engineering share or traffic: enrich the first peers in ONE batched request
+            doms = [(c.get("basic_info") or {}).get("primary_domain") for c in raw[: config.PEER_ENRICH_MAX]]
+            full = client.enrich_companies([d for d in doms if d])
+            raw = [full.get(norm_key((c.get("basic_info") or {}).get("primary_domain") or ""), c) for c in raw]
         conn.execute("INSERT OR REPLACE INTO peers VALUES (?,?,?)",
                      (key, json.dumps(raw), datetime.now(timezone.utc).isoformat()))
         conn.commit()

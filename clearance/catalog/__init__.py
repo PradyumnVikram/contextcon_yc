@@ -68,7 +68,8 @@ def classify(part_number: str, ledger: Ledger, description: str = "") -> Classif
             scomet_category=row["scomet_category"] or None, eccn=row["eccn"] or None, us_origin=_bool(row["us_origin"]),
             part_class=row["part_class"], needs=[n for n in row["needs"].split(";") if n],
             max_units_per_engineer=int(row["max_units_per_engineer"]),
-            max_units_distributor_small=int(row["max_units_distributor_small"]), evidence_ids=[eid])
+            max_units_distributor_small=int(row["max_units_distributor_small"]), function=row.get("function") or None,
+            evidence_ids=[eid])
     idx = list(load_catalog()).index(pn) + 2  # CSV line number (header is line 1)
     value = {k: row[k] for k in ("description", "controlled", "scomet_category", "eccn", "us_origin", "part_class", "needs")}
     eid = ledger.add(f"Catalog entry for {pn}", value, f"catalog:row/{idx}")
@@ -77,7 +78,8 @@ def classify(part_number: str, ledger: Ledger, description: str = "") -> Classif
         scomet_category=row["scomet_category"] or None, eccn=row["eccn"] or None, us_origin=_bool(row["us_origin"]),
         part_class=row["part_class"], needs=[n for n in row["needs"].split(";") if n],
         max_units_per_engineer=int(row["max_units_per_engineer"]),
-        max_units_distributor_small=int(row["max_units_distributor_small"]), evidence_ids=[eid])
+        max_units_distributor_small=int(row["max_units_distributor_small"]), function=row.get("function") or None,
+            evidence_ids=[eid])
 
 
 def _best(regime: str, key: str, dest: str) -> tuple[int, dict] | None:

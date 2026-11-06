@@ -32,6 +32,12 @@ CREATE TABLE IF NOT EXISTS evidence (
 CREATE TABLE IF NOT EXISTS emails (
     msg_id TEXT PRIMARY KEY, direction TEXT, order_id TEXT, subject TEXT, body TEXT,
     in_reply_to TEXT, received_at TEXT);
+CREATE TABLE IF NOT EXISTS network_links (
+    company_key TEXT, company_name TEXT, kind TEXT, value TEXT, order_id TEXT, source TEXT, created_at TEXT,
+    PRIMARY KEY (company_key, kind, value));
+CREATE TABLE IF NOT EXISTS network_orders (
+    order_id TEXT, line INTEGER, company_key TEXT, company_name TEXT, part_number TEXT, function TEXT,
+    quantity INTEGER, controlled INTEGER, created_at TEXT, PRIMARY KEY (order_id, line));
 CREATE TABLE IF NOT EXISTS customers (
     company_key TEXT PRIMARY KEY, name TEXT, tier TEXT, watcher_id TEXT, updated_at TEXT);
 """
@@ -55,9 +61,26 @@ def cache_key(endpoint: str, request: Any) -> str:
     return hashlib.sha256(blob.encode()).hexdigest()
 
 
-def cache_get(conn: sqlite3.Connection, endpoint: str, request: Any) -> Any | None:
-    row = conn.execute("SELECT response_json FROM api_cache WHERE key=?", (cache_key(endpoint, request),)).fetchone()
-    return json.loads(row["response_json"]) if row else None
+def cache_get(conn: sqlite3.Connection, endpoint: str, request: Any, max_age_days: float | None = None) -> Any | None:
+    row = conn.execute("SELECT response_json, fetched_at FROM api_cache WHERE key=?",
+                       (cache_key(endpoint, request),)).fetchone()
+    if row is None or (max_age_days is not None and is_stale(row["fetched_at"], max_age_days)):
+        return None
+    return json.loads(row["response_json"])
+
+
+def cache_fetched_at(conn: sqlite3.Connection, endpoint: str, request: Any) -> datetime | None:
+    row = conn.execute("SELECT fetched_at FROM api_cache WHERE key=?", (cache_key(endpoint, request),)).fetchone()
+    return datetime.fromisoformat(row["fetched_at"]) if row and row["fetched_at"] else None
+
+
+def is_stale(fetched_at: str | datetime | None, max_age_days: float) -> bool:
+    if not fetched_at:
+        return True
+    at = datetime.fromisoformat(fetched_at) if isinstance(fetched_at, str) else fetched_at
+    if at.tzinfo is None:
+        at = at.replace(tzinfo=timezone.utc)
+    return (datetime.now(timezone.utc) - at).total_seconds() > max_age_days * 86400
 
 
 def cache_put(conn: sqlite3.Connection, endpoint: str, request: Any, response: Any) -> None:

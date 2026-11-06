@@ -40,9 +40,21 @@ def test_extra_sanctions_list_is_screened(tmp_path, monkeypatch):
 
 
 def test_listed_address_is_its_own_hit():
+    # a specific listed address (with its office number) is a hit even under a new name, but an address alone
+    # is a close match for the officer to compare, never an exact hit (exact needs the name, per AGENTS §4.2)
     hit = _s("Independent Buyer", "AE", address="Office 12, Demo Tower, Dubai")
-    assert hit.status == "exact_hit"
+    assert hit.status == "fuzzy_hit"
     assert hit.matches[0].listed_record.get("address_match")
+
+
+def test_a_generic_area_address_does_not_match_every_buyer_there():
+    # the listed entry's address is only "Jebel Ali Free Zone, Dubai": thousands of real companies are there
+    for addr in ["Warehouse 14, Jebel Ali Free Zone, Dubai, UAE", "Plot S10, Jebel Ali Free Zone, Dubai"]:
+        assert _s("Independent Buyer", "AE", address=addr).status == "clear", addr
+
+
+def test_a_different_unit_number_is_not_the_same_address():
+    assert _s("Independent Buyer", "AE", address="Office 47, Demo Tower, Dubai").status == "clear"
 
 
 def test_indian_buyer_records_that_iec_was_not_checked():
@@ -65,3 +77,9 @@ def test_convert_raw_csl(tmp_path):
     assert csl.convert(raw, out) == 1
     [e] = csl._read(out)
     assert e.countries == {"AE", "IN"} and e.alt_names == ["XC"]
+
+
+def test_one_word_listed_name_does_not_flag_longer_company_names():
+    # a listed entity called just "NOVA" must not flag every company with "Nova" in its name
+    assert _s("Nova Microwave Products Limited", "IN").status == "clear"
+    assert _s("Nova", "RU").status == "exact_hit"

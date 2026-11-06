@@ -10,6 +10,8 @@ class LineOut(BaseModel):
 
 
 class ParsedOrder(BaseModel):
+    is_order: bool = Field(True, description="False if the email is not about buying parts at all (spam, jokes, "
+                                             "unrelated questions)")
     buyer_name: str | None = None
     buyer_website: str | None = None
     buyer_country: str | None = Field(None, description="ISO-3166 alpha-2, e.g. IN")

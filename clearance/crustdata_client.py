@@ -15,6 +15,7 @@ import sqlite3
 import threading
 import time
 from collections import deque
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -25,7 +26,8 @@ log = logging.getLogger(__name__)
 FIXTURES_DIR = config.DATA_DIR / "demo_crustdata"
 
 ENRICH_FIELDS = ["basic_info", "headcount", "taxonomy", "locations", "web_traffic", "hiring", "news"]
-PEER_FIELDS = ["basic_info", "headcount", "web_traffic"]
+PEER_FIELDS = ["basic_info", "headcount", "taxonomy", "locations"]   # /company/search rejects web_traffic (live, 2026-11-06)
+PEER_ENRICH_FIELDS = ["basic_info", "headcount", "web_traffic"]
 PERSON_FIELDS = [
     "crustdata_person_id",
     "basic_profile.name",
@@ -131,6 +133,7 @@ class CrustdataClient:
         self._transport = transport
         self._http = None
         self._throttle = _Throttle()
+        self.fetched_at: dict[str, datetime | None] = {}   # endpoint -> when the last answer was fetched
 
     @property
     def live(self) -> bool:
@@ -147,14 +150,25 @@ class CrustdataClient:
         return self._http
 
     def post(self, endpoint: str, body: dict[str, Any], cache: bool = True) -> Any:
-        if cache and (hit := store.cache_get(self.conn, endpoint, body)) is not None:
+        if cache and (hit := store.cache_get(self.conn, endpoint, body, config.CRUSTDATA_MAX_AGE_DAYS)) is not None:
+            self.fetched_at[endpoint] = store.cache_fetched_at(self.conn, endpoint, body)
             return hit
+        self.fetched_at[endpoint] = datetime.now(timezone.utc)
         if not self.live:
             raise CrustdataError("CRUSTDATA_API_KEY not set")
+        import httpx
         resp = None
         for attempt in range(self.max_retries + 1):
             self._throttle.wait(endpoint.split("/{")[0] if "{" in endpoint else endpoint)
-            resp = self._client().post(endpoint, json=body)
+            try:
+                resp = self._client().post(endpoint, json=body)
+            except httpx.TransportError as e:   # timeout, DNS, connection reset: retried, then reported
+                resp = None
+                log.warning("crustdata %s -> %s (attempt %d)", endpoint, type(e).__name__, attempt + 1)
+                if attempt == self.max_retries:
+                    raise CrustdataError(f"{endpoint} -> network error after {attempt + 1} tries: {e}") from e
+                time.sleep(min(2 ** attempt, 10))
+                continue
             if resp.status_code == 429 or resp.status_code >= 500:
                 delay = float(resp.headers.get("retry-after") or 2 ** attempt)
                 log.warning("crustdata %s -> %s, retry in %.0fs", endpoint, resp.status_code, delay)
@@ -186,6 +200,20 @@ class CrustdataClient:
         matches = (data[0] or {}).get("matches") or []
         return matches[0]["company_data"] if matches else None
 
+    def enrich_companies(self, domains: list[str], fields: list[str] = PEER_ENRICH_FIELDS) -> dict[str, dict]:
+        """ONE batched enrich request for several domains -> {domain: company_data}. Missing ones are left out."""
+        doms = sorted({norm_key(d) for d in domains if d and is_domain(norm_key(d))})
+        if not doms or not self.live:
+            return {}
+        data = self.post("/company/enrich", {"domains": doms, "fields": fields}) or []
+        out = {}
+        for entry in data:
+            matches = (entry or {}).get("matches") or []
+            if matches:
+                cd = matches[0]["company_data"]
+                out[norm_key((cd.get("basic_info") or {}).get("primary_domain") or entry.get("matched_on") or "")] = cd
+        return out
+
     def search_companies(self, filters: dict[str, Any], fields: list[str] = PEER_FIELDS, limit: int = 50,
                          fixture_industry: str | None = None) -> list[dict]:
         if fixture_industry is not None and (fx := self.fixtures.peer_set(fixture_industry)) is not None:
@@ -196,7 +224,7 @@ class CrustdataClient:
         return data.get("companies", [])
 
     def search_people(self, company_key: str, fields: list[str] = PERSON_FIELDS, limit: int = 25) -> list[dict] | None:
-        """Up to `limit` current employees, most senior first. None = company unknown to the source."""
+        """Up to `limit` current employees. None = company unknown to the source."""
         fx = self.fixtures.company_people(company_key)
         if fx is not None:
             return fx[:limit]
@@ -247,3 +275,33 @@ def set_client(client: CrustdataClient | None) -> None:
     """Tests and the watcher can swap the module-wide client."""
     global _default
     _default = client
+
+
+def _check(domain: str = "stripe.com") -> int:
+    """`python -m clearance.crustdata_client [domain]`: verify the key, show credits, make ONE cached enrich (~2 credits)."""
+    import httpx
+    c = get_client()
+    if not c.live:
+        print("CRUSTDATA_API_KEY is not set (check .env). Only synthetic demo fixtures are available.")
+        return 1
+    h = {"authorization": f"Bearer {c.api_key}", "x-api-version": config.CRUSTDATA_API_VERSION}
+    r = httpx.get(config.CRUSTDATA_BASE_URL + "/account/credits", headers=h, timeout=30)
+    if r.status_code != 200:
+        print(f"key rejected: /account/credits -> {r.status_code} {r.text[:200]}")
+        return 1
+    print(f"key OK. credits: {r.json()['account']['credits']:,.0f}")
+    from clearance.capability.profile import parse_company
+    cd = c.enrich_company(domain)
+    if cd is None:
+        print(f"enrich {domain}: no match")
+        return 1
+    p = parse_company(cd)
+    print(f"enrich {domain}: {p.name} | {p.industry} | {p.country} | founded {p.year_founded} | "
+          f"headcount {p.headcount} | engineering share {p.engineering_share} | visitors/month {p.monthly_visitors}")
+    print("(cached: running this again costs nothing)")
+    return 0
+
+
+if __name__ == "__main__":
+    import sys
+    sys.exit(_check(*sys.argv[1:2]))

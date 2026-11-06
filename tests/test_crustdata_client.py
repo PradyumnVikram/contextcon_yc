@@ -42,6 +42,38 @@ def test_http_error_raises():
         c.search_companies({"field": "x", "type": "=", "value": 1})
 
 
+def test_network_timeout_is_retried_then_reported(monkeypatch):
+    monkeypatch.setattr("time.sleep", lambda s: None)
+    seq = [httpx.ReadTimeout("slow"), httpx.Response(200, json=[{"matches": []}])]
+
+    def handler(req):
+        r = seq.pop(0)
+        if isinstance(r, Exception):
+            raise r
+        return r
+    assert _client(handler).enrich_company("slow.example") is None
+
+    def always(req):
+        raise httpx.ConnectTimeout("down")
+    with pytest.raises(CrustdataError):
+        _client(always).enrich_company("down.example")
+
+
+def test_cached_answer_older_than_max_age_is_fetched_again():
+    calls = []
+
+    def handler(req):
+        calls.append(req)
+        return httpx.Response(200, json=[{"matches": [{"company_data": {"basic_info": {"name": "Acme"}}}]}])
+    c = _client(handler)
+    c.enrich_company("acme.example")
+    c.conn.execute("UPDATE api_cache SET fetched_at='2020-01-01T00:00:00+00:00'")
+    c.enrich_company("acme.example")
+    assert len(calls) == 2
+    c.enrich_company("acme.example")
+    assert len(calls) == 2 and c.fetched_at["/company/enrich"].year >= 2026
+
+
 def test_offline_uses_fixtures_and_unknown_is_none():
     c = CrustdataClient(store.connect(":memory:"), api_key="")
     assert c.enrich_company("Synthetic Radar Systems")["basic_info"]["primary_domain"] == "synthetic-radar.example"
