@@ -15,6 +15,7 @@ import sqlite3
 import threading
 import time
 from collections import deque
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -132,6 +133,7 @@ class CrustdataClient:
         self._transport = transport
         self._http = None
         self._throttle = _Throttle()
+        self.fetched_at: dict[str, datetime | None] = {}   # endpoint -> when the last answer was fetched
 
     @property
     def live(self) -> bool:
@@ -148,14 +150,25 @@ class CrustdataClient:
         return self._http
 
     def post(self, endpoint: str, body: dict[str, Any], cache: bool = True) -> Any:
-        if cache and (hit := store.cache_get(self.conn, endpoint, body)) is not None:
+        if cache and (hit := store.cache_get(self.conn, endpoint, body, config.CRUSTDATA_MAX_AGE_DAYS)) is not None:
+            self.fetched_at[endpoint] = store.cache_fetched_at(self.conn, endpoint, body)
             return hit
+        self.fetched_at[endpoint] = datetime.now(timezone.utc)
         if not self.live:
             raise CrustdataError("CRUSTDATA_API_KEY not set")
+        import httpx
         resp = None
         for attempt in range(self.max_retries + 1):
             self._throttle.wait(endpoint.split("/{")[0] if "{" in endpoint else endpoint)
-            resp = self._client().post(endpoint, json=body)
+            try:
+                resp = self._client().post(endpoint, json=body)
+            except httpx.TransportError as e:   # timeout, DNS, connection reset: retried, then reported
+                resp = None
+                log.warning("crustdata %s -> %s (attempt %d)", endpoint, type(e).__name__, attempt + 1)
+                if attempt == self.max_retries:
+                    raise CrustdataError(f"{endpoint} -> network error after {attempt + 1} tries: {e}") from e
+                time.sleep(min(2 ** attempt, 10))
+                continue
             if resp.status_code == 429 or resp.status_code >= 500:
                 delay = float(resp.headers.get("retry-after") or 2 ** attempt)
                 log.warning("crustdata %s -> %s, retry in %.0fs", endpoint, resp.status_code, delay)

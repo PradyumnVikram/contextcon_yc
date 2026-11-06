@@ -12,7 +12,7 @@ import sqlite3
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
-from clearance import config
+from clearance import config, store
 from clearance.capability.profile import CompanyProfile, PersonProfile, func_bucket, parse_person
 from clearance.crustdata_client import CrustdataClient, norm_key
 
@@ -83,6 +83,9 @@ def background_check(client: CrustdataClient, conn: sqlite3.Connection, company_
     """None when the company is unknown to Crustdata (and to the fixtures)."""
     key = norm_key(company_key)
     rows = conn.execute("SELECT * FROM people WHERE company_key=?", (key,)).fetchall()
+    if rows and store.is_stale(rows[0]["fetched_at"], config.CRUSTDATA_MAX_AGE_DAYS):
+        conn.execute("DELETE FROM people WHERE company_key=?", (key,))
+        rows = []
     if rows:
         fetched = datetime.fromisoformat(rows[0]["fetched_at"]) if rows[0]["fetched_at"] else None
         return PeopleCheck(_rows_to_people(rows), fetched, "people-cache")

@@ -12,6 +12,7 @@ from __future__ import annotations
 import json
 import logging
 import sqlite3
+from datetime import timedelta
 from types import ModuleType
 from typing import Any
 
@@ -84,8 +85,36 @@ class Pipeline:
 
     # ------------------------------------------------------------------ entry points
     def process_inbox(self) -> list[str]:
-        """Poll the mailbox and ingest every new email. Returns the order ids touched."""
-        return [oid for e in self.mailbox.poll(self.conn) if (oid := self.ingest(e))]
+        """Finish orders interrupted mid-check, then ingest every new email. Returns the order ids touched.
+        One failing email never stops the others; it is retried on the next poll."""
+        touched = []
+        for oid in self._interrupted():
+            try:
+                self.resume(oid)
+                touched.append(oid)
+            except Exception:
+                log.exception("resuming %s failed; will retry", oid)
+        for e in self.mailbox.poll(self.conn):
+            try:
+                if oid := self.ingest(e):
+                    touched.append(oid)
+            except Exception:
+                log.exception("processing email %s failed; will retry", e.msg_id)
+        return touched
+
+    def _interrupted(self) -> list[str]:
+        mid = (OrderState.PARSED, OrderState.CLASSIFIED, OrderState.SCREENED, OrderState.CAPABILITY_CHECKED)
+        return [r["order_id"] for r in self.conn.execute(
+            f"SELECT order_id FROM orders WHERE state IN ({','.join('?' * len(mid))}) ORDER BY order_id",
+            [s.value for s in mid])]
+
+    def resume(self, oid: str) -> None:
+        """Re-run the checks for an order that stopped part-way. Checks only read data, and the end-use request
+        is recorded as sent before anything else can fail, so nothing is sent twice."""
+        order, ctx = store.load_order(self.conn, oid), self._ctx(oid)
+        ledger = self._ledger(oid)
+        ledger.add("Checks resumed after an interruption", None, f"pipeline:{oid}")
+        self._assess(oid, order, ledger, ctx)
 
     def ingest(self, email: Email) -> str | None:
         oid = match_reply(email, self.conn)
@@ -120,6 +149,13 @@ class Pipeline:
             store.save_email(self.conn, email, "in", order_id=TRASH)
             log.info("email %s is not an order: moved to trash", email.msg_id)
             return None
+        if not isinstance(parsed, Incomplete) and (dup := self._duplicate_of(parsed, email)):
+            store.save_email(self.conn, email, "in", order_id=dup)
+            led = self._ledger(dup)
+            led.add("The same order was received again; kept on this order, nothing re-run or re-sent",
+                    email.subject, f"email:{email.msg_id}", email.received_at)
+            self._save_ledger(dup, led)
+            return dup
         store.save_email(self.conn, email, "in", order_id=oid)
         if isinstance(parsed, Incomplete):
             order = self._placeholder(oid, email, parsed.partial)
@@ -135,8 +171,25 @@ class Pipeline:
         store.save_order(self.conn, parsed, OrderState.EMAIL_RECEIVED)
         store.set_state(self.conn, oid, OrderState.PARSED)
         self._save_ctx(oid, ctx)
+        self._save_ledger(oid, ledger)
         self._assess(oid, parsed, ledger, ctx)
         return oid
+
+    def _duplicate_of(self, order: Order, email: Email) -> str | None:
+        """An open order from the same sender for the same buyer, destination and parts in the last few days.
+        A signed order is never a duplicate: a repeat purchase is a new order."""
+        def sig(o: Order):
+            return ((o.buyer.name or "").strip().lower(), (o.ship_to_country or "").upper(),
+                    tuple(sorted((l.part_number.strip().upper(), l.quantity) for l in o.lines)))
+        since = (email.received_at - timedelta(days=config.DUPLICATE_ORDER_DAYS)).isoformat()
+        rows = self.conn.execute(
+            "SELECT o.order_id, o.order_json FROM orders o JOIN order_context c ON c.order_id = o.order_id "
+            "JOIN emails e ON e.order_id = o.order_id AND e.direction = 'in' "
+            "WHERE o.state != ? AND e.received_at >= ? AND json_extract(c.context_json, '$.buyer_email') = ? "
+            "GROUP BY o.order_id ORDER BY o.order_id",
+            (OrderState.SIGNED.value, since, email.from_addr)).fetchall()
+        target = sig(order)
+        return next((r["order_id"] for r in rows if sig(Order.model_validate_json(r["order_json"])) == target), None)
 
     @staticmethod
     def _placeholder(oid: str, email: Email, partial: dict[str, Any]) -> Order:
@@ -197,6 +250,7 @@ class Pipeline:
             draft = enduse.draft_request(order, self.llm)
             self._send(oid, draft.subject, draft.body, in_reply_to=order.source_email_id)
             ctx.end_use_requested = True
+            self._save_ctx(oid, ctx)
             ledger.add("End-use statement requested from buyer", draft.subject, f"pipeline:{oid}")
 
         if d.outcome == "AWAITING_END_USE":
@@ -240,6 +294,8 @@ class Pipeline:
             store.save_order(self.conn, res, OrderState.PARSED)
             store.set_state(self.conn, oid, OrderState.PARSED)
             ctx.partial = None
+            self._save_ctx(oid, ctx)
+            self._save_ledger(oid, ledger)
             self._assess(oid, res, ledger, ctx)
             return
 

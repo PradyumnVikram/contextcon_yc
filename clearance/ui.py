@@ -99,7 +99,10 @@ def _cached_company(client: CrustdataClient, key: str) -> tuple[dict | None, str
     body = {"domains" if crustdata_client.is_domain(k) else "names": [k], "fields": crustdata_client.ENRICH_FIELDS}
     data = crustdata_client.store.cache_get(client.conn, "/company/enrich", body)
     matches = (data[0] or {}).get("matches") if data else None
-    return (matches[0]["company_data"], "live Crustdata") if matches else (None, "")
+    if not matches:
+        return None, ""
+    at = crustdata_client.store.cache_fetched_at(client.conn, "/company/enrich", body)
+    return matches[0]["company_data"], "live Crustdata" + (f" · fetched {at:%d %b %H:%M} UTC" if at else "")
 
 
 def crustdata_snapshot(client: CrustdataClient, party: Party) -> dict[str, Any]:

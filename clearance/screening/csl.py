@@ -14,6 +14,7 @@ import csv
 import re
 import sys
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from functools import lru_cache
 from pathlib import Path
 
@@ -93,6 +94,12 @@ def load(paths: tuple[Path, ...] | None = None) -> list[Entry]:
     Module globals are read at call time so tests can point CSL_CSV and EXTRA_CSV at fixtures.
     """
     return [e for p in (paths or (CSL_CSV, EXTRA_CSV, CSL_DEMO_CSV)) for e in _read(p)]
+
+
+def downloaded_at() -> datetime | None:
+    """When the oldest of the real lists on disk was downloaded; None when only the demo list is present."""
+    times = [p.stat().st_mtime for p in (CSL_CSV, EXTRA_CSV) if p.exists()]
+    return datetime.fromtimestamp(min(times), timezone.utc) if times else None
 
 
 if __name__ == "__main__":

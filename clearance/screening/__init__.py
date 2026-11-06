@@ -16,7 +16,7 @@ from functools import lru_cache
 from rapidfuzz import fuzz
 from rapidfuzz.distance import JaroWinkler
 
-from clearance import config
+from clearance import config, store
 from clearance.evidence import Ledger
 from clearance.models import Match, Party, ScreeningResult
 from clearance.screening import csl
@@ -107,15 +107,22 @@ def screen(party: Party, ledger: Ledger) -> ScreeningResult:
 
     matches = sorted(best.values(), key=lambda m: -m.score)[:5]
     status = "exact_hit" if any(m.listed_record["exact"] for m in matches) else "fuzzy_hit" if matches else "clear"
+    lists_at = csl.downloaded_at()
     if matches:
         top = matches[0]
         eid = ledger.add(f"CSL screening of {party.role} '{party.name}': {status} vs '{top.listed_name}'",
                          {"score": top.score, "breakdown": top.breakdown, "list": top.listed_record["source"]},
-                         f"csl:entry/{top.csl_entry_id}")
+                         f"csl:entry/{top.csl_entry_id}", lists_at)
     else:
         eid = ledger.add(f"CSL screening of {party.role} '{party.name}': clear",
-                         {"candidates_checked": len(candidates)}, "csl:none")
+                         {"candidates_checked": len(candidates)}, "csl:none", lists_at)
     ids = [eid]
+    if lists_at is None:
+        ids.append(ledger.add("Only the demo restricted list is loaded; the official lists were not checked",
+                              None, "csl:lists"))
+    elif store.is_stale(lists_at, config.SCREENING_LIST_MAX_AGE_DAYS):
+        ids.append(ledger.add(f"Restricted lists are out of date: downloaded {lists_at:%d %b %Y}",
+                              lists_at.isoformat(), "csl:lists", lists_at))
     if is_forwarder:
         ids.append(ledger.add(f"'{party.name}' is a freight/logistics company", True, "screening:forwarder_keywords"))
     if (party.country or "").upper() == "IN":

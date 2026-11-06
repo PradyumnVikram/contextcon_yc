@@ -145,8 +145,13 @@ with st.sidebar:
     st.badge(f"LLM · {txt}", color=lvl, icon=":material/smart_toy:")
     st.badge("Crustdata · live API" if config.CRUSTDATA_API_KEY else "Crustdata · demo data only",
              color="green" if config.CRUSTDATA_API_KEY else "orange", icon=":material/apartment:")
-    st.badge(f"Screening list · {n_csl:,} entries" if n_csl > 100 else "Screening list · demo only",
-             color="green" if n_csl > 100 else "orange", icon=":material/gpp_good:")
+    from clearance.screening import csl as _csl
+    lists_at = _csl.downloaded_at()
+    lists_stale = lists_at is None or store.is_stale(lists_at, config.SCREENING_LIST_MAX_AGE_DAYS)
+    st.badge(f"Screening list · {n_csl:,} entries · {lists_at:%d %b}" if lists_at else "Screening list · demo only",
+             color="orange" if lists_stale else "green", icon=":material/gpp_good:")
+    if lists_at and lists_stale:
+        st.caption(f"Restricted lists were downloaded {lists_at:%d %b %Y}: refresh them before signing.")
 
     cust = rows("SELECT company_key, name, tier FROM customers ORDER BY updated_at DESC")
     with st.expander(f"Watched customers ({len(cust)})", icon=":material/visibility:"):
@@ -296,7 +301,7 @@ with p2:
                 st.caption("The capability check has not run yet for this order.")
             else:
                 with st.container(border=True):
-                    st.markdown("**What Crustdata returned**" + (f" :{'green' if snap['source'] == 'live Crustdata' else 'gray'}"
+                    st.markdown("**What Crustdata returned**" + (f" :{'green' if snap['source'].startswith('live Crustdata') else 'gray'}"
                                                                 f"-badge[{snap['source']}]" if snap["source"] else ""))
                     icons = {"Company record": ":material/apartment:", "Employees": ":material/groups:",
                              "Peer comparison": ":material/compare_arrows:", "Verdict": ":material/gavel:"}

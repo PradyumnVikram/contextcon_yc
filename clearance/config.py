@@ -54,6 +54,9 @@ CRUSTDATA_ENRICH_PER_MIN = 15
 PEOPLE_CAP_PER_COMPANY = 25
 PEER_SET_MIN, PEER_SET_MAX = 20, 50
 PEER_ENRICH_MAX = 20   # peers enriched in one batch for engineering share + traffic (~2 credits each, cached)
+CRUSTDATA_MAX_AGE_DAYS = 7   # cached company, people and peer data older than this is fetched again
+SCREENING_LIST_MAX_AGE_DAYS = 7   # older restricted lists are flagged as stale in the evidence and the sidebar
+DUPLICATE_ORDER_DAYS = 7     # the same open order re-sent by the same sender within this window joins the first
 
 # --- Screening (§4.2) --------------------------------------------------------
 SCREEN_WEIGHTS = {"token_set": 0.60, "jaro_winkler": 0.25, "address": 0.15}

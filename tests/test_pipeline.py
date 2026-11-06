@@ -63,6 +63,49 @@ def test_irrelevant_email_goes_to_trash_without_an_order_or_reply(tmp_path):
     assert mb.outbox_messages() == [] and mb.poll(conn) == []
 
 
+def test_an_order_interrupted_mid_check_resumes_on_the_next_poll(tmp_path, monkeypatch):
+    p, mb, conn = make(tmp_path)
+    real = p.capability.assess
+
+    def crash(*a, **k):
+        raise RuntimeError("process killed")
+    monkeypatch.setattr(p.capability, "assess", crash)
+    mb.compose("buyer@radar.example", "PO radar", "4 pcs PA-77G-HE")
+    assert p.process_inbox() == []          # the crash does not stop the loop
+    [oid] = [r["order_id"] for r in conn.execute("SELECT order_id FROM orders")]
+    assert store.get_state(conn, oid) is OrderState.SCREENED
+    monkeypatch.setattr(p.capability, "assess", real)
+    assert p.process_inbox() == [oid]
+    assert store.load_decision(conn, oid).outcome == "RELEASE"
+    assert p.process_inbox() == []
+
+
+def test_end_use_request_is_not_sent_twice_after_a_crash(tmp_path, monkeypatch):
+    p, mb, conn = make(tmp_path, extract=[EVASIVE, EVASIVE])
+    from clearance import decision
+    real = decision.explain
+    monkeypatch.setattr("clearance.pipeline.dec.explain", lambda *a: (_ for _ in ()).throw(RuntimeError("crash")))
+    mb.compose("x@shell.example", "PO shell", "100 pcs")
+    p.process_inbox()
+    monkeypatch.setattr("clearance.pipeline.dec.explain", real)
+    p.process_inbox()
+    assert len(mb.outbox_messages()) == 1
+
+
+def test_a_resent_identical_order_joins_the_first(tmp_path):
+    p, mb, conn = make(tmp_path)
+    mb.compose("buyer@radar.example", "PO radar", "4 pcs PA-77G-HE")
+    [oid] = p.process_inbox()
+    mb.compose("buyer@radar.example", "PO radar (resent)", "4 pcs PA-77G-HE")
+    assert p.process_inbox() == [oid]
+    assert conn.execute("SELECT COUNT(*) FROM orders").fetchone()[0] == 1
+    assert conn.execute("SELECT COUNT(*) FROM emails WHERE order_id=? AND direction='in'", (oid,)).fetchone()[0] == 2
+    p.sign(oid, "A. Officer")
+    mb.compose("buyer@radar.example", "PO radar again", "4 pcs PA-77G-HE")
+    [oid2] = p.process_inbox()                # after signing, a repeat purchase is a new order
+    assert oid2 != oid
+
+
 def test_a_vague_enquiry_is_not_trash(tmp_path):
     p, mb, conn = make(tmp_path)
     mb.compose("buyer@radar.example", "Quote please", "Need some amplifiers. Synthetic Radar Systems, India")

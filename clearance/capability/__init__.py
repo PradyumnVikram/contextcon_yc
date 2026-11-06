@@ -32,15 +32,20 @@ def assess(party: Party, classifications: list[Classification], lines: list[Orde
     src = "crustdata-fixture" if client.fixtures.company(key) is not None else "crustdata"
     now = datetime.now(timezone.utc)
     ids: list[str] = []
+    stamp = [now]   # when the Crustdata answers were fetched (a cached answer keeps its original date)
 
     def ev(claim, value, path):
-        ids.append(ledger.add(claim, value, f"{src}:{path}", now))
+        ids.append(ledger.add(claim, value, f"{src}:{path}", stamp[0]))
 
+    client.fetched_at.pop("/company/enrich", None)
     try:
         cd = client.enrich_company(key)
         if cd is None and len(keys) > 1 and key != keys[-1]:
             key = keys[-1]
             cd = client.enrich_company(key)
+        if cd is not None and (at := client.fetched_at.get("/company/enrich")):
+            stamp[0] = at
+            ev(f"Crustdata company record fetched {at:%d %b %Y %H:%M} UTC", at.isoformat(), "/company/enrich#fetched_at")
     except crustdata_client.CrustdataError as e:
         ev(f"Crustdata company lookup unavailable for '{party.name}'", str(e)[:200], "/company/enrich#error")
         return CapabilityResult(party_name=party.name, coverage="missing", buyer_type="unclear", tier="no_data",
